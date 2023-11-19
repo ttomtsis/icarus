@@ -64,6 +64,12 @@
 
         <!--> ###  - Database Drivers - ###<!/-->
 
+        <!--> H2 </!-->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!--> ###  - External Tools - ###<!/-->
 
