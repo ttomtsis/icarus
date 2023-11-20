@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import static gr.aegean.icsd.icarus.util.IcarusConstants.maxLength;
-import static gr.aegean.icsd.icarus.util.IcarusConstants.minLength;
+import static gr.aegean.icsd.icarus.util.IcarusConstants.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -16,12 +15,12 @@ public class ProviderAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Name cannot be blank")
     @Column(unique = true)
-    @Size(min = minLength, max = maxLength)
+    @Size(min = minLength, max = maxLength, message = "Name does not conform to length limitations")
     private String name;
 
-    @Size(min = minLength, max = maxLength)
+    @Size(min = minLength, max = maxDescriptionLength, message = "Description does not conform to length limitations")
     private String description;
 
 

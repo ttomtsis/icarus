@@ -12,7 +12,7 @@ import java.nio.file.Files;
 @Entity
 public class GcpAccount extends ProviderAccount {
 
-    @NotBlank
+    @NotBlank(message = "Keyfile cannot be blank")
     @JdbcTypeCode(SqlTypes.JSON)
     private String gcpKeyfile;
 

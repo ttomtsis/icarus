@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 public class AwsAccount extends ProviderAccount{
 
-    @NotBlank
+    @NotBlank(message = "Access Key cannot be blank")
     private String awsAccessKey;
 
-    @NotBlank
+    @NotBlank(message = "Secret Key cannot be blank")
     private String awsSecretKey;
 
 
