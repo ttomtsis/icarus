@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util;
+package gr.aegean.icsd.icarus.util.constants;
 
 public class IcarusConstants {
     public final static int minLength = 3;
