@@ -30,8 +30,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Class used to model AWS Lambda Functions in the Terraform CDK as Constructs <br>
+ */
 public class AwsConstruct extends Construct {
 
+    /**
+     * Unique 8-digit ID that identifies all resources deployed as
+     * part of an AWS Construct. <br>
+     * Every AWS Construct used a different GUID
+     */
     private final String GUID;
 
     private final Set<String> locations = new HashSet<>();
@@ -42,13 +50,39 @@ public class AwsConstruct extends Construct {
     private final String functionSource;
     private final String functionArchiveName;
 
-
     private final String functionName;
     private final String functionRuntime;
     private final String functionHandler;
 
     private final int concurrentExecutions = 10;
 
+    /**
+     * Default constructor of the class, used to model an AWS Lambda function <br><br>
+     *
+     * This construct creates an S3 Bucket and Bucket object per region that all
+     * Lambda functions in that region will use. <br><br>
+     *
+     * In addition to this, it creates a lambda function per requested memory configuration
+     * and then matches that function with a new API Gateway deployed in a
+     * separate Gateway Stage. <br>
+     *
+     * @param scope Scope of the construct <br>
+     * @param id ID of the construct <br>
+     *
+     * @param awsAccessKey Access key of the account used to deploy the function <br>
+     * @param awsSecretKey Secret key of the account used to deploy the function <br>
+     *
+     * @param objectSource Location of the function's source code <br>
+     * @param objectFileName Name of the zip archive containing the function's source code <br>
+     *
+     * @param awsRegions List of regions where the function will be deployed <br>
+     * @param memoryConfs List of memory configurations according to which the function will be deployed <br>
+     *
+     * @param awsFunctionName Name of the function, this is used in a variety of supporting
+     *                        resources as well as the function <br>
+     * @param awsFunctionRuntime Runtime that will be used to execute the function <br>
+     * @param awsFunctionHandler The appropriate handler that AWS Lambda will use to execute the function <br>
+     */
     public AwsConstruct(final Construct scope, final String id,
                         String awsAccessKey, String awsSecretKey,
                         String objectSource, String objectFileName,
@@ -75,7 +109,8 @@ public class AwsConstruct extends Construct {
         this.functionRuntime = awsFunctionRuntime.get();
         this.functionHandler = awsFunctionHandler;
 
-        // Default, empty provider
+        // Default, empty provider. Used solely because Terraform requires a default provider.
+        // This provider is never used.
         AwsProvider.Builder.create(this, "awsProvider")
                 .region("ap-northeast-3")
                 .accessKey(accessKey)
@@ -84,13 +119,16 @@ public class AwsConstruct extends Construct {
 
         Set<AwsProvider> providers = createProviders();
 
+        // Create the IAM Role that functions will require
         IamRole functionRole = createIamRole();
 
+        // Create a function, bucket and api gateway for every requested region
         for (AwsProvider provider : providers) {
 
             S3Bucket myBucket = createBucket(provider, provider.getRegion());
             S3Object bucketObject = createBucketObject(provider, myBucket, provider.getRegion());
 
+            // Create a function and api gateway for every requested memory configuration
             for (Integer memory: memoryConfigurations) {
 
                 String targetFunctionID = functionName + "-" + memory + "mb-" + provider.getRegion();
@@ -100,6 +138,7 @@ public class AwsConstruct extends Construct {
 
                 Apigatewayv2Stage stage = createAPIGateway(provider, lambdaFunction, targetFunctionID);
 
+                // Create an output that will print the URL used to invoke the function
                 TerraformOutput baseUrl = TerraformOutput.Builder.create(
                         this, "lambda_url-" + functionName + "-" + provider.getRegion() + "-" + memory )
                         .description("Base URL for API Gateway stage.")
@@ -111,6 +150,13 @@ public class AwsConstruct extends Construct {
 
     }
 
+    /**
+     * Creates a list of AWS Providers according to the list of locations specified <br>
+     * Creates one provider per location. <br>
+     * These providers will be used to deploy resources to all desired locations
+     *
+     * @return Set of AwsProviders
+     */
     private Set<AwsProvider> createProviders() {
 
         Set<AwsProvider> providers = new HashSet<>();
@@ -129,6 +175,11 @@ public class AwsConstruct extends Construct {
         return providers;
     }
 
+    /**
+     * Creates an IamRole that all functions created by this construct will assume when executing
+     *
+     * @return IamRole that functions will use
+     */
     private IamRole createIamRole() {
 
         DataAwsIamPolicyDocument policyDocument = createDocument();
@@ -145,6 +196,11 @@ public class AwsConstruct extends Construct {
         return functionRole;
     }
 
+    /**
+     * Creates an Iam Policy Document that specifies the privileges the Iam Role can use <br>
+     *
+     * @return An Iam Policy Document
+     */
     private DataAwsIamPolicyDocument createDocument() {
 
         // Principals
@@ -180,6 +236,14 @@ public class AwsConstruct extends Construct {
                 .build();
     }
 
+    /**
+     * Creates a Bucket that will be used to store the function's source code
+     *
+     * @param provider Provider that will be used to create the Bucket
+     * @param location Region where the bucket will be created
+     *
+     * @return S3 Bucket with proper ACL controls applied
+     */
     private S3Bucket createBucket(AwsProvider provider, String location) {
 
         S3Bucket myBucket = S3Bucket.Builder.create(this, "lambda_bucket-" + location + GUID)
@@ -215,6 +279,15 @@ public class AwsConstruct extends Construct {
 
     }
 
+    /**
+     * Creates an S3 Object that will contain the function's source code
+     *
+     * @param provider Provider used to create the object
+     * @param bucket S3 Bucket that will contain the object
+     * @param location Location where the object will be created
+     *
+     * @return S3 Object containing the function's source code
+     */
     private S3Object createBucketObject(AwsProvider provider, S3Bucket bucket, String location){
 
         return S3Object.Builder.create(this, "lambda_object-" + location + "-" + GUID)
@@ -225,13 +298,25 @@ public class AwsConstruct extends Construct {
                 .build();
     }
 
-    private LambdaFunction createFunction(S3Bucket myBucket, S3Object bucketObject, IamRole functionRole,
+    /**
+     * Creates a Lambda function and associates a CloudWatch log group with it
+     *
+     * @param bucket Bucket used to store the Bucket Object containing the function's source code
+     * @param bucketObject Bucket Object where the source code is stored
+     * @param functionRole IAM Role that the function will assume when executing
+     * @param provider Provider used to deploy the function
+     * @param memory Memory configuration of the function
+     * @param targetFunctionID The basic name of the function
+     *
+     * @return A Lambda Function
+     */
+    private LambdaFunction createFunction(S3Bucket bucket, S3Object bucketObject, IamRole functionRole,
                                           AwsProvider provider, int memory, String targetFunctionID) {
 
         LambdaFunction lambdaFunction = LambdaFunction.Builder.create(
                 this, targetFunctionID + "-" + GUID)
                 .functionName(targetFunctionID + "-" + GUID )
-                .s3Bucket(myBucket.getId())
+                .s3Bucket(bucket.getId())
                 .s3Key(bucketObject.getKey())
                 .runtime(functionRuntime)
                 .handler(functionHandler)
@@ -251,6 +336,15 @@ public class AwsConstruct extends Construct {
 
     }
 
+    /**
+     * Create an API Gateway, that will expose the function to the internet
+     *
+     * @param provider Provider used to create the API
+     * @param lambdaFunction Function that will be exposed
+     * @param targetFunctionID Basic name of the function that will be exposed
+     *
+     * @return The API Gateway Stage where the API Gateway is created
+     */
     private Apigatewayv2Stage createAPIGateway(AwsProvider provider, LambdaFunction lambdaFunction,
                                                String targetFunctionID) {
 
