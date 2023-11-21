@@ -32,6 +32,7 @@ import java.util.UUID;
 
 /**
  * Class used to model AWS Lambda Functions in the Terraform CDK as Constructs <br>
+ * Used as part of a parent Stack.
  */
 public class AwsConstruct extends Construct {
 
@@ -54,7 +55,8 @@ public class AwsConstruct extends Construct {
     private final String functionRuntime;
     private final String functionHandler;
 
-    private final int concurrentExecutions = 10;
+    // Currently not supported due to restrictions on AWS starter accounts
+    // private final int concurrentExecutions = 10;
 
     /**
      * Default constructor of the class, used to model an AWS Lambda function <br><br>
@@ -139,11 +141,11 @@ public class AwsConstruct extends Construct {
                 Apigatewayv2Stage stage = createAPIGateway(provider, lambdaFunction, targetFunctionID);
 
                 // Create an output that will print the URL used to invoke the function
-                TerraformOutput baseUrl = TerraformOutput.Builder.create(
-                        this, "lambda_url-" + functionName + "-" + provider.getRegion() + "-" + memory )
-                        .description("Base URL for API Gateway stage.")
-                        .value(stage.getInvokeUrl())
-                        .build();
+                TerraformOutput.Builder.create(
+                    this, "lambda_url-" + functionName + "-" + provider.getRegion() + "-" + memory )
+                    .description("Base URL for API Gateway stage.")
+                    .value(stage.getInvokeUrl())
+                    .build();
             }
 
         }
@@ -188,10 +190,10 @@ public class AwsConstruct extends Construct {
                 .assumeRolePolicy(policyDocument.getJson())
                 .build();
 
-        IamRolePolicyAttachment functionAttachment = IamRolePolicyAttachment.Builder.create(this, "lambda_policy-" + GUID)
-                .role(functionRole.getName())
-                .policyArn("arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole")
-                .build();
+        IamRolePolicyAttachment.Builder.create(this, "lambda_policy-" + GUID)
+            .role(functionRole.getName())
+            .policyArn("arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole")
+            .build();
 
         return functionRole;
     }
@@ -267,13 +269,13 @@ public class AwsConstruct extends Construct {
         dependencies.add(myBucket);
         dependencies.add(bucketControls);
 
-        S3BucketAcl bucketACL = S3BucketAcl.Builder.create(
-                this, "lambda_bucket_acl-" + location + "-" + GUID)
-                .bucket(myBucket.getId())
-                .acl("private")
-                .dependsOn(dependencies)
-                .provider(provider)
-                .build();
+        S3BucketAcl.Builder.create(
+            this, "lambda_bucket_acl-" + location + "-" + GUID)
+            .bucket(myBucket.getId())
+            .acl("private")
+            .dependsOn(dependencies)
+            .provider(provider)
+            .build();
 
         return myBucket;
 
@@ -326,11 +328,11 @@ public class AwsConstruct extends Construct {
                 .provider(provider)
                 .build();
 
-        CloudwatchLogGroup functionLogGroup = CloudwatchLogGroup.Builder.create(
-                        this, "log_group-" + targetFunctionID + "-" + GUID)
-                .name("/aws/lambda/"+lambdaFunction.getFunctionName())
-                .retentionInDays(30)
-                .build();
+        CloudwatchLogGroup.Builder.create(
+                    this, "log_group-" + targetFunctionID + "-" + GUID)
+            .name("/aws/lambda/"+lambdaFunction.getFunctionName())
+            .retentionInDays(30)
+            .build();
 
         return lambdaFunction;
 
@@ -387,22 +389,22 @@ public class AwsConstruct extends Construct {
                 .provider(provider)
                 .build();
 
-        Apigatewayv2Route route = Apigatewayv2Route.Builder.create(this, "route-" + apiName)
-                .apiId(api.getId())
-                .routeKey("$default")
-                .target("integrations/"+integration.getId())
-                .provider(provider)
-                .build();
+        Apigatewayv2Route.Builder.create(this, "route-" + apiName)
+            .apiId(api.getId())
+            .routeKey("$default")
+            .target("integrations/"+integration.getId())
+            .provider(provider)
+            .build();
 
-        LambdaPermission permission = LambdaPermission.Builder.create(this,
-                        "permission-" + targetFunctionID + "-" + GUID)
-                .statementId("AllowExecutionFromAPIGateway")
-                .action("lambda:InvokeFunction")
-                .functionName(lambdaFunction.getFunctionName())
-                .principal("apigateway.amazonaws.com")
-                .sourceArn(api.getExecutionArn()+"/*/*")
-                .provider(provider)
-                .build();
+        LambdaPermission.Builder.create(this,
+                    "permission-" + targetFunctionID + "-" + GUID)
+            .statementId("AllowExecutionFromAPIGateway")
+            .action("lambda:InvokeFunction")
+            .functionName(lambdaFunction.getFunctionName())
+            .principal("apigateway.amazonaws.com")
+            .sourceArn(api.getExecutionArn()+"/*/*")
+            .provider(provider)
+            .build();
 
         return stage;
     }
