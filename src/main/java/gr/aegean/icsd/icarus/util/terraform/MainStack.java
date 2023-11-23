@@ -11,7 +11,9 @@ import java.util.Set;
 
 /**
  * Parent Stack, used in conjunction with constructs in order to deploy functions from
- * multiple providers
+ * multiple providers <br>
+ *
+ * MainStack is used as a container for multiple constructs
  */
 public class MainStack extends TerraformStack {
 
