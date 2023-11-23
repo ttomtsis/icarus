@@ -12,12 +12,21 @@ import gr.aegean.icsd.icarus.util.enums.gcp.GcpRegion;
 import software.constructs.Construct;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Class used to model GCF Functions in the Terraform CDK as Constructs <br>
+ * Used as part of a parent Stack.
+ */
 public class GcpConstruct extends Construct
 {
-
+    /**
+     * Unique 8-digit ID that identifies all resources deployed as
+     * part of a GCP Construct. <br>
+     * Every GCP Construct uses a different GUID
+     */
     private final String GUID;
 
     private final String functionName;
@@ -27,17 +36,45 @@ public class GcpConstruct extends Construct
     private final String functionEntrypoint;
 
     private final String credentials;
+
+    /**
+     * The GCP project that resources will be deployed at
+     */
     private final String project;
 
     private final Set<Integer> memoryConfigurations;
     private final Set<Integer> cpuConfigurations;
-    private Set<String> locations;
+    private final Set<String> locations = new HashSet<>();
 
     ArrayList<ITerraformDependable> dependencies = new ArrayList<>();
 
 
+    /**
+     * Default constructor of the class, used to model a GCF function <br><br>
+     * Uses an existing GCP Project to deploy a Bucket, per desired region,
+     * which functions are going to use. <br>
+     * Deploys a function per memory and cpu configuration
+     * to every desired region
+     *
+     * @param scope Scope of the Construct <br>
+     * @param id ID of the Construct <br>
+     *
+     * @param gcpCredentials GCP keyfile.json file in String format <br>
+     *
+     * @param gcfFunctionSource GCF function source code file <br>
+     * @param gcfFunctionName GCF function name <br>
+     * @param gcfFunctionDescription GCF function description <br>
+     *
+     * @param gcpProject GCP project where the resources will be deployed <br>
+     * @param gcfRuntime GCF function runtime <br>
+     * @param gcfFunctionEntrypoint GCF function entrypoint <br>
+     *
+     * @param memoryConfigs Memory configurations for the GCF function <br>
+     * @param cpuConfigs CPU configurations for the GCF function <br>
+     * @param regions Regions where the GCF function will be deployed <br>
+     */
     public GcpConstruct(final Construct scope, final String id,
-                        String gcfCredentials, String gcfFunctionSource,
+                        String gcpCredentials, String gcfFunctionSource,
                         String gcfFunctionName, String gcfFunctionDescription,
                         String gcpProject, GcfRuntime gcfRuntime, String gcfFunctionEntrypoint,
                         Set<Integer> memoryConfigs, Set<Integer> cpuConfigs, Set<GcpRegion> regions) {
@@ -45,7 +82,7 @@ public class GcpConstruct extends Construct
         super(scope, id);
 
         this.GUID = UUID.randomUUID().toString().substring(0, 8);
-        this.credentials = gcfCredentials;
+        this.credentials = gcpCredentials;
         this.project = gcpProject;
 
         this.functionSource = gcfFunctionSource;
@@ -81,11 +118,13 @@ public class GcpConstruct extends Construct
                     String name = functionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + GUID;
                     name = name.toLowerCase();
 
+                    String functionMemory = memory + "M";
+
                     dependencies.clear();
                     dependencies.add(object);
                     Cloudfunctions2Function newFunction = createFunction(bucketName, objectName,
                             dependencies, name, location,
-                            Integer.toString(memory), Integer.toString(cpu),
+                            functionMemory, Integer.toString(cpu),
                             1, 60);
 
                     dependencies.clear();
@@ -101,6 +140,16 @@ public class GcpConstruct extends Construct
     }
 
 
+    /**
+     * Create a Storage Bucket that will contain the function's source code as an object
+     *
+     * @param bucketName Name of the Bucket
+     * @param objectName Name of the Bucket's Object
+     * @param objectLocation Location of the function's source code
+     * @param location Region where the bucket will be deployed
+     *
+     * @return A Storage Bucket Object containing the function's source code
+     */
     private StorageBucketObject createBucket(String bucketName, String objectName,
                                              String objectLocation, String location) {
 
@@ -122,6 +171,21 @@ public class GcpConstruct extends Construct
 
     }
 
+    /**
+     * Create a GCF Function
+     *
+     * @param bucketName Name of the Bucket where the object with the function's source code is located
+     * @param objectName Name of the Object that contains the function's source code
+     * @param dependencies Required dependencies prior to the function's creation
+     * @param name Name of the function
+     * @param location GCP region where the funciton will be deployed
+     * @param memory Memory configuration that the function will use
+     * @param cpu CPU configuration that the function will use
+     * @param instances Number of Instances the function is allowed to use
+     * @param timeout Maximum amount of time the function may execute ( in seconds )
+     *
+     * @return A fully configured GCF v2 function
+     */
     private Cloudfunctions2Function createFunction(String bucketName, String objectName,
                                                    ArrayList<ITerraformDependable> dependencies,
                                                    String name, String location,
@@ -160,6 +224,12 @@ public class GcpConstruct extends Construct
                 .build();
     }
 
+    /**
+     * Create an IAM member that functions will assume when executed
+     *
+     * @param location Region where the member will be created
+     * @param name Name of the service that will assume this member
+     */
     private void createServiceIAMmember(String location, String name) {
 
         CloudRunServiceIamMember.Builder.create(this, "iam_member-" + name)
@@ -171,6 +241,12 @@ public class GcpConstruct extends Construct
                 .build();
     }
 
+    /**
+     * Creates a terraform output that will print the invocation url of a function
+     *
+     * @param id ID of the resource in the context of this construct
+     * @param function Name of the function
+     */
     private void createOutput(String id, Cloudfunctions2Function function) {
 
         TerraformOutput.Builder.create(this, id)

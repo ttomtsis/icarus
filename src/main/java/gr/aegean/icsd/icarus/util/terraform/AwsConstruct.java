@@ -39,7 +39,7 @@ public class AwsConstruct extends Construct {
     /**
      * Unique 8-digit ID that identifies all resources deployed as
      * part of an AWS Construct. <br>
-     * Every AWS Construct used a different GUID
+     * Every AWS Construct uses a different GUID
      */
     private final String GUID;
 
