@@ -178,11 +178,11 @@ public class GcpConstruct extends Construct
      * @param objectName Name of the Object that contains the function's source code
      * @param dependencies Required dependencies prior to the function's creation
      * @param name Name of the function
-     * @param location GCP region where the funciton will be deployed
+     * @param location GCP region where the function will be deployed
      * @param memory Memory configuration that the function will use
      * @param cpu CPU configuration that the function will use
-     * @param instances Number of Instances the function is allowed to use
-     * @param timeout Maximum amount of time the function may execute ( in seconds )
+     * @param instances Number of Instances the function is allowed to use, defaults to 1
+     * @param timeout Maximum amount of time the function may execute ( in seconds ), defaults to 60
      *
      * @return A fully configured GCF v2 function
      */
