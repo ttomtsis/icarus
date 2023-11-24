@@ -5,6 +5,7 @@ import gr.aegean.icsd.icarus.util.enums.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.enums.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.enums.gcp.GcpRegion;
+import org.springframework.http.HttpMethod;
 import software.constructs.Construct;
 
 import java.util.Set;
@@ -46,13 +47,14 @@ public class MainStack extends TerraformStack {
                                    String objectSource, String objectFileName,
                                    Set<AwsRegion> awsRegions, Set<Integer> memoryConfs,
                                    String awsFunctionName, LambdaRuntime awsFunctionRuntime,
-                                   String awsFunctionHandler) {
+                                   String awsFunctionHandler, String awsFunctionRoute, HttpMethod awsFunctionMethod) {
 
         new AwsConstruct(this, "awsConstruct",
                 awsAccessKey, awsSecretKey,
                 objectSource, objectFileName,
                 awsRegions, memoryConfs,
-                awsFunctionName, awsFunctionRuntime, awsFunctionHandler);
+                awsFunctionName, awsFunctionRuntime, awsFunctionHandler,
+                awsFunctionRoute, awsFunctionMethod);
 
     }
 
