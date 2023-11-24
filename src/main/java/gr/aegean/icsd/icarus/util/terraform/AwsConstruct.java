@@ -23,6 +23,7 @@ import com.hashicorp.cdktf.providers.aws.s3_bucket_ownership_controls.S3BucketOw
 import com.hashicorp.cdktf.providers.aws.s3_object.S3Object;
 import gr.aegean.icsd.icarus.util.enums.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.enums.aws.LambdaRuntime;
+import org.springframework.http.HttpMethod;
 import software.constructs.Construct;
 
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ public class AwsConstruct extends Construct {
     private final String functionName;
     private final String functionRuntime;
     private final String functionHandler;
+    private final String functionRoute;
+    private final String functionMethod;
 
     // Currently not supported due to restrictions on AWS starter accounts
     // private final int concurrentExecutions = 10;
@@ -84,12 +87,15 @@ public class AwsConstruct extends Construct {
      *                        resources as well as the function <br>
      * @param awsFunctionRuntime Runtime that will be used to execute the function <br>
      * @param awsFunctionHandler The appropriate handler that AWS Lambda will use to execute the function <br>
+     * @param awsFunctionRoute Route that the function is exposed at in AWS ApiGateway
+     * @param awsFunctionMethod HTTP Method used to invoke the function
      */
     public AwsConstruct(final Construct scope, final String id,
                         String awsAccessKey, String awsSecretKey,
                         String objectSource, String objectFileName,
                         Set<AwsRegion> awsRegions, Set<Integer> memoryConfs,
-                        String awsFunctionName, LambdaRuntime awsFunctionRuntime, String awsFunctionHandler) {
+                        String awsFunctionName, LambdaRuntime awsFunctionRuntime, String awsFunctionHandler,
+                        String awsFunctionRoute, HttpMethod awsFunctionMethod) {
 
         super(scope, id);
 
@@ -110,6 +116,8 @@ public class AwsConstruct extends Construct {
         this.functionName = awsFunctionName;
         this.functionRuntime = awsFunctionRuntime.get();
         this.functionHandler = awsFunctionHandler;
+        this.functionRoute = awsFunctionRoute;
+        this.functionMethod = awsFunctionMethod.toString();
 
         // Default, empty provider. Used solely because Terraform requires a default provider.
         // This provider is never used.
@@ -390,11 +398,11 @@ public class AwsConstruct extends Construct {
                 .build();
 
         Apigatewayv2Route.Builder.create(this, "route-" + apiName)
-            .apiId(api.getId())
-            .routeKey("$default")
-            .target("integrations/"+integration.getId())
-            .provider(provider)
-            .build();
+                .apiId(api.getId())
+                .routeKey(functionMethod + " " + functionRoute)
+                .target("integrations/"+integration.getId())
+                .provider(provider)
+                .build();
 
         LambdaPermission.Builder.create(this,
                     "permission-" + targetFunctionID + "-" + GUID)
