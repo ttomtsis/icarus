@@ -97,7 +97,21 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>5.3.2</version>
-            <scope>test</scope>
+
+            <!-- https://github.com/rest-assured/rest-assured/issues/1612 -->
+            <exclusions>
+
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy-xml</artifactId>
+                </exclusion>
+
+            </exclusions>
         </dependency>
 
         <!-- Terraform CDK for Java -->
