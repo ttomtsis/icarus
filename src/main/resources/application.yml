@@ -1,3 +1,8 @@
+jmeter:
+  jmeterHome: ${JMETER_HOME}
+  jmeterProperties: ${JMETER_PROPERTIES}
+  jmeterLogOutputDirectory: ${JMETER_LOGS_DIR}
+
 spring:
 
   groovy:
