@@ -84,7 +84,7 @@ public class LoadTest {
 
         this.functionMethod = invokeHTTPMethod.toString();
 
-        this.jmeterHome = new File(jmeterHomeFile);
+        this.jmeterHome = new File(jmeterHomeDirectory);
         this.jmeterProperties = new File(jmeterPropertiesFile);
 
         this.jmeter = initJMeter();
