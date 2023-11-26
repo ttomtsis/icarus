@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import static gr.aegean.icsd.icarus.util.IcarusConstants.*;
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
