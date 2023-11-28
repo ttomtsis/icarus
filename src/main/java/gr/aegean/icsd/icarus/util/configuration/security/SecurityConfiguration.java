@@ -62,7 +62,7 @@ public class SecurityConfiguration {
 
                         // Authentication endpoints
                         .requestMatchers("/oauth/**").permitAll()
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/").authenticated()
                 )
 
                 .headers(headers -> headers
@@ -85,10 +85,6 @@ public class SecurityConfiguration {
                                 .preload(true)
                                 .maxAgeInSeconds(31536000)
                         )
-                )
-
-                .requiresChannel(channel -> channel
-                        .anyRequest().requiresSecure()
                 )
 
                 .sessionManagement((session) -> session
