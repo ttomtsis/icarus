@@ -37,6 +37,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!--> Spring Boot Security </!-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!--> Spring Boot HATEOAS<!/-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
