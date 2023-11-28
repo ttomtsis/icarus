@@ -1,4 +1,12 @@
+users:
+
+  enableTestUser: ${ENABLE_TEST_USER}
+  testUserUsername: ${TEST_USER_USERNAME}
+  testUserPassword: ${TEST_USER_PASSWORD}
+  testUserEmail: ${TEST_USER_EMAIL}
+
 jmeter:
+
   jmeterHome: ${JMETER_HOME}
   jmeterProperties: ${JMETER_PROPERTIES}
   jmeterLogOutputDirectory: ${JMETER_LOGS_DIR}
@@ -21,4 +29,5 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         dialect.storage_engine: innodb
