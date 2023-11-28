@@ -18,7 +18,6 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.maxLength;
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.minLength;
 
 
-
 @Entity
 @Table(name = "icarusUser")
 public class IcarusUser implements UserDetails {
@@ -43,7 +42,7 @@ public class IcarusUser implements UserDetails {
 
 
     @OneToMany(targetEntity = ProviderAccount.class, orphanRemoval = true,
-            cascade = {CascadeType.REFRESH, CascadeType.REMOVE, CascadeType.PERSIST}) //TODO: Check PERSIST Cascade
+            cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private final Set<ProviderAccount> accounts = new HashSet<>();
 
@@ -132,6 +131,14 @@ public class IcarusUser implements UserDetails {
         this.password = password;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String newEmail) {
+        this.email = newEmail;
+    }
+
     public Set<ProviderAccount> getAccounts() {
         return accounts;
     }
@@ -143,7 +150,6 @@ public class IcarusUser implements UserDetails {
     public void removeAccount(long accountID) {
         accounts.removeIf(account -> account.getId().equals(accountID));
     }
-
 
 
 }
