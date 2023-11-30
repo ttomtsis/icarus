@@ -28,6 +28,20 @@ public class AwsAccount extends ProviderAccount{
     public AwsAccount() {}
 
 
+    public static AwsAccount createAccountFromModel(ProviderAccountModel awsAccountModel) {
+        String name = awsAccountModel.getName();
+        String description = awsAccountModel.getDescription();
+        String accessKey = awsAccountModel.getAwsAccessKey();
+        String secretKey = awsAccountModel.getAwsSecretKey();
+
+        if (description == null || description.isBlank()) {
+            return new AwsAccount(accessKey, secretKey, name);
+        }
+
+        return new AwsAccount(accessKey, secretKey, name, description);
+    }
+
+
     public String getAwsAccessKey() {
         return awsAccessKey;
     }
@@ -43,4 +57,10 @@ public class AwsAccount extends ProviderAccount{
     public void setAwsSecretKey(String awsSecretKey) {
         this.awsSecretKey = awsSecretKey;
     }
+
+    public void changeCredentials(String awsAccessKey, String awsSecretKey) {
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecretKey = awsSecretKey;
+    }
+
 }
