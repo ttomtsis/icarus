@@ -1,6 +1,12 @@
 package gr.aegean.icsd.icarus.account;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.aegean.icsd.icarus.util.gcp.GcpKeyfile;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.RepresentationModel;
+
 
 public class ProviderAccountModel extends RepresentationModel<ProviderAccountModel> {
 
@@ -11,7 +17,8 @@ public class ProviderAccountModel extends RepresentationModel<ProviderAccountMod
     private String awsAccessKey;
     private String awsSecretKey;
 
-    private String gcpKeyfile;
+    @JsonProperty("gcpKeyfile")
+    private GcpKeyfile gcpKeyfile;
 
 
 
@@ -56,10 +63,33 @@ public class ProviderAccountModel extends RepresentationModel<ProviderAccountMod
     }
 
     public String getGcpKeyfile() {
-        return gcpKeyfile;
+        try{
+            ObjectMapper mapper = new ObjectMapper();
+
+            return mapper.writeValueAsString(this.gcpKeyfile);
+        }
+        catch (JsonProcessingException ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
     }
 
-    public void setGcpKeyfile(String gcpKeyfile) {
+    public void setGcpKeyfile(GcpKeyfile gcpKeyfile) {
         this.gcpKeyfile = gcpKeyfile;
     }
+
+    public void setKeyfile(String stringKeyfile) {
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            this.gcpKeyfile = mapper.readValue(stringKeyfile, GcpKeyfile.class);
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
