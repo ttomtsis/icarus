@@ -1,8 +1,5 @@
 package gr.aegean.icsd.icarus.account;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import gr.aegean.icsd.icarus.util.gcp.GcpKeyfile;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
