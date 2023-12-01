@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.aegean.icsd.icarus.util.gcp.GcpKeyfile;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.RepresentationModel;
 
 
