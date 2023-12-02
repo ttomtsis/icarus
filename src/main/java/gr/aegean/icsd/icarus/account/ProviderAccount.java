@@ -1,8 +1,12 @@
 package gr.aegean.icsd.icarus.account;
 
+import gr.aegean.icsd.icarus.test.Test;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
@@ -22,6 +26,10 @@ public class ProviderAccount {
 
     @Size(min = minLength, max = maxDescriptionLength, message = "Description does not conform to length limitations")
     private String description;
+
+    @ManyToMany(mappedBy = "accountsList", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
+            targetEntity = Test.class)
+    private final Set<Test> associatedTests = new HashSet<>();
 
 
     public ProviderAccount(String name, String description) {
@@ -60,5 +68,10 @@ public class ProviderAccount {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public Set<Test> getAssociatedTests() {
+        return associatedTests;
+    }
+
 
 }
