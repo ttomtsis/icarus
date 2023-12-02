@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.enums.aws;
+package gr.aegean.icsd.icarus.util.aws;
 
 /**
  * Contains a list of all supported AWS regions <br>

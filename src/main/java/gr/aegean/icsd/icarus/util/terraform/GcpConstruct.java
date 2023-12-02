@@ -7,8 +7,8 @@ import com.hashicorp.cdktf.providers.google.cloudfunctions2_function.*;
 import com.hashicorp.cdktf.providers.google.provider.GoogleProvider;
 import com.hashicorp.cdktf.providers.google.storage_bucket.StorageBucket;
 import com.hashicorp.cdktf.providers.google.storage_bucket_object.StorageBucketObject;
-import gr.aegean.icsd.icarus.util.enums.gcp.GcfRuntime;
-import gr.aegean.icsd.icarus.util.enums.gcp.GcpRegion;
+import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
+import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import software.constructs.Construct;
 
 import java.util.ArrayList;

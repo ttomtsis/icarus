@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.enums.gcp;
+package gr.aegean.icsd.icarus.util.gcp;
 
 /**
  * Contains a list of all supported Google Cloud Function Runtimes <br>

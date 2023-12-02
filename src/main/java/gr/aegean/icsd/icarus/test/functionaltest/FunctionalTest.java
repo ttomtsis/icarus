@@ -2,8 +2,8 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.util.enums.aws.AwsRegion;
-import gr.aegean.icsd.icarus.util.enums.gcp.GcpRegion;
+import gr.aegean.icsd.icarus.util.aws.AwsRegion;
+import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
