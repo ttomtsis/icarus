@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Entity
 @Table(name = "performance_test")
 public class PerformanceTest extends Test  {
@@ -27,6 +28,11 @@ public class PerformanceTest extends Test  {
 
     private String requestBody;
 
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = LoadProfile.class)
+    private final Set<LoadProfile> loadProfiles = new HashSet<>();
+
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = LoadProfile.class)
+    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
 
     public static class PerformanceTestBuilder {
