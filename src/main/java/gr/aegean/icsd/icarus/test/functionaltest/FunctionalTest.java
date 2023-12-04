@@ -3,7 +3,6 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
