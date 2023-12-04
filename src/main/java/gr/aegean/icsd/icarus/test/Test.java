@@ -22,7 +22,7 @@ public class Test {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @NotBlank(message = "Test name cannot be blank")
@@ -30,7 +30,8 @@ public class Test {
     @Column(unique = true)
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength, message = "Test description does not conform to length limitations")
+    @Size(min = minLength, max = maxDescriptionLength,
+            message = "Test description does not conform to length limitations")
     private String description;
 
     @NotBlank(message = "Http Method used by the Test cannot be blank")
@@ -39,6 +40,11 @@ public class Test {
     @Pattern(regexp = "^/([a-zA-Z]+/)*(\\{[a-zA-Z]+\\}/([a-zA-Z]+/)*)?$",
             message = "The exposed path is not in a valid format")
     private String path;
+
+    @Pattern(regexp = "\\{(?!\\d*\\})[a-zA-Z0-9_]+\\}",
+            message = "Path variable exposed in the test is not in a valid format." +
+                    " Path variable must be in the format {A-Z, a-z, 0-9} e.g. {variable1}")
+    private String pathVariable;
 
     @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "test_author_id")
@@ -53,23 +59,61 @@ public class Test {
 
 
 
-    public Test(String name, HttpMethod httpMethod, String description, IcarusUser author,
-                Function targetFunction) {
-        this.name = name;
-        this.httpMethod = httpMethod.toString();
-        this.description = description;
-        this.testAuthor = author;
-        this.targetFunction = targetFunction;
+    public static class TestBuilder {
+
+
+        private final String name;
+        private final IcarusUser testAuthor;
+        private final Function targetFunction;
+        private final String httpMethod;
+
+        private String description;
+        private String path;
+        private String pathVariable;
+
+
+        public TestBuilder(String name, IcarusUser testAuthor, Function targetFunction,
+        HttpMethod httpMethod) {
+            this.name = name;
+            this.testAuthor = testAuthor;
+            this.targetFunction = targetFunction;
+            this.httpMethod = httpMethod.toString();
+        }
+
+
+        public TestBuilder description (String description) {
+            this.description = description;
+            return this;
+        }
+
+        public TestBuilder path (String path) {
+            this.path = path;
+            return this;
+        }
+
+        public TestBuilder pathVariable (String pathVariable) {
+            this.pathVariable = pathVariable;
+            return this;
+        }
+
+        public Test build () {
+            return new Test(this);
+        }
+
+
     }
 
-    public Test(String name, HttpMethod httpMethod, String description, String path, IcarusUser author,
-                Function targetFunction) {
-        this.name = name;
-        this.httpMethod = httpMethod.toString();
-        this.description = description;
-        this.path = path;
-        this.testAuthor = author;
-        this.targetFunction = targetFunction;
+
+
+    private Test (TestBuilder builder) {
+        this.name = builder.name;
+        this.testAuthor = builder.testAuthor;
+        this.targetFunction = builder.targetFunction;
+        this.httpMethod = builder.httpMethod;
+
+        this.description = builder.description;
+        this.path = builder.path;
+        this.pathVariable = builder.pathVariable;
     }
 
     public Test() {}
@@ -124,7 +168,17 @@ public class Test {
 
     public void addProviderAccount(ProviderAccount newAccount) {accountsList.add(newAccount);}
 
-    public Function getTargetFunction() {return this.targetFunction;}
+    public String getPathVariable() {
+        return pathVariable;
+    }
+
+    public void setPathVariable(String pathVariable) {
+        this.pathVariable = pathVariable;
+    }
+
+    public Function getTargetFunction() {
+        return targetFunction;
+    }
 
 
 }
