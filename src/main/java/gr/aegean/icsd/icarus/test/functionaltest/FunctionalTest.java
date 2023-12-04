@@ -35,7 +35,7 @@ public class FunctionalTest extends Test {
 
 
 
-    public static class FunctionalTestBuilder extends TestBuilder {
+    public static class FunctionalTestBuilder {
 
 
         private final String name;
@@ -55,7 +55,6 @@ public class FunctionalTest extends Test {
 
         public FunctionalTestBuilder(String name, IcarusUser author, Function targetFunction,
                                       HttpMethod httpMethod) {
-            super(name, author, targetFunction, httpMethod);
             this.name = name;
             this.testAuthor = author;
             this.targetFunction = targetFunction;
