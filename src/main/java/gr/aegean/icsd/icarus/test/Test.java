@@ -180,5 +180,13 @@ public class Test {
         return targetFunction;
     }
 
+    protected void setAuthor(IcarusUser testAuthor) {
+        this.testAuthor = testAuthor;
+    }
+
+    protected void setTargetFunction(Function targetFunction) {
+        this.targetFunction = targetFunction;
+    }
+
 
 }
