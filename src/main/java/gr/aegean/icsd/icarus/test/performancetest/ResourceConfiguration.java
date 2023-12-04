@@ -26,7 +26,6 @@ public class ResourceConfiguration {
     @Max(value = 8, message = "Resource configuration's cpu cannot exceed 8")
     private Integer cpu;
 
-    @NotNull(message = "Resource configuration's associated performance test cannot be null")
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
     private PerformanceTest parentTest;
 
