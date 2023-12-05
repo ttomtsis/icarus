@@ -28,10 +28,12 @@ public class PerformanceTest extends Test  {
 
     private String requestBody;
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = LoadProfile.class)
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
+            targetEntity = LoadProfile.class, orphanRemoval = true)
     private final Set<LoadProfile> loadProfiles = new HashSet<>();
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = LoadProfile.class)
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
+            targetEntity = LoadProfile.class, orphanRemoval = true)
     private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
 
@@ -121,6 +123,22 @@ public class PerformanceTest extends Test  {
 
     public void addMetric(Metric newMetric) {
         this.chosenMetrics.add(newMetric);
+    }
+
+    public String getPathVariableValue() {
+        return pathVariableValue;
+    }
+
+    public void setPathVariableValue(String pathVariableValue) {
+        this.pathVariableValue = pathVariableValue;
+    }
+
+    public Set<LoadProfile> getLoadProfiles() {
+        return loadProfiles;
+    }
+
+    public Set<ResourceConfiguration> getResourceConfigurations() {
+        return resourceConfigurations;
     }
 
 

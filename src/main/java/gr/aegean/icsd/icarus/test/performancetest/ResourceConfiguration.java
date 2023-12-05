@@ -31,13 +31,13 @@ public class ResourceConfiguration {
 
 
 
-    public ResourceConfiguration(String region, Integer usedMemory, PerformanceTest parentTest) {
+    public ResourceConfiguration(PerformanceTest parentTest, String region, Integer usedMemory) {
         this.region = region;
         this.usedMemory = usedMemory;
         this.parentTest = parentTest;
     }
 
-    public ResourceConfiguration(String region, Integer usedMemory, Integer cpu, PerformanceTest parentTest) {
+    public ResourceConfiguration(PerformanceTest parentTest, String region, Integer usedMemory, Integer cpu) {
         this.region = region;
         this.usedMemory = usedMemory;
         this.cpu = cpu;
@@ -46,6 +46,15 @@ public class ResourceConfiguration {
 
     public ResourceConfiguration() {}
 
+
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setParentTest(PerformanceTest parentTest) {
+        this.parentTest = parentTest;
+    }
 
     public Long getId() {
         return id;

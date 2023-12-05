@@ -38,8 +38,8 @@ public class LoadProfile {
 
 
 
-    public LoadProfile(Integer loadTime, Integer rampUp, Integer concurrentUsers,
-                       Integer startDelay, Integer thinkTime, PerformanceTest parentTest) {
+    public LoadProfile(PerformanceTest parentTest, Integer loadTime, Integer rampUp, Integer concurrentUsers,
+                       Integer startDelay, Integer thinkTime) {
         this.loadTime = loadTime;
         this.rampUp = rampUp;
         this.concurrentUsers = concurrentUsers;
@@ -51,6 +51,14 @@ public class LoadProfile {
     public LoadProfile() {}
 
 
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setParentTest(PerformanceTest parentTest) {
+        this.parentTest = parentTest;
+    }
 
     public Integer getLoadTime() {
         return loadTime;
