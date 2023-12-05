@@ -2,7 +2,6 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.performancetest.LoadProfile;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
@@ -26,16 +25,16 @@ import java.util.Set;
 public class FunctionalTest extends Test {
 
 
-    @NotBlank(message = "Function URL cannot be blank")
-    @URL(message = "Function URL is not a valid URL")
+    @NotBlank(message = "Functional Test's function URL cannot be blank")
+    @URL(message = "Functional Test's function URL is not a valid URL")
     private String functionURL;
 
-    @NotNull(message = "Allocated memory cannot be null")
-    @Positive(message = "Allocated memory must be positive")
-    @Min(value = 128, message = "Minimum allocated memory must be at least 128MB")
+    @NotNull(message = "Functional Test's allocated memory cannot be null")
+    @Positive(message = "Functional Test's allocated memory must be positive")
+    @Min(value = 128, message = "Functional Test's minimum allocated memory must be at least 128MB")
     private Integer usedMemory;
 
-    @NotBlank(message = "Region cannot be blank")
+    @NotBlank(message = "Functional Test's region cannot be blank")
     private String region;
 
     @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = TestCase.class)
@@ -50,6 +49,8 @@ public class FunctionalTest extends Test {
         private final IcarusUser testAuthor;
         private final Function targetFunction;
         private final HttpMethod httpMethod;
+        private final Set<TestCase> testCases = new HashSet<>();
+
 
         private String description;
         private String path;
@@ -104,6 +105,16 @@ public class FunctionalTest extends Test {
             return this;
         }
 
+        public FunctionalTestBuilder testCase (TestCase testCase) {
+            this.testCases.add(testCase);
+            return this;
+        }
+
+        public FunctionalTestBuilder testCase (Set<TestCase> testCases) {
+            this.testCases.addAll(testCases);
+            return this;
+        }
+
         public FunctionalTest build () {
             return new FunctionalTest(this);
         }
@@ -122,6 +133,8 @@ public class FunctionalTest extends Test {
         super.setDescription(builder.description);
         super.setPath(builder.path);
         super.setPathVariable(builder.pathVariable);
+
+        this.testCases.addAll(builder.testCases);
 
         this.functionURL = builder.functionURL;
         this.usedMemory = builder.usedMemory;
@@ -150,6 +163,31 @@ public class FunctionalTest extends Test {
 
     public String getRegion() {
         return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public Set<TestCase> getTestCases() {
+        return testCases;
+    }
+
+
+    public void addTestCase(TestCase newTestCase) {
+        this.testCases.add(newTestCase);
+    }
+
+    public void addTestCase(Set<TestCase> newTestCases) {
+        this.testCases.addAll(newTestCases);
+    }
+
+    public void removeTestCase(TestCase testCase) {
+        this.testCases.remove(testCase);
+    }
+
+    public void removeTestCase(Set<TestCase> testCases) {
+        this.testCases.removeAll(testCases);
     }
 
 

@@ -1,8 +1,6 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import jakarta.persistence.*;
-import org.springframework.http.HttpStatusCode;
 
 
 @Entity
@@ -21,8 +19,8 @@ public class TestCaseMember {
 
     private String requestBody;
 
-    @ManyToOne(targetEntity = FunctionalTest.class, optional = false)
-    private PerformanceTest parentTestCase;
+    @ManyToOne(targetEntity = TestCase.class)
+    private TestCase parentTestCase;
 
 
 
@@ -35,8 +33,8 @@ public class TestCaseMember {
 
         private String requestBody;
 
-        public TestCaseMemberBuilder(HttpStatusCode expectedResponseCode, String expectedResponseBody) {
-            this.expectedResponseCode = expectedResponseCode.value();
+        public TestCaseMemberBuilder(int expectedResponseCode, String expectedResponseBody) {
+            this.expectedResponseCode = expectedResponseCode;
             this.expectedResponseBody = expectedResponseBody;
         }
 
@@ -71,6 +69,14 @@ public class TestCaseMember {
 
 
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public int getExpectedResponseCode() {
         return expectedResponseCode;
     }
@@ -103,8 +109,12 @@ public class TestCaseMember {
         this.requestBody = requestBody;
     }
 
-    public PerformanceTest getParentTestCase() {
+    public TestCase getParentTestCase() {
         return parentTestCase;
+    }
+
+    public void setParentTestCase(TestCase parentTestCase) {
+        this.parentTestCase = parentTestCase;
     }
 
 
