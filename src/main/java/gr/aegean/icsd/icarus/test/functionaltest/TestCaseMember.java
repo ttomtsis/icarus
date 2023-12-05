@@ -19,7 +19,7 @@ public class TestCaseMember {
 
     private String requestBody;
 
-    @ManyToOne(targetEntity = TestCase.class)
+    @ManyToOne(targetEntity = TestCase.class, optional = false)
     private TestCase parentTestCase;
 
 

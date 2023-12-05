@@ -14,7 +14,7 @@ public class TestCase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(targetEntity = FunctionalTest.class)
+    @ManyToOne(targetEntity = FunctionalTest.class, optional = false)
     private FunctionalTest parentTest;
 
     @OneToMany(mappedBy = "parentTestCase", cascade = CascadeType.ALL,
