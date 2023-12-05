@@ -1,12 +1,14 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
-
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.test.performancetest.LoadProfile;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +16,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.http.HttpMethod;
+
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
 @Table(name = "functional_test")
@@ -31,6 +37,9 @@ public class FunctionalTest extends Test {
 
     @NotBlank(message = "Region cannot be blank")
     private String region;
+
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = TestCase.class)
+    private final Set<TestCase> testCases = new HashSet<>();
 
 
 
