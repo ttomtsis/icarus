@@ -17,7 +17,8 @@ public class TestCase {
     @ManyToOne(targetEntity = FunctionalTest.class)
     private FunctionalTest parentTest;
 
-    @OneToMany(mappedBy = "parentTestCase", cascade = CascadeType.ALL, targetEntity = TestCaseMember.class)
+    @OneToMany(mappedBy = "parentTestCase", cascade = CascadeType.ALL,
+            orphanRemoval = true, targetEntity = TestCaseMember.class)
     private final Set<TestCaseMember> testCaseMembers = new HashSet<>();
 
 

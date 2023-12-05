@@ -37,7 +37,8 @@ public class FunctionalTest extends Test {
     @NotBlank(message = "Functional Test's region cannot be blank")
     private String region;
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL, targetEntity = TestCase.class)
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
+            orphanRemoval = true, targetEntity = TestCase.class)
     private final Set<TestCase> testCases = new HashSet<>();
 
 
