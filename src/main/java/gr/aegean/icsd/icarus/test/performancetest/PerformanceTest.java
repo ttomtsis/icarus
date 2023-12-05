@@ -22,8 +22,6 @@ public class PerformanceTest extends Test  {
     @Column(name = "metric")
     private final Set<Metric> chosenMetrics = new HashSet<>();
 
-    private String pathVariable;
-
     private String pathVariableValue;
 
     private String requestBody;
