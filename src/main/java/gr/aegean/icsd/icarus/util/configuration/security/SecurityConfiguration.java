@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.util.configuration.security;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.util.configuration.security.httpbasic.MySqlAuthenticationManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,6 +68,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/").authenticated()
 
                         .requestMatchers("/api/v0/users/{username}/accounts/**").authenticated()
+                        .requestMatchers("/api/v0/tests/**").authenticated()
+
                 )
 
                 .headers(headers -> headers
