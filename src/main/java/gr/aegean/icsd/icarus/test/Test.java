@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.http.HttpMethod;
 
 import java.util.HashSet;
@@ -56,6 +57,9 @@ public class Test {
 
     @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
+
+    @CreatedBy
+    private String authorUsername;
 
 
 
@@ -126,6 +130,22 @@ public class Test {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
+    }
+
+    public void setTestAuthor(IcarusUser testAuthor) {
+        this.testAuthor = testAuthor;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
+    }
+
+    public void setAuthorUsername(String authorUsername) {
+        this.authorUsername = authorUsername;
     }
 
     public String getName() {
