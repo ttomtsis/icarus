@@ -1,5 +1,6 @@
-package gr.aegean.icsd.icarus.test.performancetest;
+package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
 
+import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -28,6 +29,12 @@ public class ResourceConfiguration {
 
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
     private PerformanceTest parentTest;
+
+
+
+    public static ResourceConfiguration createResourceConfigurationFromModel(ResourceConfigurationModel model) {
+        return new ResourceConfiguration(null, model.getRegion(), model.getUsedMemory());
+    }
 
 
 
