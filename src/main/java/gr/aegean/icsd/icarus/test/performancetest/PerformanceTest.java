@@ -2,6 +2,8 @@ package gr.aegean.icsd.icarus.test.performancetest;
 
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
+import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import jakarta.persistence.*;
@@ -35,6 +37,7 @@ public class PerformanceTest extends Test  {
     private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
 
+
     public static class PerformanceTestBuilder {
 
 
@@ -42,6 +45,7 @@ public class PerformanceTest extends Test  {
         private final IcarusUser testAuthor;
         private final Function targetFunction;
         private final HttpMethod httpMethod;
+        private final Set<Metric> chosenMetrics = new HashSet<>();
 
         private String description;
         private String path;
@@ -72,6 +76,16 @@ public class PerformanceTest extends Test  {
             return this;
         }
 
+        public PerformanceTestBuilder metrics (Metric newMetric) {
+            this.chosenMetrics.add(newMetric);
+            return this;
+        }
+
+        public PerformanceTestBuilder metrics (Set<Metric> newMetrics) {
+            this.chosenMetrics.addAll(newMetrics);
+            return this;
+        }
+
         public PerformanceTest build () {
             return new PerformanceTest(this);
         }
@@ -83,6 +97,25 @@ public class PerformanceTest extends Test  {
 
     public PerformanceTest() {}
 
+    public static PerformanceTest createPerformanceTestFromModel(PerformanceTestModel model) {
+
+        IcarusUser author = new IcarusUser();
+        author.setId(model.getTestAuthor());
+
+        Function targetFunction = new Function();
+        targetFunction.setId(model.getTargetFunction());
+
+        return new PerformanceTestBuilder(
+                model.getName(), author, targetFunction,
+                HttpMethod.valueOf(model.getHttpMethod())
+        )
+                .pathVariableValue(model.getPathVariableValue())
+                .requestBody(model.getRequestBody())
+                .metrics(model.getChosenMetrics())
+                .build();
+
+    }
+
     private PerformanceTest(PerformanceTestBuilder builder) {
         super.setName(builder.name);
         super.setAuthor(builder.testAuthor);
@@ -92,6 +125,8 @@ public class PerformanceTest extends Test  {
         super.setDescription(builder.description);
         super.setPath(builder.path);
         super.setPathVariable(builder.pathVariable);
+
+        this.chosenMetrics.addAll(builder.chosenMetrics);
 
         this.pathVariableValue = builder.pathVariable;
         this.requestBody = builder.requestBody;
@@ -137,6 +172,14 @@ public class PerformanceTest extends Test  {
 
     public Set<ResourceConfiguration> getResourceConfigurations() {
         return resourceConfigurations;
+    }
+
+    public void addConfiguration (ResourceConfiguration configuration) {
+        this.resourceConfigurations.add(configuration);
+    }
+
+    public void addLoadProfile (LoadProfile profile) {
+        this.loadProfiles.add(profile);
     }
 
 
