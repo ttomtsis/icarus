@@ -1,6 +1,6 @@
 package testexecution;
 
-import gr.aegean.icsd.icarus.test.functionaltest.TestCaseMember;
+import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
 import jakarta.persistence.*;
 
 

@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.user;
 
-import gr.aegean.icsd.icarus.account.ProviderAccount;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.test.Test;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
