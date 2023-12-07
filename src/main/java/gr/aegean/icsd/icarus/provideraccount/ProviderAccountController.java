@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.account;
+package gr.aegean.icsd.icarus.provideraccount;
 
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;

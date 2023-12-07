@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.account;
+package gr.aegean.icsd.icarus.provideraccount;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.Entity;

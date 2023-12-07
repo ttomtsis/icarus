@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.account;
+package gr.aegean.icsd.icarus.provideraccount;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

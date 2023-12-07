@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.account;
+package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.util.configuration.security.UserUtils;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
