@@ -1,6 +1,6 @@
-package gr.aegean.icsd.icarus.test.functionaltest;
+package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 
-import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

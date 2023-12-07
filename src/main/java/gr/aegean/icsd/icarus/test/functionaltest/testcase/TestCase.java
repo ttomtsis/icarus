@@ -1,5 +1,7 @@
-package gr.aegean.icsd.icarus.test.functionaltest;
+package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 
+import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
+import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
