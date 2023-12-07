@@ -1,5 +1,6 @@
-package gr.aegean.icsd.icarus.test.performancetest;
+package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
+import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -35,6 +36,16 @@ public class LoadProfile {
 
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
     private PerformanceTest parentTest;
+
+
+
+    public static LoadProfile createLoadProfileFromModel(LoadProfileModel model) {
+
+        return new LoadProfile(null, model.getLoadTime(),
+                model.getRampUp(), model.getConcurrentUsers(),
+                model.getStartDelay(), model.getThinkTime());
+
+    }
 
 
 
