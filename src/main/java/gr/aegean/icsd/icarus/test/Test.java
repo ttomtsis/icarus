@@ -38,7 +38,7 @@ public class Test {
     @NotBlank(message = "Http Method used by the Test cannot be blank")
     private String httpMethod;
 
-    @Pattern(regexp = "^/([a-zA-Z]+/)*(\\{[a-zA-Z]+\\}/([a-zA-Z]+/)*)?$",
+    @Pattern(regexp = "^/([a-zA-Z]+/?)*(\\{[a-zA-Z]+\\}/([a-zA-Z]+/?)*)?$",
             message = "The exposed path is not in a valid format")
     private String path;
 
@@ -124,6 +124,11 @@ public class Test {
     public Test() {}
 
 
+
+    @PreRemove
+    private void removeForeignKeyConstraints() {
+        this.targetFunction = null;
+    }
 
     public Long getId() {
         return id;
