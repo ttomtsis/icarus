@@ -1,17 +1,17 @@
 package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import org.springframework.hateoas.RepresentationModel;
 
 public class LoadProfileModel extends RepresentationModel<LoadProfileModel> {
 
 
+    private Long id;
     private Integer loadTime;
     private Integer rampUp;
     private Integer concurrentUsers;
     private Integer startDelay;
     private Integer thinkTime;
-    private PerformanceTest parentTest;
+    private Long parentTest;
 
 
 
@@ -55,11 +55,19 @@ public class LoadProfileModel extends RepresentationModel<LoadProfileModel> {
         this.thinkTime = thinkTime;
     }
 
-    public PerformanceTest getParentTest() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getParentTest() {
         return parentTest;
     }
 
-    public void setParentTest(PerformanceTest parentTest) {
+    public void setParentTest(Long parentTest) {
         this.parentTest = parentTest;
     }
 
