@@ -84,7 +84,7 @@ public class PerformanceTestModelAssembler
                 .deleteTest(model.getId())).withRel("Delete"));
 
         model.add(linkTo(methodOn(PerformanceTestController.class)
-                .updateTest(model.getId(), null)).withRel("Update"));
+                .updateTest(model.getId(), new PerformanceTestModel())).withRel("Update"));
 
         return model;
     }
