@@ -154,9 +154,16 @@ public class PerformanceTest extends Test  {
         return chosenMetrics;
     }
 
+    public void setChosenMetrics(Set<Metric> newMetrics) {
+        this.chosenMetrics.clear();
+        this.chosenMetrics.addAll(newMetrics);
+    }
+
     public void addMetric(Metric newMetric) {
         this.chosenMetrics.add(newMetric);
     }
+
+    public void removeMetric(Metric metric) {this.chosenMetrics.remove(metric);}
 
     public String getPathVariableValue() {
         return pathVariableValue;
@@ -172,14 +179,6 @@ public class PerformanceTest extends Test  {
 
     public Set<ResourceConfiguration> getResourceConfigurations() {
         return resourceConfigurations;
-    }
-
-    public void addConfiguration (ResourceConfiguration configuration) {
-        this.resourceConfigurations.add(configuration);
-    }
-
-    public void addLoadProfile (LoadProfile profile) {
-        this.loadProfiles.add(profile);
     }
 
 
