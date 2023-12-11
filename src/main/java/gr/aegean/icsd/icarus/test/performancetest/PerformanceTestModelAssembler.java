@@ -7,10 +7,14 @@ import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.Resource
 import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModel;
 import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModelAssembler;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @Component
@@ -33,7 +37,7 @@ public class PerformanceTestModelAssembler
     }
 
 
-
+    @NonNull
     @Override
     public PerformanceTestModel toModel(PerformanceTest entity) {
 
@@ -68,7 +72,21 @@ public class PerformanceTestModelAssembler
         newModel.setLoadProfiles(loadProfiles);
         newModel.setResourceConfigurations(resourceConfigurations);
 
-        return newModel;
+        return addLinksToModel(newModel);
+    }
+
+    private PerformanceTestModel addLinksToModel(PerformanceTestModel model) {
+
+        model.add(linkTo(methodOn(PerformanceTestController.class)
+                .searchTest(model.getId())).withSelfRel());
+
+        model.add(linkTo(methodOn(PerformanceTestController.class)
+                .deleteTest(model.getId())).withRel("Delete"));
+
+        model.add(linkTo(methodOn(PerformanceTestController.class)
+                .updateTest(model.getId(), null)).withRel("Update"));
+
+        return model;
     }
 
 
