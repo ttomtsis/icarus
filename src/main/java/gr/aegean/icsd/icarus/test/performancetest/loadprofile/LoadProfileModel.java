@@ -62,4 +62,6 @@ public class LoadProfileModel extends RepresentationModel<LoadProfileModel> {
     public void setParentTest(PerformanceTest parentTest) {
         this.parentTest = parentTest;
     }
+
+
 }
