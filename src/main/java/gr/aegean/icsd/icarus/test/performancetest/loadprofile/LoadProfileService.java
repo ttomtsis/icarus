@@ -84,15 +84,13 @@ public class LoadProfileService {
     private PerformanceTest checkIfTestExists(Long parentTestId) {
 
         return (PerformanceTest) testRepository.findById(parentTestId)
-                .orElseThrow( () -> new TestNotFoundException
-                        ("Performance test with id: " + parentTestId + " does not exist"));
+                .orElseThrow( () -> new TestNotFoundException(parentTestId));
     }
 
     private LoadProfile checkIfProfileExists(Long loadProfileId) {
 
         return loadProfileRepository.findById(loadProfileId)
-                .orElseThrow( () -> new LoadProfileNotFoundException
-                        ("Load Profile with ID: " + loadProfileId + " does not exist"));
+                .orElseThrow( () -> new LoadProfileNotFoundException(loadProfileId));
     }
 
 

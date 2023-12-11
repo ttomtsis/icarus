@@ -43,7 +43,7 @@ public class ProviderAccountService {
                     },
 
                 () -> {
-                    throw new UserNotFoundException("User: " + username + ", not found");
+                    throw new UserNotFoundException(username);
                 }
         );
 
@@ -54,8 +54,7 @@ public class ProviderAccountService {
 
         Optional<ProviderAccount> existingProviderAccount = accountRepository.findByName(awsAccountName);
 
-        if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException("Account: " +
-                awsAccountName + ", was not found");}
+        if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException(awsAccountName);}
 
         AwsAccount existingAwsAccount = (AwsAccount) existingProviderAccount.get();
 
@@ -78,8 +77,7 @@ public class ProviderAccountService {
 
         Optional<ProviderAccount> existingProviderAccount = accountRepository.findByName(gcpAccountName);
 
-        if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException("Account: " +
-                gcpAccountName + ", was not found");}
+        if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException(gcpAccountName);}
 
         GcpAccount existingGcpAccount = (GcpAccount) existingProviderAccount.get();
 

@@ -9,7 +9,6 @@ import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class PerformanceTestService {
 
         return (PerformanceTest) repository.findById(testId)
                 .orElseThrow(() -> new TestNotFoundException
-                        ("Performance Test with id: " + testId + " was not found"));
+                        (testId));
 
     }
 
@@ -67,7 +66,7 @@ public class PerformanceTestService {
 
         PerformanceTest requestedTest = (PerformanceTest) repository.findById(testId).orElseThrow( () ->
                 new TestNotFoundException
-                        ("Performance Test with ID: " + testId + " was not found"));
+                        (testId));
 
         setIfNotBlank(requestedTest::setName, test.getName());
         setIfNotBlank(value -> requestedTest.setHttpMethod(HttpMethod.valueOf(value)), test.getHttpMethod());
@@ -81,7 +80,6 @@ public class PerformanceTestService {
             requestedTest.setChosenMetrics(test.getChosenMetrics());
         }
 
-        LoggerFactory.getLogger("bobz").warn("path: " + test.getPath());
         repository.save(requestedTest);
 
     }
@@ -113,8 +111,7 @@ public class PerformanceTestService {
 
 
         PerformanceTest requestedTest = (PerformanceTest) repository.findById(testId).orElseThrow( () ->
-                new TestNotFoundException
-                        ("Performance Test with ID: " + testId + " was not found"));
+                new TestNotFoundException(testId));
 
 
         if (patchDoc.getOp().equals(PatchOperation.ADD)) {
@@ -135,7 +132,7 @@ public class PerformanceTestService {
 
         } else {
 
-            throw new TestNotFoundException("Performance Test with id " + testId + " does not exist");
+            throw new TestNotFoundException(testId);
 
         }
 
