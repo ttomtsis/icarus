@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.test;
 
-import gr.aegean.icsd.icarus.account.ProviderAccount;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
@@ -58,6 +58,7 @@ public class Test {
     @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
 
+    // TODO: Merge this field with testAuthor field
     @CreatedBy
     private String authorUsername;
 
