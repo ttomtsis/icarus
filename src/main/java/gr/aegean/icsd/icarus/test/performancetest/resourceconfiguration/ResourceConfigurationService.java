@@ -55,6 +55,10 @@ public class ResourceConfigurationService {
             existingResourceConfiguration.setRegion(model.getRegion());
         }
 
+        if (model.getPlatform() != null && !model.getPlatform().toString().isBlank()) {
+            existingResourceConfiguration.setProviderPlatform(model.getPlatform());
+        }
+
         if (model.getUsedMemory() != null && model.getUsedMemory() >= 0) {
             existingResourceConfiguration.setUsedMemory(model.getUsedMemory());
         }
