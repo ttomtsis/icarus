@@ -3,8 +3,6 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModelAssembler;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestController;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
