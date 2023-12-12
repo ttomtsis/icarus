@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
+import gr.aegean.icsd.icarus.util.enums.Platform;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -27,28 +28,39 @@ public class ResourceConfiguration {
     @Max(value = 8, message = "Resource configuration's cpu cannot exceed 8")
     private Integer cpu;
 
+    @Enumerated(EnumType.STRING)
+    @NotBlank(message = "Resource configuration's target platform must not be blank")
+    private Platform providerPlatform;
+
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
     private PerformanceTest parentTest;
 
 
 
     public static ResourceConfiguration createResourceConfigurationFromModel(ResourceConfigurationModel model) {
-        return new ResourceConfiguration(null, model.getRegion(), model.getUsedMemory());
+
+        return new ResourceConfiguration(null, model.getRegion(),
+                model.getUsedMemory(), model.getPlatform());
     }
 
 
 
-    public ResourceConfiguration(PerformanceTest parentTest, String region, Integer usedMemory) {
+    public ResourceConfiguration(PerformanceTest parentTest, String region,
+                                 Integer usedMemory, Platform targetPlatform) {
+
         this.region = region;
         this.usedMemory = usedMemory;
         this.parentTest = parentTest;
+        this.providerPlatform = targetPlatform;
     }
 
-    public ResourceConfiguration(PerformanceTest parentTest, String region, Integer usedMemory, Integer cpu) {
+    public ResourceConfiguration(PerformanceTest parentTest, String region,
+                                 Integer usedMemory, Integer cpu, Platform targetPlatform) {
         this.region = region;
         this.usedMemory = usedMemory;
         this.cpu = cpu;
         this.parentTest = parentTest;
+        this.providerPlatform = targetPlatform;
     }
 
     public ResourceConfiguration() {}
@@ -93,6 +105,14 @@ public class ResourceConfiguration {
 
     public PerformanceTest getParentTest() {
         return parentTest;
+    }
+
+    public Platform getProviderPlatform() {
+        return providerPlatform;
+    }
+
+    public void setProviderPlatform(Platform providerPlatform) {
+        this.providerPlatform = providerPlatform;
     }
 
 
