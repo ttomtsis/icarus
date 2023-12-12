@@ -3,12 +3,17 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModelAssembler;
+import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestController;
+import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @Component
@@ -59,6 +64,16 @@ public class FunctionalTestModelAssembler
     }
 
     private FunctionalTestModel addLinksToModel(FunctionalTestModel model) {
+
+        model.add(linkTo(methodOn(FunctionalTestController.class)
+                .searchTest(model.getId())).withSelfRel());
+
+        model.add(linkTo(methodOn(FunctionalTestController.class)
+                .deleteTest(model.getId())).withRel("Delete"));
+
+        model.add(linkTo(methodOn(FunctionalTestController.class)
+                .updateTest(model.getId(), new FunctionalTestModel())).withRel("Update"));
+
         return model;
     }
 
