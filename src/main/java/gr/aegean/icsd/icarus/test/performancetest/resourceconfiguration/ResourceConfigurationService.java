@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
-import gr.aegean.icsd.icarus.util.exceptions.LoadProfileNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.ResourceConfigurationNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
@@ -89,7 +89,7 @@ public class ResourceConfigurationService {
     private ResourceConfiguration checkIfConfigurationExists(Long configurationId) {
 
         return resourceConfigurationRepository.findById(configurationId)
-                .orElseThrow( () -> new LoadProfileNotFoundException(configurationId));
+                .orElseThrow( () -> new ResourceConfigurationNotFoundException(configurationId));
     }
 
 
