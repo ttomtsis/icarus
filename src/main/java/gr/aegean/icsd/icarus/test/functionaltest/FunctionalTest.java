@@ -1,15 +1,15 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
+import com.google.api.gax.rpc.InvalidArgumentException;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
+import gr.aegean.icsd.icarus.util.enums.Platform;
+import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +42,10 @@ public class FunctionalTest extends Test {
             orphanRemoval = true, targetEntity = TestCase.class)
     private final Set<TestCase> testCases = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Functional test's target platform cannot be blank")
+    private Platform providerPlatform;
+
 
 
     public static class FunctionalTestBuilder {
@@ -52,6 +56,7 @@ public class FunctionalTest extends Test {
         private final Function targetFunction;
         private final HttpMethod httpMethod;
         private final Set<TestCase> testCases = new HashSet<>();
+        private final Platform providerPlatform;
 
 
         private String description;
@@ -65,11 +70,12 @@ public class FunctionalTest extends Test {
 
 
         public FunctionalTestBuilder(String name, IcarusUser author, Function targetFunction,
-                                      HttpMethod httpMethod) {
+                                     HttpMethod httpMethod, Platform providerPlatform) {
             this.name = name;
             this.testAuthor = author;
             this.targetFunction = targetFunction;
             this.httpMethod = httpMethod;
+            this.providerPlatform = providerPlatform;
         }
 
         public FunctionalTestBuilder description (String description) {
@@ -94,6 +100,11 @@ public class FunctionalTest extends Test {
 
         public FunctionalTestBuilder usedMemory (Integer usedMemory) {
             this.usedMemory = usedMemory;
+            return this;
+        }
+
+        public FunctionalTestBuilder region (String region) {
+            this.region = region;
             return this;
         }
 
@@ -127,10 +138,13 @@ public class FunctionalTest extends Test {
 
 
     private FunctionalTest(FunctionalTestBuilder builder) {
+
         super.setName(builder.name);
         super.setAuthor(builder.testAuthor);
         super.setTargetFunction(builder.targetFunction);
         super.setHttpMethod(builder.httpMethod);
+
+        this.providerPlatform = builder.providerPlatform;
 
         super.setDescription(builder.description);
         super.setPath(builder.path);
@@ -145,6 +159,52 @@ public class FunctionalTest extends Test {
 
     public FunctionalTest() {}
 
+    public static FunctionalTest createFunctionalTestFromModel(FunctionalTestModel model) {
+
+        IcarusUser author = new IcarusUser();
+        author.setId(model.getTestAuthor());
+
+        Function targetFunction = new Function();
+        targetFunction.setId(model.getTargetFunction());
+
+
+        return new FunctionalTestBuilder(
+                model.getName(), author, targetFunction,
+                HttpMethod.valueOf(model.getHttpMethod()),
+                model.getProviderPlatform())
+
+                .region(model.getRegion())
+                .usedMemory(model.getUsedMemory())
+                .functionURL(model.getFunctionUrl())
+                .build();
+    }
+
+
+
+    @PrePersist
+    private void validateRegion() {
+        if (this.providerPlatform != null && this.providerPlatform.equals(Platform.AWS)) {
+
+            try{
+                AwsRegion.valueOf(this.region);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new InvalidTestConfigurationException
+                        ("The specified region: " + this.region + " is not a valid AWS region");
+            }
+        }
+
+        else if (this.providerPlatform != null && this.providerPlatform.equals(Platform.GCP)) {
+
+            try{
+                GcpRegion.valueOf(this.region);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new InvalidTestConfigurationException
+                        ("The specified region: " + this.region + " is not a valid GCP region");
+            }
+        }
+    }
 
 
     public String getFunctionURL() {
@@ -167,8 +227,8 @@ public class FunctionalTest extends Test {
         return region;
     }
 
-    public void setRegion(String region) {
-        this.region = region;
+    public void setRegion(String newRegion) {
+        this.region = newRegion;
     }
 
     public Set<TestCase> getTestCases() {
@@ -190,6 +250,14 @@ public class FunctionalTest extends Test {
 
     public void removeTestCase(Set<TestCase> testCases) {
         this.testCases.removeAll(testCases);
+    }
+
+    public Platform getProviderPlatform() {
+        return providerPlatform;
+    }
+
+    public void setProviderPlatform(Platform providerPlatform) {
+        this.providerPlatform = providerPlatform;
     }
 
 
