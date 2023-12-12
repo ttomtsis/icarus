@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 
 @Component
@@ -31,6 +30,7 @@ public class LoadProfileModelAssembler
         LoadProfileModel newModel = new LoadProfileModel();
 
         newModel.setId(entity.getId());
+        newModel.setParentTest(entity.getParentTest().getId());
         newModel.setLoadTime(entity.getLoadTime());
         newModel.setRampUp(entity.getRampUp());
         newModel.setConcurrentUsers(entity.getConcurrentUsers());
