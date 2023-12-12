@@ -41,6 +41,7 @@ public class LoadProfileModelAssembler
     }
 
     public PagedModel<LoadProfileModel> createPagedModel(Page<LoadProfile> profiles, Long testId) {
+
         PagedModel<LoadProfileModel> pagedModel = createPagedModelFromPage(profiles);
 
         pagedModel.add(linkTo(methodOn(LoadProfileController.class).getAllLoadProfiles(testId,
@@ -78,7 +79,8 @@ public class LoadProfileModelAssembler
                 .updateLoadProfile(model.getParentTest(), model.getId(), new LoadProfileModel())).withRel("Update"));
 
         model.add(linkTo(methodOn(LoadProfileController.class)
-                .getAllLoadProfiles(model.getParentTest(), 0, 10)).withRel("Get all models for this test"));
+                .getAllLoadProfiles(model.getParentTest(), 0, 10))
+                .withRel("Get all Load profiles for this test"));
 
         return model;
     }

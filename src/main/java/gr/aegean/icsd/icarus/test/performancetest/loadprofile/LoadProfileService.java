@@ -42,9 +42,9 @@ public class LoadProfileService {
 
         checkIfTestExists(testId);
 
-        checkIfProfileExists(loadProfileId);
+        LoadProfile existingLoadProfile = checkIfProfileExists(loadProfileId);
 
-        loadProfileRepository.deleteById(loadProfileId);
+        loadProfileRepository.delete(existingLoadProfile);
     }
 
     public void updateLoadModel(@NotNull @Positive Long testId, @NotNull @Positive Long loadProfileId,
@@ -76,6 +76,7 @@ public class LoadProfileService {
 
         return loadProfileRepository.findAllByParentTest(parentTest, pageable);
     }
+
 
     private PerformanceTest checkIfTestExists(Long parentTestId) {
 
