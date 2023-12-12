@@ -1,7 +1,10 @@
 package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
+import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.enums.Platform;
+import gr.aegean.icsd.icarus.util.exceptions.InvalidResourceConfigurationConfigurationException;
+import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -29,7 +32,7 @@ public class ResourceConfiguration {
     private Integer cpu;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank(message = "Resource configuration's target platform must not be blank")
+    @NotNull(message = "Resource configuration's target platform cannot be blank")
     private Platform providerPlatform;
 
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
@@ -39,8 +42,14 @@ public class ResourceConfiguration {
 
     public static ResourceConfiguration createResourceConfigurationFromModel(ResourceConfigurationModel model) {
 
+        if (model.getCpu() == null) {
+
+            return new ResourceConfiguration(null, model.getRegion(),
+                    model.getUsedMemory(), model.getPlatform());
+        }
+
         return new ResourceConfiguration(null, model.getRegion(),
-                model.getUsedMemory(), model.getPlatform());
+                model.getUsedMemory(), model.getCpu(), model.getPlatform());
     }
 
 
@@ -56,6 +65,7 @@ public class ResourceConfiguration {
 
     public ResourceConfiguration(PerformanceTest parentTest, String region,
                                  Integer usedMemory, Integer cpu, Platform targetPlatform) {
+
         this.region = region;
         this.usedMemory = usedMemory;
         this.cpu = cpu;
@@ -66,6 +76,38 @@ public class ResourceConfiguration {
     public ResourceConfiguration() {}
 
 
+
+    @PrePersist
+    private void validateConfiguration() {
+
+        if (this.providerPlatform.equals(Platform.AWS) && this.cpu != null) {
+
+            throw new InvalidResourceConfigurationConfigurationException("AWS does not support CPU configurations");
+        }
+
+        if (this.providerPlatform.equals(Platform.GCP)) {
+
+            try {
+                GcpRegion.valueOf(region);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new InvalidResourceConfigurationConfigurationException
+                        ("The provided region: " + region + " is not a valid GCP region");
+            }
+        }
+
+        if (this.providerPlatform.equals(Platform.AWS)) {
+
+            try {
+                AwsRegion.valueOf(region);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new RuntimeException
+                        ("The provided region: " + region + " is not a valid AWS region");
+            }
+        }
+
+    }
 
     public void setId(Long id) {
         this.id = id;
