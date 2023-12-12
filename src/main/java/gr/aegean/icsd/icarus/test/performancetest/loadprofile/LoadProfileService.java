@@ -71,7 +71,7 @@ public class LoadProfileService {
         }
     }
 
-    public Page<LoadProfile> getLoadProfiles(Long testId, Pageable pageable) {
+    public Page<LoadProfile> getLoadProfiles(@NotNull @Positive Long testId, @NotNull Pageable pageable) {
 
         checkIfTestExists(testId);
 
