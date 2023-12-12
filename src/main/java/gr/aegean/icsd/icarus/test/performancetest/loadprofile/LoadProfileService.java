@@ -32,7 +32,6 @@ public class LoadProfileService {
     public LoadProfile createLoadProfile(@NotNull LoadProfile newLoadProfile, @NotNull @Positive Long testId) {
 
         PerformanceTest parentTest = checkIfTestExists(testId);
-
         newLoadProfile.setParentTest(parentTest);
 
         return loadProfileRepository.save(newLoadProfile);
@@ -73,10 +72,7 @@ public class LoadProfileService {
 
     public Page<LoadProfile> getLoadProfiles(@NotNull @Positive Long testId, @NotNull Pageable pageable) {
 
-        checkIfTestExists(testId);
-
-        PerformanceTest parentTest = new PerformanceTest();
-        parentTest.setId(testId);
+        PerformanceTest parentTest = checkIfTestExists(testId);
 
         return loadProfileRepository.findAllByParentTest(parentTest, pageable);
     }
