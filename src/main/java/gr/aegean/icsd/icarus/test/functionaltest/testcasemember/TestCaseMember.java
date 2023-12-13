@@ -68,6 +68,16 @@ public class TestCaseMember {
 
     public TestCaseMember() {}
 
+    public static TestCaseMember createTestCaseMemberFromModel(TestCaseMemberModel model) {
+
+        return new TestCaseMemberBuilder(model.getExpectedResponseCode(),
+                model.getExpectedResponseBody())
+
+                .requestPathVariable(model.getRequestPathVariable())
+                .requestBody(model.getRequestBody())
+                .build();
+    }
+
 
 
     public Long getId() {
