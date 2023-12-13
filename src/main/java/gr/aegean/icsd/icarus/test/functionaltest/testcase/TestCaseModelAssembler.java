@@ -96,7 +96,7 @@ public class TestCaseModelAssembler extends RepresentationModelAssemblerSupport<
 
         model.add(linkTo(methodOn(TestCaseController.class)
                 .getAllTestCases(model.getParentTest(), 0, 10))
-                .withRel("Get all Resource configurations for this test"));
+                .withRel("Get all Test cases for this test"));
 
         return model;
     }
