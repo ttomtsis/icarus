@@ -70,6 +70,12 @@ public class Test {
 
 
 
+
+    public Test() {this.state = TestState.CREATED;}
+
+
+
+
     @PreRemove
     private void removeForeignKeyConstraints() {
         this.targetFunction = null;
@@ -160,11 +166,11 @@ public class Test {
         return targetFunction;
     }
 
-    protected void setAuthor(IcarusUser testAuthor) {
+    public void setAuthor(IcarusUser testAuthor) {
         this.testAuthor = testAuthor;
     }
 
-    protected void setTargetFunction(Function targetFunction) {
+    public void setTargetFunction(Function targetFunction) {
         this.targetFunction = targetFunction;
     }
 
