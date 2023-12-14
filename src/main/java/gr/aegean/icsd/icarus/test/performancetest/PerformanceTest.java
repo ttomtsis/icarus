@@ -134,13 +134,6 @@ public class PerformanceTest extends Test  {
 
 
 
-    public String getPathVariable() {
-        return super.getPathVariable();
-    }
-
-    public String getPath () {
-        return super.getPath();
-    }
 
     public String getRequestBody() {
         return requestBody;
