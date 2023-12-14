@@ -33,7 +33,7 @@ public class PerformanceTest extends Test  {
     private final Set<LoadProfile> loadProfiles = new HashSet<>();
 
     @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
-            targetEntity = LoadProfile.class, orphanRemoval = true)
+            targetEntity = ResourceConfiguration.class, orphanRemoval = true)
     private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
 
@@ -66,6 +66,21 @@ public class PerformanceTest extends Test  {
         }
 
 
+        public PerformanceTestBuilder description (String description) {
+            this.description = description;
+            return this;
+        }
+
+        public PerformanceTestBuilder path (String path) {
+            this.path = path;
+            return this;
+        }
+
+        public PerformanceTestBuilder pathVariable (String pathVariable) {
+            this.pathVariable = pathVariable;
+            return this;
+        }
+
         public PerformanceTestBuilder pathVariableValue (String pathVariableValue) {
             this.pathVariableValue = pathVariableValue;
             return this;
@@ -73,11 +88,6 @@ public class PerformanceTest extends Test  {
 
         public PerformanceTestBuilder requestBody (String requestBody) {
             this.requestBody = requestBody;
-            return this;
-        }
-
-        public PerformanceTestBuilder metrics (Metric newMetric) {
-            this.chosenMetrics.add(newMetric);
             return this;
         }
 
@@ -109,6 +119,8 @@ public class PerformanceTest extends Test  {
                 model.getName(), author, targetFunction,
                 HttpMethod.valueOf(model.getHttpMethod())
         )
+                .pathVariable(model.getPathVariable())
+
                 .pathVariableValue(model.getPathVariableValue())
                 .requestBody(model.getRequestBody())
                 .metrics(model.getChosenMetrics())
@@ -128,7 +140,7 @@ public class PerformanceTest extends Test  {
 
         this.chosenMetrics.addAll(builder.chosenMetrics);
 
-        this.pathVariableValue = builder.pathVariable;
+        this.pathVariableValue = builder.pathVariableValue;
         this.requestBody = builder.requestBody;
     }
 

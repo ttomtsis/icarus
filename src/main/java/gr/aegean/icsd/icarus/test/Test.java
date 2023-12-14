@@ -1,10 +1,12 @@
 package gr.aegean.icsd.icarus.test;
 
-import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
@@ -62,66 +64,9 @@ public class Test {
     @CreatedBy
     private String authorUsername;
 
-
-
-    public static class TestBuilder {
-
-
-        private final String name;
-        private final IcarusUser testAuthor;
-        private final Function targetFunction;
-        private final String httpMethod;
-
-        private String description;
-        private String path;
-        private String pathVariable;
-
-
-        public TestBuilder(String name, IcarusUser testAuthor, Function targetFunction,
-        HttpMethod httpMethod) {
-            this.name = name;
-            this.testAuthor = testAuthor;
-            this.targetFunction = targetFunction;
-            this.httpMethod = httpMethod.toString();
-        }
-
-
-        public TestBuilder description (String description) {
-            this.description = description;
-            return this;
-        }
-
-        public TestBuilder path (String path) {
-            this.path = path;
-            return this;
-        }
-
-        public TestBuilder pathVariable (String pathVariable) {
-            this.pathVariable = pathVariable;
-            return this;
-        }
-
-        public Test build () {
-            return new Test(this);
-        }
-
-
-    }
-
-
-
-    private Test (TestBuilder builder) {
-        this.name = builder.name;
-        this.testAuthor = builder.testAuthor;
-        this.targetFunction = builder.targetFunction;
-        this.httpMethod = builder.httpMethod;
-
-        this.description = builder.description;
-        this.path = builder.path;
-        this.pathVariable = builder.pathVariable;
-    }
-
-    public Test() {}
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private TestState state;
 
 
 
@@ -130,12 +75,21 @@ public class Test {
         this.targetFunction = null;
     }
 
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public TestState getState() {
+        return state;
+    }
+
+    public void setState(TestState state) {
+        this.state = state;
     }
 
     public void setHttpMethod(String httpMethod) {
