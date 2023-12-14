@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 @Entity
 public class MetricResult {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +27,19 @@ public class MetricResult {
 
     public MetricResult() {}
 
+
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setLoadProfile(LoadProfile loadProfile) {
+        this.loadProfile = loadProfile;
+    }
+
+    public void setResourceConfiguration(ResourceConfiguration resourceConfiguration) {
+        this.resourceConfiguration = resourceConfiguration;
+    }
 
     public Long getId() {
         return id;
