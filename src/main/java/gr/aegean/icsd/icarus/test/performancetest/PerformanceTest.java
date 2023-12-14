@@ -43,7 +43,6 @@ public class PerformanceTest extends Test  {
 
         private final String name;
         private final IcarusUser testAuthor;
-        private final Function targetFunction;
         private final HttpMethod httpMethod;
         private final Set<Metric> chosenMetrics = new HashSet<>();
 
@@ -55,12 +54,10 @@ public class PerformanceTest extends Test  {
         private String requestBody;
 
 
-        public PerformanceTestBuilder(String name, IcarusUser author, Function targetFunction,
-                                      HttpMethod httpMethod) {
+        public PerformanceTestBuilder(String name, IcarusUser author, HttpMethod httpMethod) {
 
             this.name = name;
             this.testAuthor = author;
-            this.targetFunction = targetFunction;
             this.httpMethod = httpMethod;
 
         }
@@ -116,8 +113,7 @@ public class PerformanceTest extends Test  {
         targetFunction.setId(model.getTargetFunction());
 
         return new PerformanceTestBuilder(
-                model.getName(), author, targetFunction,
-                HttpMethod.valueOf(model.getHttpMethod())
+                model.getName(), author, HttpMethod.valueOf(model.getHttpMethod())
         )
                 .pathVariable(model.getPathVariable())
 
@@ -131,7 +127,6 @@ public class PerformanceTest extends Test  {
     private PerformanceTest(PerformanceTestBuilder builder) {
         super.setName(builder.name);
         super.setAuthor(builder.testAuthor);
-        super.setTargetFunction(builder.targetFunction);
         super.setHttpMethod(builder.httpMethod);
 
         super.setDescription(builder.description);
