@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.test.performancetest;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import jakarta.persistence.*;

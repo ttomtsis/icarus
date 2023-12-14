@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
-import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModel;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfigurationModel;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.HashSet;

@@ -1,6 +1,5 @@
-package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
+package gr.aegean.icsd.icarus.test.resourceconfiguration;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +14,7 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.defaultPageSi
 
 
 @RestController
-@RequestMapping(value = "api/v0/tests/performance/{testId}/resource-configurations", produces = "application/json")
+@RequestMapping(value = "api/v0/tests/{testId}/resource-configurations", produces = "application/json")
 public class ResourceConfigurationController {
 
 
@@ -57,7 +56,7 @@ public class ResourceConfigurationController {
         ResourceConfigurationModel savedConfigurationModel = modelAssembler.toModel(savedConfiguration);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("api/v0/tests/performance/" + testId + "/resource-configurations/" + savedConfiguration.getId())
+                .path("api/v0/tests/" + testId + "/resource-configurations/" + savedConfiguration.getId())
                 .buildAndExpand()
                 .toUri();
 

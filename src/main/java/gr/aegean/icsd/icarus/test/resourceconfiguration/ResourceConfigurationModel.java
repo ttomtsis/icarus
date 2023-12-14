@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
+package gr.aegean.icsd.icarus.test.resourceconfiguration;
 
 
 import gr.aegean.icsd.icarus.util.enums.Platform;

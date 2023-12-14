@@ -1,7 +1,5 @@
-package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
+package gr.aegean.icsd.icarus.test.resourceconfiguration;
 
-import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfileController;
-import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfileModel;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;

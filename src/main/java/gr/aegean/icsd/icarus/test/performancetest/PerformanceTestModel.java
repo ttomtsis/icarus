@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfileModel;
-import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModel;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfigurationModel;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import org.springframework.hateoas.RepresentationModel;
 

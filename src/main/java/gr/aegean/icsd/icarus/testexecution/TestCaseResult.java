@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.testexecution;
 
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
-import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import jakarta.persistence.*;
 
 

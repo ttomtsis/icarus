@@ -1,5 +1,6 @@
-package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
+package gr.aegean.icsd.icarus.test.resourceconfiguration;
 
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.enums.Platform;
@@ -36,7 +37,7 @@ public class ResourceConfiguration {
     private Platform providerPlatform;
 
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
-    private PerformanceTest parentTest;
+    private Test parentTest;
 
 
 
@@ -54,7 +55,7 @@ public class ResourceConfiguration {
 
 
 
-    public ResourceConfiguration(PerformanceTest parentTest, String region,
+    public ResourceConfiguration(Test parentTest, String region,
                                  Integer usedMemory, Platform targetPlatform) {
 
         this.region = region;
@@ -63,7 +64,7 @@ public class ResourceConfiguration {
         this.providerPlatform = targetPlatform;
     }
 
-    public ResourceConfiguration(PerformanceTest parentTest, String region,
+    public ResourceConfiguration(Test parentTest, String region,
                                  Integer usedMemory, Integer cpu, Platform targetPlatform) {
 
         this.region = region;
@@ -102,7 +103,7 @@ public class ResourceConfiguration {
                 AwsRegion.valueOf(region);
             }
             catch (IllegalArgumentException ex) {
-                throw new RuntimeException
+                throw new InvalidResourceConfigurationConfigurationException
                         ("The provided region: " + region + " is not a valid AWS region");
             }
         }
@@ -113,7 +114,7 @@ public class ResourceConfiguration {
         this.id = id;
     }
 
-    public void setParentTest(PerformanceTest parentTest) {
+    public void setParentTest(Test parentTest) {
         this.parentTest = parentTest;
     }
 
@@ -145,7 +146,7 @@ public class ResourceConfiguration {
         this.cpu = cpu;
     }
 
-    public PerformanceTest getParentTest() {
+    public Test getParentTest() {
         return parentTest;
     }
 

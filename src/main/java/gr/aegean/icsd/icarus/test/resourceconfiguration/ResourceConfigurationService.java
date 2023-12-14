@@ -1,7 +1,7 @@
-package gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration;
+package gr.aegean.icsd.icarus.test.resourceconfiguration;
 
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.util.exceptions.ResourceConfigurationNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
@@ -31,7 +31,7 @@ public class ResourceConfigurationService {
     public Page<ResourceConfiguration> getResourceConfigurations(@NotNull @Positive Long testId,
                                                                       @NotNull Pageable pageable) {
 
-        PerformanceTest parentTest = checkIfTestExists(testId);
+        Test parentTest = checkIfTestExists(testId);
 
         return resourceConfigurationRepository.findAllByParentTest(parentTest, pageable);
     }
@@ -39,7 +39,7 @@ public class ResourceConfigurationService {
     public ResourceConfiguration createConfiguration(@NotNull ResourceConfiguration newConfiguration,
                                                      @NotNull @Positive Long testId) {
 
-        PerformanceTest parentTest = checkIfTestExists(testId);
+        Test parentTest = checkIfTestExists(testId);
 
         newConfiguration.setParentTest(parentTest);
         return resourceConfigurationRepository.save(newConfiguration);
@@ -80,9 +80,9 @@ public class ResourceConfigurationService {
     }
 
 
-    private PerformanceTest checkIfTestExists(Long parentTestId) {
+    private Test checkIfTestExists(Long parentTestId) {
 
-        return (PerformanceTest) testRepository.findById(parentTestId)
+        return testRepository.findById(parentTestId)
                 .orElseThrow( () -> new TestNotFoundException(parentTestId));
     }
 
