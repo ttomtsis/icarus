@@ -12,7 +12,7 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@Table(name = "providerAccount")
+@Table(name = "provider_account")
 public class ProviderAccount {
 
     @Id
@@ -27,9 +27,13 @@ public class ProviderAccount {
     @Size(min = minLength, max = maxDescriptionLength, message = "Description does not conform to length limitations")
     private String description;
 
+    @Column(name = "dtype", insertable = false, updatable = false)
+    private String accountType;
+
     @ManyToMany(mappedBy = "accountsList", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
             targetEntity = Test.class)
     private final Set<Test> associatedTests = new HashSet<>();
+
 
 
     public ProviderAccount(String name, String description) {
@@ -42,6 +46,7 @@ public class ProviderAccount {
     }
 
     public ProviderAccount() {}
+
 
 
     // GETTERS - SETTERS
@@ -71,6 +76,10 @@ public class ProviderAccount {
 
     public Set<Test> getAssociatedTests() {
         return associatedTests;
+    }
+
+    public String getAccountType() {
+        return accountType;
     }
 
 
