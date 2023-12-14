@@ -51,7 +51,6 @@ public class FunctionalTest extends Test {
 
         private final String name;
         private final IcarusUser testAuthor;
-        private final Function targetFunction;
         private final HttpMethod httpMethod;
 
         private String description;
@@ -64,11 +63,9 @@ public class FunctionalTest extends Test {
 
 
 
-        public FunctionalTestBuilder(String name, IcarusUser author, Function targetFunction,
-                                     HttpMethod httpMethod) {
+        public FunctionalTestBuilder(String name, IcarusUser author, HttpMethod httpMethod) {
             this.name = name;
             this.testAuthor = author;
-            this.targetFunction = targetFunction;
             this.httpMethod = httpMethod;
         }
 
@@ -124,7 +121,6 @@ public class FunctionalTest extends Test {
 
         super.setName(builder.name);
         super.setAuthor(builder.testAuthor);
-        super.setTargetFunction(builder.targetFunction);
         super.setHttpMethod(builder.httpMethod);
 
         super.setDescription(builder.description);
@@ -148,7 +144,7 @@ public class FunctionalTest extends Test {
 
 
         return new FunctionalTestBuilder(
-                model.getName(), author, targetFunction,
+                model.getName(), author,
                 HttpMethod.valueOf(model.getHttpMethod()))
 
                 .pathVariable(model.getPathVariable())

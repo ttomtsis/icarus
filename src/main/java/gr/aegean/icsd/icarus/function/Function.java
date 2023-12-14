@@ -3,6 +3,8 @@ package gr.aegean.icsd.icarus.function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
+import gr.aegean.icsd.icarus.util.exceptions.FunctionConfigurationException;
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -57,6 +59,46 @@ public class Function {
     public Function() {}
 
 
+    public static Function createFunctionFromModel(FunctionModel model) {
+
+        if (StringUtils.isBlank(model.getGithubURL()) && StringUtils.isBlank(model.getFunctionSource())) {
+            throw new FunctionConfigurationException("Function requires either a GitHub URL or a Filepath to the local" +
+                    "source");
+        }
+
+        if (StringUtils.isNotBlank(model.getGithubURL()) && StringUtils.isNotBlank(model.getFunctionSource())) {
+            throw new FunctionConfigurationException("A function can either fetch it's source code from the local" +
+                    "filesystem or from github, not from both");
+        }
+
+        if (model.getGithubURL() == null) {
+            return new Function(model.getName(), model.getDescription(), model.getFunctionSource());
+        }
+
+        return new Function(model.getName(), model.getDescription(), model.getGithubURL());
+    }
+
+
+
+    @PrePersist
+    private void checkFunctionSource() {
+
+        if (StringUtils.isNotBlank(this.functionSource) &&
+                StringUtils.isNotBlank(this.githubURL)) {
+
+            throw new FunctionConfigurationException("A function can either fetch it's source code from the local" +
+                    "filesystem or from github, not from both");
+        }
+    }
+
+    @PreRemove
+    private void removeForeignKeyConstraints() {
+
+        for (Test test : this.createdTests) {
+            test.setTargetFunction(null);
+        }
+    }
+
 
     public Long getId() {
         return id;
@@ -100,10 +142,6 @@ public class Function {
 
     public Set<Test> getCreatedTests() {
         return createdTests;
-    }
-
-    public void addTest(Test newTest) {
-        createdTests.add(newTest);
     }
 
 

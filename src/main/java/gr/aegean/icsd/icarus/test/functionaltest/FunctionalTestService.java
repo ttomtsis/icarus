@@ -1,7 +1,11 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.test.TestRepository;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestStateException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import jakarta.validation.constraints.NotNull;
@@ -86,16 +90,66 @@ public class FunctionalTestService {
 
     public void executeTest(@NotNull @Positive Long testId) {
 
+        // Test exists
         FunctionalTest requestedTest = (FunctionalTest) repository.findById(testId)
                 .orElseThrow(() -> new TestNotFoundException
                         (testId));
 
+        // Test is in correct state
         if (!requestedTest.getState().equals(TestState.CREATED)) {
             throw new InvalidTestStateException(testId, requestedTest.getState(), TestState.CREATED);
         }
 
+        // Test has a Function associated with it
+        if (requestedTest.getTargetFunction() == null) {
+            throw new InvalidTestConfigurationException("Test with id: " + testId + " does not have a Function" +
+                    "associated with it");
+        }
+
+        // Test has at least 1 provider account
+        if (requestedTest.getAccountsList().isEmpty()) {
+            throw new InvalidTestConfigurationException("Test with id: " + testId + " does not have " +
+                    "any provider accounts associated with it");
+        }
+
+        // Test has one configuration per provider account
+        if (!oneConfigurationPerProviderAccount(requestedTest)) {
+            throw new InvalidTestConfigurationException("Test with id: " + testId + " does not have a resource" +
+                    "configuration for every provider account");
+        }
 
 
+    }
+
+    public boolean oneConfigurationPerProviderAccount(FunctionalTest requestedTest) {
+
+        for (ProviderAccount account : requestedTest.getAccountsList()) {
+
+            boolean foundAssociatedConfiguration = false;
+            for (ResourceConfiguration configuration : requestedTest.getResourceConfigurations()){
+
+                if (account.getAccountType().equals("AwsAccount") &&
+                        configuration.getProviderPlatform().equals(Platform.AWS)) {
+
+                    foundAssociatedConfiguration = true;
+                    break;
+                }
+
+                if (account.getAccountType().equals("GcpAccount") &&
+                        configuration.getProviderPlatform().equals(Platform.GCP)) {
+
+                    foundAssociatedConfiguration = true;
+                    break;
+                }
+
+            }
+
+            if (!foundAssociatedConfiguration) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
