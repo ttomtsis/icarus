@@ -3,6 +3,9 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModelAssembler;
+import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModel;
+import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModelAssembler;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -20,13 +23,16 @@ public class FunctionalTestModelAssembler
 
 
     private final TestCaseModelAssembler testCaseModelAssembler;
+    private final ResourceConfigurationModelAssembler resourceConfigurationModelAssembler;
 
 
 
-    public FunctionalTestModelAssembler(TestCaseModelAssembler testCaseModelAssembler) {
+    public FunctionalTestModelAssembler(TestCaseModelAssembler testCaseModelAssembler,
+                                        ResourceConfigurationModelAssembler resourceConfigurationModelAssembler) {
 
         super(FunctionalTestController.class, FunctionalTestModel.class);
         this.testCaseModelAssembler = testCaseModelAssembler;
+        this.resourceConfigurationModelAssembler = resourceConfigurationModelAssembler;
     }
 
 
@@ -42,21 +48,30 @@ public class FunctionalTestModelAssembler
         newModel.setDescription(entity.getDescription());
         newModel.setHttpMethod(entity.getHttpMethod());
 
-        newModel.setProviderPlatform(entity.getProviderPlatform());
-
         newModel.setTestAuthor(entity.getTestAuthor().getId());
         newModel.setTargetFunction(entity.getTargetFunction().getId());
+
+        newModel.setPath(entity.getPath());
+        newModel.setPathVariable(entity.getPathVariable());
 
         newModel.setRegion(entity.getRegion());
         newModel.setUsedMemory(entity.getUsedMemory());
         newModel.setFunctionUrl(entity.getFunctionURL());
+
 
         Set<TestCaseModel> testCases = new HashSet<>();
         for (TestCase testCase : entity.getTestCases()) {
             testCases.add(testCaseModelAssembler.toModel(testCase));
         }
 
+        Set<ResourceConfigurationModel> resourceConfigurations = new HashSet<>();
+        for (ResourceConfiguration configuration : entity.getResourceConfigurations()) {
+            resourceConfigurations.add(resourceConfigurationModelAssembler.toModel(configuration));
+        }
+
+
         newModel.setTestCases(testCases);
+        newModel.setResourceConfigurations(resourceConfigurations);
 
         return addLinksToModel(newModel);
     }

@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
-import gr.aegean.icsd.icarus.util.enums.Platform;
+import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModel;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.HashSet;
@@ -24,8 +24,7 @@ public class FunctionalTestModel extends RepresentationModel<FunctionalTestModel
     private Integer usedMemory;
     private String functionUrl;
     private Set<TestCaseModel> testCases = new HashSet<>();
-    private Platform providerPlatform;
-
+    private Set<ResourceConfigurationModel> resourceConfigurations = new HashSet<>();
 
 
     public Long getId() {
@@ -34,14 +33,6 @@ public class FunctionalTestModel extends RepresentationModel<FunctionalTestModel
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Platform getProviderPlatform() {
-        return providerPlatform;
-    }
-
-    public void setProviderPlatform(Platform providerPlatform) {
-        this.providerPlatform = providerPlatform;
     }
 
     public String getName() {
@@ -130,6 +121,14 @@ public class FunctionalTestModel extends RepresentationModel<FunctionalTestModel
 
     public void setTestCases(Set<TestCaseModel> testCases) {
         this.testCases = testCases;
+    }
+
+    public Set<ResourceConfigurationModel> getResourceConfigurations() {
+        return resourceConfigurations;
+    }
+
+    public void setResourceConfigurations(Set<ResourceConfigurationModel> resourceConfigurations) {
+        this.resourceConfigurations = resourceConfigurations;
     }
 
 

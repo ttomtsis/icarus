@@ -1,6 +1,8 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.test.TestRepository;
+import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.exceptions.InvalidTestStateException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -81,5 +83,20 @@ public class FunctionalTestService {
         }
 
     }
-    
+
+    public void executeTest(@NotNull @Positive Long testId) {
+
+        FunctionalTest requestedTest = (FunctionalTest) repository.findById(testId)
+                .orElseThrow(() -> new TestNotFoundException
+                        (testId));
+
+        if (!requestedTest.getState().equals(TestState.CREATED)) {
+            throw new InvalidTestStateException(testId, requestedTest.getState(), TestState.CREATED);
+        }
+
+
+
+    }
+
+
 }
