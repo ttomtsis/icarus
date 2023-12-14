@@ -21,8 +21,8 @@ import com.hashicorp.cdktf.providers.aws.s3_bucket_acl.S3BucketAcl;
 import com.hashicorp.cdktf.providers.aws.s3_bucket_ownership_controls.S3BucketOwnershipControls;
 import com.hashicorp.cdktf.providers.aws.s3_bucket_ownership_controls.S3BucketOwnershipControlsRule;
 import com.hashicorp.cdktf.providers.aws.s3_object.S3Object;
-import gr.aegean.icsd.icarus.util.enums.aws.AwsRegion;
-import gr.aegean.icsd.icarus.util.enums.aws.LambdaRuntime;
+import gr.aegean.icsd.icarus.util.aws.AwsRegion;
+import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import org.springframework.http.HttpMethod;
 import software.constructs.Construct;
 

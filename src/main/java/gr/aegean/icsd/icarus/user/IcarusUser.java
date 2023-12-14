@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.user;
 
-import gr.aegean.icsd.icarus.account.ProviderAccount;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.test.Test;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -46,6 +47,9 @@ public class IcarusUser implements UserDetails {
     @JoinColumn(name = "user_id")
     private final Set<ProviderAccount> accounts = new HashSet<>();
 
+    @OneToMany(mappedBy = "testAuthor", targetEntity = Test.class, orphanRemoval = true,
+            cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
+    private final Set<Test> createdTests = new HashSet<>();
 
     @BooleanFlag
     @NotNull
@@ -73,32 +77,6 @@ public class IcarusUser implements UserDetails {
     private final Set<GrantedAuthority> authorities = new HashSet<>();
 
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return this.accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return this.accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return this.credentialsNonExpired;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.accountEnabled;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorities;
-    }
-
-
 
     public IcarusUser(String username, String password, String email) {
         this.username = username;
@@ -114,6 +92,14 @@ public class IcarusUser implements UserDetails {
     public IcarusUser() {}
 
 
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
@@ -151,5 +137,31 @@ public class IcarusUser implements UserDetails {
         accounts.removeIf(account -> account.getId().equals(accountID));
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.accountEnabled;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.authorities;
+    }
+
+    public Set<Test> getCreatedTests() {return this.createdTests;}
 
 }

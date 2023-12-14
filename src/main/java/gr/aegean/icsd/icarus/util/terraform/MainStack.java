@@ -1,10 +1,10 @@
 package gr.aegean.icsd.icarus.util.terraform;
 
 import com.hashicorp.cdktf.TerraformStack;
-import gr.aegean.icsd.icarus.util.enums.aws.AwsRegion;
-import gr.aegean.icsd.icarus.util.enums.aws.LambdaRuntime;
-import gr.aegean.icsd.icarus.util.enums.gcp.GcfRuntime;
-import gr.aegean.icsd.icarus.util.enums.gcp.GcpRegion;
+import gr.aegean.icsd.icarus.util.aws.AwsRegion;
+import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
+import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
+import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import org.springframework.http.HttpMethod;
 import software.constructs.Construct;
 
