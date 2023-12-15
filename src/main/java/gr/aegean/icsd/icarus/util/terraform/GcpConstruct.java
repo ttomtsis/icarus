@@ -74,7 +74,7 @@ public class GcpConstruct extends Construct
      * @param regions Regions where the GCF function will be deployed <br>
      */
     public GcpConstruct(final Construct scope, final String id,
-                        String gcpCredentials, String gcfFunctionSource,
+                        String gcpCredentials, String gcfFunctionSource, String gcfFunctionSourceFileName,
                         String gcfFunctionName, String gcfFunctionDescription,
                         String gcpProject, GcfRuntime gcfRuntime, String gcfFunctionEntrypoint,
                         Set<Integer> memoryConfigs, Set<Integer> cpuConfigs, Set<GcpRegion> regions) {
@@ -85,7 +85,7 @@ public class GcpConstruct extends Construct
         this.credentials = gcpCredentials;
         this.project = gcpProject;
 
-        this.functionSource = gcfFunctionSource;
+        this.functionSource = gcfFunctionSource + "/" + gcfFunctionSourceFileName;
         this.functionRuntime = gcfRuntime;
         this.functionEntrypoint = gcfFunctionEntrypoint;
         this.functionDescription = gcfFunctionDescription;

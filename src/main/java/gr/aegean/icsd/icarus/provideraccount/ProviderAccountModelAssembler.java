@@ -67,6 +67,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
         gcpAccountModel.setName(accountName);
         gcpAccountModel.setDescription(accountDescription);
         gcpAccountModel.setKeyfile(gcpCredentials);
+        gcpAccountModel.setGcpProjectId(entity.getGcpProjectId());
 
         gcpAccountModel.add(linkTo(methodOn(ProviderAccountController.class)
                 .updateGcpAccount(UserUtils.getUsername(), entity.getName(), gcpAccountModel))

@@ -23,7 +23,6 @@ import com.hashicorp.cdktf.providers.aws.s3_bucket_ownership_controls.S3BucketOw
 import com.hashicorp.cdktf.providers.aws.s3_object.S3Object;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
-import org.springframework.http.HttpMethod;
 import software.constructs.Construct;
 
 import java.util.ArrayList;
@@ -95,7 +94,7 @@ public class AwsConstruct extends Construct {
                         String objectSource, String objectFileName,
                         Set<AwsRegion> awsRegions, Set<Integer> memoryConfs,
                         String awsFunctionName, LambdaRuntime awsFunctionRuntime, String awsFunctionHandler,
-                        String awsFunctionRoute, HttpMethod awsFunctionMethod) {
+                        String awsFunctionRoute, String awsFunctionMethod) {
 
         super(scope, id);
 
@@ -117,7 +116,7 @@ public class AwsConstruct extends Construct {
         this.functionRuntime = awsFunctionRuntime.get();
         this.functionHandler = awsFunctionHandler;
         this.functionRoute = awsFunctionRoute;
-        this.functionMethod = awsFunctionMethod.toString();
+        this.functionMethod = awsFunctionMethod;
 
         // Default, empty provider. Used solely because Terraform requires a default provider.
         // This provider is never used.

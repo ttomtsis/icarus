@@ -47,7 +47,7 @@ public class MainStack extends TerraformStack {
                                    String objectSource, String objectFileName,
                                    Set<AwsRegion> awsRegions, Set<Integer> memoryConfs,
                                    String awsFunctionName, LambdaRuntime awsFunctionRuntime,
-                                   String awsFunctionHandler, String awsFunctionRoute, HttpMethod awsFunctionMethod) {
+                                   String awsFunctionHandler, String awsFunctionRoute, String awsFunctionMethod) {
 
         new AwsConstruct(this, "awsConstruct",
                 awsAccessKey, awsSecretKey,
@@ -75,13 +75,13 @@ public class MainStack extends TerraformStack {
      * @param cpuConfigs CPU configurations for the GCF function <br>
      * @param regions Regions where the GCF function will be deployed <br>
      */
-    public void createGcpConstruct(String gcpCredentials, String gcfFunctionSource,
+    public void createGcpConstruct(String gcpCredentials, String gcfFunctionSource, String gcfFunctionSourceFileName,
                                    String gcfFunctionName, String gcfFunctionDescription,
                                    String gcpProject, GcfRuntime gcfRuntime, String gcfFunctionEntrypoint,
                                    Set<Integer> memoryConfigs, Set<Integer> cpuConfigs, Set<GcpRegion> regions) {
 
         new GcpConstruct(this, "gcpConstruct",
-                gcpCredentials, gcfFunctionSource,
+                gcpCredentials, gcfFunctionSource, gcfFunctionSourceFileName,
                 gcfFunctionName, gcfFunctionDescription,
                 gcpProject, gcfRuntime, gcfFunctionEntrypoint,
                 memoryConfigs, cpuConfigs, regions);

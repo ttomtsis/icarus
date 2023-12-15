@@ -51,20 +51,24 @@ public class ResourceConfigurationService {
 
         ResourceConfiguration existingResourceConfiguration = checkIfConfigurationExists(configurationId);
 
-        if (StringUtils.isNotBlank(model.getRegion())) {
-            existingResourceConfiguration.setRegion(model.getRegion());
+        if (model.getRegions() != null) {
+            existingResourceConfiguration.setRegions(model.getRegions());
         }
 
         if (model.getPlatform() != null && !model.getPlatform().toString().isBlank()) {
             existingResourceConfiguration.setProviderPlatform(model.getPlatform());
         }
 
-        if (model.getUsedMemory() != null && model.getUsedMemory() >= 0) {
-            existingResourceConfiguration.setUsedMemory(model.getUsedMemory());
+        if (model.getMemoryConfigurations() != null) {
+            existingResourceConfiguration.setMemoryConfigurations(model.getMemoryConfigurations());
         }
 
-        if (model.getCpu() != null && model.getCpu() >= 0) {
-            existingResourceConfiguration.setCpu(model.getCpu());
+        if (model.getCpuConfigurations() != null) {
+            existingResourceConfiguration.setCpuConfigurations(model.getCpuConfigurations());
+        }
+
+        if (StringUtils.isNotBlank(model.getFunctionRuntime())) {
+            existingResourceConfiguration.setFunctionRuntime(model.getFunctionRuntime());
         }
 
         resourceConfigurationRepository.save(existingResourceConfiguration);

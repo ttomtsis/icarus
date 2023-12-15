@@ -11,6 +11,12 @@ public class IcarusConstants {
 
     public static final String DEFAULT_PAGE_SIZE = "10";
 
+
+    public static final int GCP_MIN_CPU = 1;
+    public static final int GCP_MAX_CPU = 8;
+
+    public static final int FUNCTION_MEMORY_MIN = 128;
+
     private IcarusConstants() {}
 
 

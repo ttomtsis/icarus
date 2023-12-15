@@ -9,18 +9,23 @@ import org.hibernate.type.SqlTypes;
 @Entity
 public class GcpAccount extends ProviderAccount {
 
-    @NotBlank(message = "Keyfile cannot be blank")
+    @NotBlank(message = "GCP Account Keyfile cannot be blank")
     @JdbcTypeCode(SqlTypes.JSON)
     private String gcpKeyfile;
 
+    @NotBlank(message = "GCP Account project id cannot be blank")
+    private String gcpProjectId;
 
-    public GcpAccount(String keyfile, String name, String description) {
+
+    public GcpAccount(String keyfile, String project, String name, String description) {
         super(name,description);
         this.gcpKeyfile = keyfile;
+        this.gcpProjectId = project;
     }
 
-    public GcpAccount(String keyfile, String name) {
+    public GcpAccount(String keyfile, String project, String name) {
         super(name);
+        this.gcpProjectId = project;
         this.gcpKeyfile = keyfile;
     }
 
@@ -30,12 +35,13 @@ public class GcpAccount extends ProviderAccount {
         String name = gcpAccountModel.getName();
         String description = gcpAccountModel.getDescription();
         String gcpKeyfile = gcpAccountModel.getGcpKeyfile();
+        String gcpProject = gcpAccountModel.getGcpProjectId();
 
         if (StringUtils.isBlank(description)) {
-            return new GcpAccount(gcpKeyfile, name);
+            return new GcpAccount(gcpKeyfile, gcpProject, name);
         }
 
-        return new GcpAccount(gcpKeyfile, name, description);
+        return new GcpAccount(gcpKeyfile, gcpProject, name, description);
     }
 
 
@@ -45,6 +51,14 @@ public class GcpAccount extends ProviderAccount {
 
     public void setGcpKeyfile(String newKeyfile) {
         this.gcpKeyfile = newKeyfile;
+    }
+
+    public String getGcpProjectId() {
+        return gcpProjectId;
+    }
+
+    public void setGcpProjectId(String gcpProjectId) {
+        this.gcpProjectId = gcpProjectId;
     }
 
 

@@ -94,6 +94,10 @@ public class ProviderAccountService {
             existingGcpAccount.setDescription(updatedGcpAccountDescription);
         }
 
+        if (!StringUtils.isBlank(updatedGcpAccount.getGcpProjectId())) {
+            existingGcpAccount.setGcpProjectId(updatedGcpAccount.getGcpProjectId());
+        }
+
         accountRepository.save(existingGcpAccount);
     }
 

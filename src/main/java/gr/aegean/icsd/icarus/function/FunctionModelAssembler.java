@@ -39,7 +39,9 @@ public class FunctionModelAssembler
         newModel.setId(entity.getId());
         newModel.setName(entity.getName());
         newModel.setDescription(entity.getDescription());
-        newModel.setFunctionSource(entity.getFunctionSource());
+        newModel.setFunctionHandler(entity.getFunctionHandler());
+        newModel.setFunctionSourceDirectory(entity.getFunctionSourceDirectory());
+        newModel.setFunctionSourceFileName(entity.getFunctionSourceFileName());
         newModel.setGithubURL(entity.getGithubURL());
 
         Set<Long> tests = entity.getCreatedTests().stream()

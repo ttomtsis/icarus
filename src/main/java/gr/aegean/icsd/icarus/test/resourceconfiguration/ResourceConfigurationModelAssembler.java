@@ -27,14 +27,11 @@ public class ResourceConfigurationModelAssembler
     @Override
     public ResourceConfigurationModel toModel(ResourceConfiguration entity) {
 
-        ResourceConfigurationModel newModel = new ResourceConfigurationModel();
-
-        newModel.setId(entity.getId());
-        newModel.setPlatform(entity.getProviderPlatform());
-        newModel.setRegion(entity.getRegion());
-        newModel.setCpu(entity.getCpu());
-        newModel.setUsedMemory(entity.getUsedMemory());
-        newModel.setParentTest(entity.getParentTest().getId());
+        ResourceConfigurationModel newModel = new ResourceConfigurationModel(
+                entity.getId(), entity.getProviderPlatform(), entity.getFunctionRuntime(),
+                entity.getRegions(), entity.getCpuConfigurations(), entity.getMemoryConfigurations(),
+                entity.getParentTest().getId()
+        );
 
         return addLinks(newModel);
     }

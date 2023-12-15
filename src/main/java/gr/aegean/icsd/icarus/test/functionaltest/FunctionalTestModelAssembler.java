@@ -49,7 +49,10 @@ public class FunctionalTestModelAssembler
         newModel.setHttpMethod(entity.getHttpMethod());
 
         newModel.setTestAuthor(entity.getTestAuthor().getId());
-        newModel.setTargetFunction(entity.getTargetFunction().getId());
+
+        if (entity.getTargetFunction() != null) {
+            newModel.setTargetFunction(entity.getTargetFunction().getId());
+        }
 
         newModel.setPath(entity.getPath());
         newModel.setPathVariable(entity.getPathVariable());

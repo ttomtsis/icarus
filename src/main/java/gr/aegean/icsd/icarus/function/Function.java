@@ -37,23 +37,31 @@ public class Function {
     private String githubURL;
 
     @ValidFilePath(message = "Function's source is not a valid filepath")
-    private String functionSource;
+    private String functionSourceDirectory;
+
+    private String functionSourceFileName;
+
+    @NotBlank(message = "Function's handler cannot be blank")
+    private String functionHandler;
 
     @OneToMany(mappedBy = "targetFunction", targetEntity = Test.class, cascade = CascadeType.REFRESH)
     private final Set<Test> createdTests = new HashSet<>();
 
 
 
-    public Function (String name, String description, String githubURL) {
+    public Function (String name, String description, String functionHandler, String githubURL) {
         this.name = name;
         this.description = description;
+        this.functionHandler = functionHandler;
         this.githubURL = githubURL;
     }
 
-    public Function (String name, String description, File functionSource) {
+    public Function (String name, String description, String functionHandler, String functionSourceFileName, File functionSource) {
         this.name = name;
         this.description = description;
-        this.functionSource = functionSource.getAbsolutePath();
+        this.functionHandler = functionHandler;
+        this.functionSourceFileName = functionSourceFileName;
+        this.functionSourceDirectory = functionSource.getAbsolutePath();
     }
 
     public Function() {}
@@ -61,35 +69,30 @@ public class Function {
 
     public static Function createFunctionFromModel(FunctionModel model) {
 
-        if (StringUtils.isBlank(model.getGithubURL()) && StringUtils.isBlank(model.getFunctionSource())) {
+        if (StringUtils.isBlank(model.getGithubURL()) && StringUtils.isBlank(model.getFunctionSourceDirectory())) {
+
             throw new FunctionConfigurationException("Function requires either a GitHub URL or a Filepath to the local" +
-                    "source");
+                    "source directory");
         }
 
-        if (StringUtils.isNotBlank(model.getGithubURL()) && StringUtils.isNotBlank(model.getFunctionSource())) {
-            throw new FunctionConfigurationException("A function can either fetch it's source code from the local" +
-                    "filesystem or from github, not from both");
+        if ((StringUtils.isNotBlank(model.getFunctionSourceDirectory()) ||
+                StringUtils.isNotBlank(model.getFunctionSourceFileName())) &&
+        (StringUtils.isBlank(model.getFunctionSourceDirectory()) ||
+                StringUtils.isBlank(model.getFunctionSourceFileName()))) {
+
+            throw new FunctionConfigurationException("Function requires both a specified source code directory" +
+                    " and a specified source archive filename");
         }
 
         if (model.getGithubURL() == null) {
-            return new Function(model.getName(), model.getDescription(), model.getFunctionSource());
+            return new Function(model.getName(), model.getDescription(), model.getFunctionHandler(),
+                    model.getFunctionSourceFileName(), new File(model.getFunctionSourceDirectory()));
         }
 
-        return new Function(model.getName(), model.getDescription(), model.getGithubURL());
+        return new Function(model.getName(), model.getDescription(), model.getFunctionHandler(), model.getGithubURL());
     }
 
 
-
-    @PrePersist
-    private void checkFunctionSource() {
-
-        if (StringUtils.isNotBlank(this.functionSource) &&
-                StringUtils.isNotBlank(this.githubURL)) {
-
-            throw new FunctionConfigurationException("A function can either fetch it's source code from the local" +
-                    "filesystem or from github, not from both");
-        }
-    }
 
     @PreRemove
     private void removeForeignKeyConstraints() {
@@ -132,16 +135,32 @@ public class Function {
         this.githubURL = githubURL;
     }
 
-    public String getFunctionSource() {
-        return functionSource;
+    public String getFunctionSourceDirectory() {
+        return functionSourceDirectory;
     }
 
-    public void setFunctionSource(String functionSource) {
-        this.functionSource = functionSource;
+    public void setFunctionSourceDirectory(String functionSourceDirectory) {
+        this.functionSourceDirectory = functionSourceDirectory;
     }
 
     public Set<Test> getCreatedTests() {
         return createdTests;
+    }
+
+    public String getFunctionSourceFileName() {
+        return functionSourceFileName;
+    }
+
+    public void setFunctionSourceFileName(String functionSourceFileName) {
+        this.functionSourceFileName = functionSourceFileName;
+    }
+
+    public String getFunctionHandler() {
+        return functionHandler;
+    }
+
+    public void setFunctionHandler(String functionHandler) {
+        this.functionHandler = functionHandler;
     }
 
 
