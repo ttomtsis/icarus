@@ -21,10 +21,10 @@ public class ProviderAccount {
 
     @NotBlank(message = "Name cannot be blank")
     @Column(unique = true)
-    @Size(min = minLength, max = maxLength, message = "Name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Name does not conform to length limitations")
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength, message = "Description does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_DESCRIPTION_LENGTH, message = "Description does not conform to length limitations")
     private String description;
 
     @Column(name = "dtype", insertable = false, updatable = false)

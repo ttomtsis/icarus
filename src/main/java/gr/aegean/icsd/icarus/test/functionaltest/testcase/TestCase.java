@@ -21,11 +21,11 @@ public class TestCase {
     private Long id;
 
     @NotBlank(message = "Test case name cannot be blank")
-    @Size(min = minLength, max = maxLength, message = "Test case name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Test case name does not conform to length limitations")
     @Column(unique = true)
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength,
+    @Size(min = MIN_LENGTH, max = MAX_DESCRIPTION_LENGTH,
             message = "Test case description does not conform to length limitations")
     private String description;
 

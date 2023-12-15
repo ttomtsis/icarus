@@ -21,7 +21,7 @@ import org.springframework.http.HttpMethod;
 import java.io.File;
 import java.util.UUID;
 
-import static gr.aegean.icsd.icarus.util.configuration.jmeter.JMeterConfiguration.*;
+import static gr.aegean.icsd.icarus.util.configuration.JMeterConfiguration.*;
 
 
 /**
@@ -84,8 +84,8 @@ public class LoadTest {
 
         this.functionMethod = invokeHTTPMethod.toString();
 
-        this.jmeterHome = new File(jmeterHomeDirectory);
-        this.jmeterProperties = new File(jmeterPropertiesFile);
+        this.jmeterHome = new File(JMETER_HOME_DIRECTORY);
+        this.jmeterProperties = new File(JMETER_PROPERTIES_FILE);
 
         this.jmeter = initJMeter();
 
@@ -106,7 +106,7 @@ public class LoadTest {
 
         // Store execution results into a .jtl file
         String GUID = UUID.randomUUID().toString().substring(0, 8);
-        String outputLogFile = jmeterLogOutputDirectory + testName + "-" + GUID + "-logs.jtl";
+        String outputLogFile = JMETER_LOG_OUTPUT_DIRECTORY + testName + "-" + GUID + "-logs.jtl";
 
         ResultCollector logger = new ResultCollector();
         logger.setFilename(outputLogFile);

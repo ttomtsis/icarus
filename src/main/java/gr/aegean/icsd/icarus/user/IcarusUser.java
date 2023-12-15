@@ -15,8 +15,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.maxLength;
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.minLength;
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.MAX_LENGTH;
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.MIN_LENGTH;
 
 
 @Entity
@@ -30,7 +30,7 @@ public class IcarusUser implements UserDetails {
 
     @NotBlank(message = "Username cannot be blank")
     @Column(unique = true)
-    @Size(min = minLength, max = maxLength, message = "Username does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Username does not conform to length limitations")
     private String username;
 
     @NotBlank(message = "Password cannot be blank")
