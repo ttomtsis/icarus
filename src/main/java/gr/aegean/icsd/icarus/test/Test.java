@@ -2,6 +2,7 @@ package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
@@ -29,11 +30,11 @@ public class Test {
     private Long id;
 
     @NotBlank(message = "Test name cannot be blank")
-    @Size(min = minLength, max = maxLength, message = "Test name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Test name does not conform to length limitations")
     @Column(unique = true)
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength,
+    @Size(min = MIN_LENGTH, max = MAX_DESCRIPTION_LENGTH,
             message = "Test description does not conform to length limitations")
     private String description;
 
@@ -59,6 +60,10 @@ public class Test {
 
     @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
+
+    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
+            targetEntity = ResourceConfiguration.class, orphanRemoval = true)
+    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
     // TODO: Merge this field with testAuthor field
     @CreatedBy
@@ -102,16 +107,8 @@ public class Test {
         this.httpMethod = httpMethod;
     }
 
-    public void setTestAuthor(IcarusUser testAuthor) {
-        this.testAuthor = testAuthor;
-    }
-
     public String getAuthorUsername() {
         return authorUsername;
-    }
-
-    public void setAuthorUsername(String authorUsername) {
-        this.authorUsername = authorUsername;
     }
 
     public String getName() {
@@ -172,6 +169,10 @@ public class Test {
 
     public void setTargetFunction(Function targetFunction) {
         this.targetFunction = targetFunction;
+    }
+
+    public Set<ResourceConfiguration> getResourceConfigurations() {
+        return resourceConfigurations;
     }
 
 

@@ -39,11 +39,6 @@ public class FunctionalTest extends Test {
             orphanRemoval = true, targetEntity = TestCase.class)
     private final Set<TestCase> testCases = new HashSet<>();
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
-            targetEntity = ResourceConfiguration.class, orphanRemoval = true)
-    @Size(max = 2, message = "Functional Tests can consist only of two resource configurations")
-    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
-
 
 
     public static class FunctionalTestBuilder {
@@ -162,7 +157,7 @@ public class FunctionalTest extends Test {
         int totalAwsConfigurations = 0;
         int totalGcpConfigurations = 0;
 
-        for (ResourceConfiguration configuration : this.resourceConfigurations) {
+        for (ResourceConfiguration configuration : this.getResourceConfigurations()) {
             if (configuration.getProviderPlatform().equals(Platform.AWS)) {
                 totalAwsConfigurations++;
             }
@@ -204,10 +199,6 @@ public class FunctionalTest extends Test {
 
     public Set<TestCase> getTestCases() {
         return testCases;
-    }
-
-    public Set<ResourceConfiguration> getResourceConfigurations() {
-        return resourceConfigurations;
     }
 
 

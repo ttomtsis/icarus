@@ -32,10 +32,6 @@ public class PerformanceTest extends Test  {
             targetEntity = LoadProfile.class, orphanRemoval = true)
     private final Set<LoadProfile> loadProfiles = new HashSet<>();
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
-            targetEntity = ResourceConfiguration.class, orphanRemoval = true)
-    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
-
 
 
     public static class PerformanceTestBuilder {
@@ -175,10 +171,6 @@ public class PerformanceTest extends Test  {
 
     public Set<LoadProfile> getLoadProfiles() {
         return loadProfiles;
-    }
-
-    public Set<ResourceConfiguration> getResourceConfigurations() {
-        return resourceConfigurations;
     }
 
 
