@@ -13,6 +13,11 @@ jmeter:
   jmeterLogOutputDirectory: ${JMETER_LOGS_DIR}
 
 
+terraform:
+
+  stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY}
+
+
 spring:
 
   groovy:
