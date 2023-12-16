@@ -1,15 +1,14 @@
 package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.function.Function;
-import gr.aegean.icsd.icarus.function.FunctionService;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
-import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestStateException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +26,8 @@ public class TestService {
     private final TestRepository repository;
 
     @Autowired
-    private FunctionService functionService;
+    private StackDeployer deployer;
+
 
     public TestService(TestRepository repository) {
         this.repository = repository;
@@ -103,7 +103,6 @@ public class TestService {
 
     }
 
-
     public void executeTest(@NotNull @Positive Long testId) {
 
         // Test exists
@@ -118,26 +117,25 @@ public class TestService {
 
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
-            throw new InvalidTestConfigurationException("Test with id: " + testId + " does not have a Function" +
+            throw new InvalidTestConfigurationException(testId, "does not have a Function" +
                     "associated with it");
         }
 
         // Test has at least 1 provider account
         if (requestedTest.getAccountsList().isEmpty()) {
-            throw new InvalidTestConfigurationException("Test with id: " + testId + " does not have " +
+            throw new InvalidTestConfigurationException(testId, "does not have " +
                     "any provider accounts associated with it");
         }
 
         // Test has one configuration per provider account
         if (!oneConfigurationPerProviderAccount(requestedTest)) {
-            throw new InvalidTestConfigurationException("Test with id: " + testId + " does not have a resource" +
+            throw new InvalidTestConfigurationException(testId, "does not have a resource" +
                     "configuration for every provider account");
         }
 
         // deploy test
-        functionService.deployFunction(requestedTest);
+        deployer.deploy(requestedTest);
     }
-
 
 
     private boolean oneConfigurationPerProviderAccount(Test requestedTest) {
