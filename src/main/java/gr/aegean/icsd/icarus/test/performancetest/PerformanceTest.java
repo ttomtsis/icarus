@@ -3,7 +3,6 @@ package gr.aegean.icsd.icarus.test.performancetest;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import jakarta.persistence.*;
@@ -137,7 +136,6 @@ public class PerformanceTest extends Test  {
 
 
 
-
     public String getRequestBody() {
         return requestBody;
     }
@@ -154,12 +152,6 @@ public class PerformanceTest extends Test  {
         this.chosenMetrics.clear();
         this.chosenMetrics.addAll(newMetrics);
     }
-
-    public void addMetric(Metric newMetric) {
-        this.chosenMetrics.add(newMetric);
-    }
-
-    public void removeMetric(Metric metric) {this.chosenMetrics.remove(metric);}
 
     public String getPathVariableValue() {
         return pathVariableValue;

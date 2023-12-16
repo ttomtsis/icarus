@@ -1,11 +1,10 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
+import gr.aegean.icsd.icarus.test.TestModel;
+import gr.aegean.icsd.icarus.test.TestModelAssembler;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
-import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
-import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModelAssembler;
 import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfigurationModel;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfigurationModelAssembler;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -22,59 +21,37 @@ public class FunctionalTestModelAssembler
         extends RepresentationModelAssemblerSupport<FunctionalTest, FunctionalTestModel> {
 
 
-    private final TestCaseModelAssembler testCaseModelAssembler;
-    private final ResourceConfigurationModelAssembler resourceConfigurationModelAssembler;
+    private final TestModelAssembler testModelAssembler;
 
 
 
-    public FunctionalTestModelAssembler(TestCaseModelAssembler testCaseModelAssembler,
-                                        ResourceConfigurationModelAssembler resourceConfigurationModelAssembler) {
+    public FunctionalTestModelAssembler(TestModelAssembler testModelAssembler) {
 
         super(FunctionalTestController.class, FunctionalTestModel.class);
-        this.testCaseModelAssembler = testCaseModelAssembler;
-        this.resourceConfigurationModelAssembler = resourceConfigurationModelAssembler;
+        this.testModelAssembler = testModelAssembler;
     }
 
 
 
     @Override
     @NonNull
-    public FunctionalTestModel toModel(FunctionalTest entity) {
+    public FunctionalTestModel toModel(@NotNull FunctionalTest entity) {
 
-        FunctionalTestModel newModel = new FunctionalTestModel();
+        TestModel parentModel = testModelAssembler.toModel(entity);
 
-        newModel.setId(entity.getId());
-        newModel.setName(entity.getName());
-        newModel.setDescription(entity.getDescription());
-        newModel.setHttpMethod(entity.getHttpMethod());
-
-        newModel.setTestAuthor(entity.getTestAuthor().getId());
-
-        if (entity.getTargetFunction() != null) {
-            newModel.setTargetFunction(entity.getTargetFunction().getId());
-        }
-
-        newModel.setPath(entity.getPath());
-        newModel.setPathVariable(entity.getPathVariable());
-
-        newModel.setRegion(entity.getRegion());
-        newModel.setUsedMemory(entity.getUsedMemory());
-        newModel.setFunctionUrl(entity.getFunctionURL());
-
-
-        Set<TestCaseModel> testCases = new HashSet<>();
+        Set<Long> testCases = new HashSet<>();
         for (TestCase testCase : entity.getTestCases()) {
-            testCases.add(testCaseModelAssembler.toModel(testCase));
+            testCases.add(testCase.getId());
         }
 
-        Set<ResourceConfigurationModel> resourceConfigurations = new HashSet<>();
+        Set<Long> resourceConfigurations = new HashSet<>();
         for (ResourceConfiguration configuration : entity.getResourceConfigurations()) {
-            resourceConfigurations.add(resourceConfigurationModelAssembler.toModel(configuration));
+            resourceConfigurations.add(configuration.getId());
         }
 
 
-        newModel.setTestCases(testCases);
-        newModel.setResourceConfigurations(resourceConfigurations);
+        FunctionalTestModel newModel = new FunctionalTestModel(parentModel, entity.getFunctionURL(),
+                testCases, resourceConfigurations);
 
         return addLinksToModel(newModel);
     }

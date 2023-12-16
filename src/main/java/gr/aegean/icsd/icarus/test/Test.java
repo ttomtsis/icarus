@@ -30,7 +30,8 @@ public class Test {
     private Long id;
 
     @NotBlank(message = "Test name cannot be blank")
-    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Test name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH,
+            message = "Test name does not conform to length limitations")
     @Column(unique = true)
     private String name;
 
@@ -150,6 +151,11 @@ public class Test {
     }
 
     public void addProviderAccount(ProviderAccount newAccount) {accountsList.add(newAccount);}
+
+    public void setAccountsList(Set<ProviderAccount> newList) {
+        accountsList.clear();
+        accountsList.addAll(newList);
+    }
 
     public String getPathVariable() {
         return pathVariable;

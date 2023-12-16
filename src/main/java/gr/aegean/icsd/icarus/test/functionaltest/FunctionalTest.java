@@ -5,12 +5,9 @@ import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
-import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.http.HttpMethod;
 
@@ -23,17 +20,8 @@ import java.util.Set;
 public class FunctionalTest extends Test {
 
 
-    @NotBlank(message = "Functional Test's function URL cannot be blank")
     @URL(message = "Functional Test's function URL is not a valid URL")
     private String functionURL;
-
-    @NotNull(message = "Functional Test's allocated memory cannot be null")
-    @Positive(message = "Functional Test's allocated memory must be positive")
-    @Min(value = 128, message = "Functional Test's minimum allocated memory must be at least 128MB")
-    private Integer usedMemory;
-
-    @NotBlank(message = "Functional Test's region cannot be blank")
-    private String region;
 
     @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
             orphanRemoval = true, targetEntity = TestCase.class)
@@ -53,8 +41,6 @@ public class FunctionalTest extends Test {
         private String pathVariable;
 
         private String functionURL;
-        private Integer usedMemory;
-        private String region;
 
 
 
@@ -84,26 +70,6 @@ public class FunctionalTest extends Test {
             return this;
         }
 
-        public FunctionalTestBuilder usedMemory (Integer usedMemory) {
-            this.usedMemory = usedMemory;
-            return this;
-        }
-
-        public FunctionalTestBuilder region (String region) {
-            this.region = region;
-            return this;
-        }
-
-        public FunctionalTestBuilder region (AwsRegion region) {
-            this.region = region.get();
-            return this;
-        }
-
-        public FunctionalTestBuilder region (GcpRegion region) {
-            this.region = region.get();
-            return this;
-        }
-
         public FunctionalTest build () {
             return new FunctionalTest(this);
         }
@@ -123,8 +89,6 @@ public class FunctionalTest extends Test {
         super.setPathVariable(builder.pathVariable);
 
         this.functionURL = builder.functionURL;
-        this.usedMemory = builder.usedMemory;
-        this.region = builder.region;
     }
 
     public FunctionalTest() {}
@@ -144,8 +108,6 @@ public class FunctionalTest extends Test {
 
                 .pathVariable(model.getPathVariable())
 
-                .region(model.getRegion())
-                .usedMemory(model.getUsedMemory())
                 .functionURL(model.getFunctionUrl())
                 .build();
     }
@@ -179,22 +141,6 @@ public class FunctionalTest extends Test {
 
     public void setFunctionURL(String functionURL) {
         this.functionURL = functionURL;
-    }
-
-    public Integer getUsedMemory() {
-        return usedMemory;
-    }
-
-    public void setUsedMemory(Integer usedMemory) {
-        this.usedMemory = usedMemory;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String newRegion) {
-        this.region = newRegion;
     }
 
     public Set<TestCase> getTestCases() {
