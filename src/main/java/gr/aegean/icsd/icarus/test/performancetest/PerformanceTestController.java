@@ -67,5 +67,18 @@ public class PerformanceTestController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{testId}/execute")
+    public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
+
+        service.executeTest(testId);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/v0/tests/performance/{testId}/execute")
+                .buildAndExpand(testId)
+                .toUri();
+
+        return ResponseEntity.accepted().header("Location", location.toString()).build();
+    }
+
 
 }
