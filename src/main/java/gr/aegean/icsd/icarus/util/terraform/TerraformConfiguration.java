@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.configuration;
+package gr.aegean.icsd.icarus.util.terraform;
 
 
 import org.springframework.beans.factory.annotation.Value;

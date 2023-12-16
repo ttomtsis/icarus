@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.configuration.security.httpbasic;
+package gr.aegean.icsd.icarus.util.security.httpbasic;
 
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
 import org.springframework.context.annotation.Bean;

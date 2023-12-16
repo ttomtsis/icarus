@@ -21,7 +21,7 @@ import org.springframework.http.HttpMethod;
 import java.io.File;
 import java.util.UUID;
 
-import static gr.aegean.icsd.icarus.util.configuration.JMeterConfiguration.*;
+import static gr.aegean.icsd.icarus.util.jmeter.JMeterConfiguration.*;
 
 
 /**

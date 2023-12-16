@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.configuration.security;
+package gr.aegean.icsd.icarus.util.security;
 
 
 import org.springframework.data.domain.AuditorAware;

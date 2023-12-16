@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.provideraccount;
 
-import gr.aegean.icsd.icarus.util.configuration.security.UserUtils;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;

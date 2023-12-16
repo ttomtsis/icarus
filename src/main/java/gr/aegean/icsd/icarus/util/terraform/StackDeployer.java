@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import static gr.aegean.icsd.icarus.util.configuration.TerraformConfiguration.STACK_OUTPUT_DIRECTORY;
+import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.STACK_OUTPUT_DIRECTORY;
 
 
 @Service
