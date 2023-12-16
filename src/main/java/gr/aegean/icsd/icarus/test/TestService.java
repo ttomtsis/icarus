@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.function.FunctionService;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
@@ -12,6 +13,7 @@ import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,8 @@ public class TestService {
 
     private final TestRepository repository;
 
-
+    @Autowired
+    private FunctionService functionService;
 
     public TestService(TestRepository repository) {
         this.repository = repository;
@@ -102,7 +105,7 @@ public class TestService {
     public void executeTest(@NotNull @Positive Long testId) {
 
         // Test exists
-        FunctionalTest requestedTest = (FunctionalTest) repository.findById(testId)
+        Test requestedTest = repository.findById(testId)
                 .orElseThrow(() -> new TestNotFoundException
                         (testId));
 
@@ -130,11 +133,12 @@ public class TestService {
         }
 
         // deploy test
+        functionService.deployFunction(requestedTest);
     }
 
 
 
-    public boolean oneConfigurationPerProviderAccount(FunctionalTest requestedTest) {
+    private boolean oneConfigurationPerProviderAccount(Test requestedTest) {
 
         for (ProviderAccount account : requestedTest.getAccountsList()) {
 
