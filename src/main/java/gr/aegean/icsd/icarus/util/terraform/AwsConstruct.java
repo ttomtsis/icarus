@@ -23,6 +23,7 @@ import com.hashicorp.cdktf.providers.aws.s3_bucket_ownership_controls.S3BucketOw
 import com.hashicorp.cdktf.providers.aws.s3_object.S3Object;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
+import io.micrometer.common.util.StringUtils;
 import software.constructs.Construct;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class AwsConstruct extends Construct {
      * @param objectFileName Name of the zip archive containing the function's source code <br>
      *
      * @param awsRegions List of regions where the function will be deployed <br>
-     * @param memoryConfs List of memory configurations according to which the function will be deployed <br>
+     * @param memoryConfigurations List of memory configurations according to which the function will be deployed <br>
      *
      * @param awsFunctionName Name of the function, this is used in a variety of supporting
      *                        resources as well as the function <br>
@@ -92,7 +93,7 @@ public class AwsConstruct extends Construct {
     public AwsConstruct(final Construct scope, final String id,
                         String awsAccessKey, String awsSecretKey,
                         String objectSource, String objectFileName,
-                        Set<AwsRegion> awsRegions, Set<Integer> memoryConfs,
+                        Set<AwsRegion> awsRegions, Set<Integer> memoryConfigurations,
                         String awsFunctionName, LambdaRuntime awsFunctionRuntime, String awsFunctionHandler,
                         String awsFunctionRoute, String awsFunctionMethod) {
 
@@ -106,7 +107,7 @@ public class AwsConstruct extends Construct {
         this.functionSource = objectSource;
         this.functionArchiveName = objectFileName;
 
-        this.memoryConfigurations = memoryConfs;
+        this.memoryConfigurations = memoryConfigurations;
 
         for ( AwsRegion region : awsRegions ) {
             locations.add(region.get());
@@ -138,7 +139,7 @@ public class AwsConstruct extends Construct {
             S3Object bucketObject = createBucketObject(provider, myBucket, provider.getRegion());
 
             // Create a function and api gateway for every requested memory configuration
-            for (Integer memory: memoryConfigurations) {
+            for (Integer memory: this.memoryConfigurations) {
 
                 String targetFunctionID = functionName + "-" + memory + "mb-" + provider.getRegion();
 
@@ -396,9 +397,15 @@ public class AwsConstruct extends Construct {
                 .provider(provider)
                 .build();
 
+        String routeKey = functionMethod + " " + functionRoute;
+
+        if (StringUtils.isBlank(functionRoute)) {
+            routeKey = functionMethod + " /";
+        }
+
         Apigatewayv2Route.Builder.create(this, "route-" + apiName)
                 .apiId(api.getId())
-                .routeKey(functionMethod + " " + functionRoute)
+                .routeKey(routeKey)
                 .target("integrations/"+integration.getId())
                 .provider(provider)
                 .build();
