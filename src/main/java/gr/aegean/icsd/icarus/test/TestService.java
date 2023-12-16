@@ -71,6 +71,8 @@ public class TestService {
 
             Function newFunction = new Function();
             newFunction.setId(testModel.getTargetFunction());
+
+            requestedTest.setTargetFunction(newFunction);
         }
 
         if (testModel.getAccountsList() != null) {
