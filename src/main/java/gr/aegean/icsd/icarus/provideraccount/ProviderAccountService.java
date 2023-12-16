@@ -35,19 +35,17 @@ public class ProviderAccountService {
 
         Optional<IcarusUser> icarusUser = userRepository.findUserByUsername(username);
 
-        icarusUser.ifPresentOrElse(
+        if (icarusUser.isPresent()) {
 
-                user -> {
-                    user.addAccount(account);
-                    userRepository.saveAndFlush(user);
-                    },
+            ProviderAccount savedAccount = accountRepository.save(account);
 
-                () -> {
-                    throw new UserNotFoundException(username);
-                }
-        );
+            icarusUser.get().addAccount(account);
+            userRepository.saveAndFlush(icarusUser.get());
 
-        return account;
+            return savedAccount;
+        }
+
+        throw new UserNotFoundException(username);
     }
 
     public void updateProviderAccount(@NotBlank String awsAccountName, @NotNull AwsAccount updatedAwsAccount) {
