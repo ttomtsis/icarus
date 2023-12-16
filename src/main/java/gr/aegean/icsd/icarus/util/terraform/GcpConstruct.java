@@ -43,7 +43,7 @@ public class GcpConstruct extends Construct
     private final String project;
 
     private final Set<Integer> memoryConfigurations;
-    private final Set<Integer> cpuConfigurations;
+    private Set<Integer> cpuConfigurations;
     private final Set<String> locations = new HashSet<>();
 
     ArrayList<ITerraformDependable> dependencies = new ArrayList<>();
@@ -104,6 +104,10 @@ public class GcpConstruct extends Construct
                 .credentials(credentials)
                 .build();
 
+        if (cpuConfigurations == null || cpuConfigurations.isEmpty()) {
+            this.cpuConfigurations = new HashSet<>();
+            cpuConfigurations.add(1);
+        }
 
         for (String location: locations) {
 
@@ -198,7 +202,7 @@ public class GcpConstruct extends Construct
                 .description(functionDescription)
                 .buildConfig(
                         Cloudfunctions2FunctionBuildConfig.builder()
-                                .runtime(functionRuntime.toString())
+                                .runtime(functionRuntime.get())
                                 .entryPoint(functionEntrypoint)
                                 .source(
                                         Cloudfunctions2FunctionBuildConfigSource.builder()
