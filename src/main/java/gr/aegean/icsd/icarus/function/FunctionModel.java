@@ -16,8 +16,6 @@ public class FunctionModel  extends RepresentationModel<FunctionModel> {
     private String functionHandler;
     private String functionSourceDirectory;
     private String functionSourceFileName;
-
-    // TODO: Replace with TestModel
     private Set<Long> createdTests = new HashSet<>();
 
 
