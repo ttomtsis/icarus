@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class TestModel extends RepresentationModel<TestModel> {
 
+
     private Long id;
     private String name;
     private String description;
@@ -17,28 +18,11 @@ public class TestModel extends RepresentationModel<TestModel> {
     private Long testAuthor;
     private Long targetFunction;
     private  Set<Long> accountsList;
+    private Set<Long> resourceConfigurations;
     private String authorUsername;
     private TestState state;
 
 
-
-    public TestModel(Long id, String name, String description, String httpMethod,
-                     String path, String pathVariable, Long testAuthor,
-                     Long targetFunction, Set<Long> accountsList, String authorUsername,
-                     TestState state) {
-
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.httpMethod = httpMethod;
-        this.path = path;
-        this.pathVariable = pathVariable;
-        this.testAuthor = testAuthor;
-        this.targetFunction = targetFunction;
-        this.accountsList = accountsList;
-        this.authorUsername = authorUsername;
-        this.state = state;
-    }
 
     public TestModel(TestModel model) {
 
@@ -51,6 +35,7 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.testAuthor = model.getTestAuthor();
         this.targetFunction = model.getTestAuthor();
         this.accountsList = model.getAccountsList();
+        this.resourceConfigurations = model.getResourceConfigurations();
         this.authorUsername = model.getAuthorUsername();
         this.state = model.getState();
     }
@@ -145,6 +130,14 @@ public class TestModel extends RepresentationModel<TestModel> {
 
     public void setState(TestState state) {
         this.state = state;
+    }
+
+    public Set<Long> getResourceConfigurations() {
+        return resourceConfigurations;
+    }
+
+    public void setResourceConfigurations(Set<Long> resourceConfigurations) {
+        this.resourceConfigurations = resourceConfigurations;
     }
 
 

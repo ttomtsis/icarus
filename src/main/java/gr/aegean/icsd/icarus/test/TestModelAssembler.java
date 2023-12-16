@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
@@ -43,7 +44,13 @@ public class TestModelAssembler extends RepresentationModelAssemblerSupport<Test
             providerAccounts.add(account.getId());
         }
 
+        Set<Long> configurations = new HashSet<>();
+        for (ResourceConfiguration configuration : entity.getResourceConfigurations()) {
+            providerAccounts.add(configuration.getId());
+        }
+
         newModel.setAccountsList(providerAccounts);
+        newModel.setResourceConfigurations(configurations);
 
         return newModel;
     }
