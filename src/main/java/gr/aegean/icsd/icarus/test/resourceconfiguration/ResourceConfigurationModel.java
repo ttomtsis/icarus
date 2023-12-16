@@ -17,6 +17,8 @@ public class ResourceConfigurationModel extends RepresentationModel<ResourceConf
     private String functionRuntime;
     private Platform platform;
 
+
+
     public ResourceConfigurationModel(Long id, Platform providerPlatform, String functionRuntime,
                                       Set<String> regions, Set<Integer> cpuConfigurations,
                                       Set<Integer> memoryConfigurations, Long parentTestId) {
@@ -31,6 +33,7 @@ public class ResourceConfigurationModel extends RepresentationModel<ResourceConf
     }
 
     public ResourceConfigurationModel() {}
+
 
 
     public Long getId() {

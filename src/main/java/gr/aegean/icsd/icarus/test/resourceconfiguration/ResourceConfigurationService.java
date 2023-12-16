@@ -42,6 +42,7 @@ public class ResourceConfigurationService {
         Test parentTest = checkIfTestExists(testId);
 
         newConfiguration.setParentTest(parentTest);
+
         return resourceConfigurationRepository.save(newConfiguration);
     }
 

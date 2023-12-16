@@ -1,7 +1,6 @@
 package gr.aegean.icsd.icarus.test.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
@@ -28,18 +27,15 @@ public class ResourceConfiguration {
     private Long id;
 
     @ElementCollection
-    @CollectionTable(name = "resource_configuration", joinColumns = @JoinColumn(name = "id"))
-    @Column(name = "regions")
+    @CollectionTable(name = "resource_configuration_regions", joinColumns = @JoinColumn(name = "id"))
     private Set<String> regions = new HashSet<>();
 
     @ElementCollection
-    @CollectionTable(name = "resource_configuration", joinColumns = @JoinColumn(name = "id"))
-    @Column(name = "memory_configurations")
+    @CollectionTable(name = "resource_configuration_memory", joinColumns = @JoinColumn(name = "id"))
     private Set<Integer> memoryConfigurations = new HashSet<>();
 
     @ElementCollection
-    @CollectionTable(name = "resource_configuration", joinColumns = @JoinColumn(name = "id"))
-    @Column(name = "cpu_configurations")
+    @CollectionTable(name = "resource_configuration_cpu", joinColumns = @JoinColumn(name = "id"))
     private Set<Integer> cpuConfigurations = new HashSet<>();
 
     @NotBlank(message = "Resource configuration's function runtime cannot be blank")
@@ -49,7 +45,7 @@ public class ResourceConfiguration {
     @NotNull(message = "Resource configuration's target platform cannot be blank")
     private Platform providerPlatform;
 
-    @ManyToOne(targetEntity = PerformanceTest.class, optional = false)
+    @ManyToOne(targetEntity = Test.class, optional = false)
     private Test parentTest;
 
 
@@ -181,7 +177,7 @@ public class ResourceConfiguration {
 
     private void validateMemoryConfigurations() {
 
-        if (this.memoryConfigurations.isEmpty()) {
+        if (this.memoryConfigurations == null || this.memoryConfigurations.isEmpty()) {
 
             throw new InvalidResourceConfigurationConfigurationException
                     ("At least one memory configuration must be provided per resource configuration");
@@ -199,45 +195,44 @@ public class ResourceConfiguration {
     }
 
 
+    public Long getId() {
+        return id;
+    }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void setParentTest(Test parentTest) {
-        this.parentTest = parentTest;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public Set<String> getRegions() {
         return regions;
     }
 
-    public void setRegions(Set<String> newRegions) {
-        this.regions = newRegions;
+    public void setRegions(Set<String> regions) {
+        this.regions = regions;
     }
 
     public Set<Integer> getMemoryConfigurations() {
         return memoryConfigurations;
     }
 
-    public void setMemoryConfigurations(Set<Integer> newMemoryConfigurations) {
-        this.memoryConfigurations = newMemoryConfigurations;
+    public void setMemoryConfigurations(Set<Integer> memoryConfigurations) {
+        this.memoryConfigurations = memoryConfigurations;
     }
 
     public Set<Integer> getCpuConfigurations() {
         return cpuConfigurations;
     }
 
-    public void setCpuConfigurations(Set<Integer> newCpuConfigurations) {
-        this.cpuConfigurations = newCpuConfigurations;
+    public void setCpuConfigurations(Set<Integer> cpuConfigurations) {
+        this.cpuConfigurations = cpuConfigurations;
     }
 
-    public Test getParentTest() {
-        return parentTest;
+    public String getFunctionRuntime() {
+        return functionRuntime;
+    }
+
+    public void setFunctionRuntime(String functionRuntime) {
+        this.functionRuntime = functionRuntime;
     }
 
     public Platform getProviderPlatform() {
@@ -248,12 +243,12 @@ public class ResourceConfiguration {
         this.providerPlatform = providerPlatform;
     }
 
-    public String getFunctionRuntime() {
-        return functionRuntime;
+    public Test getParentTest() {
+        return parentTest;
     }
 
-    public void setFunctionRuntime(String functionRuntime) {
-        this.functionRuntime = functionRuntime;
+    public void setParentTest(Test parentTest) {
+        this.parentTest = parentTest;
     }
 
 
