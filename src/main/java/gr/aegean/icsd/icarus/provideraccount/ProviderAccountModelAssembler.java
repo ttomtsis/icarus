@@ -21,6 +21,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
     @NonNull
     public ProviderAccountModel toModel(@NonNull AwsAccount entity) {
 
+        Long id = entity.getId();
         String accountName = entity.getName();
         String accountDescription = entity.getDescription();
 
@@ -29,6 +30,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
 
         ProviderAccountModel awsAccountModel = new ProviderAccountModel();
 
+        awsAccountModel.setId(id);
         awsAccountModel.setName(accountName);
         awsAccountModel.setDescription(accountDescription);
         awsAccountModel.setAwsAccessKey(awsAccessKey);
@@ -57,6 +59,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
     @NonNull
     public ProviderAccountModel toModel(@NonNull GcpAccount entity) {
 
+        Long id = entity.getId();
         String accountName = entity.getName();
         String accountDescription = entity.getDescription();
 
@@ -64,6 +67,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
 
         ProviderAccountModel gcpAccountModel = new ProviderAccountModel();
 
+        gcpAccountModel.setId(id);
         gcpAccountModel.setName(accountName);
         gcpAccountModel.setDescription(accountDescription);
         gcpAccountModel.setKeyfile(gcpCredentials);
@@ -92,7 +96,17 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
     @NonNull
     @Override
     public ProviderAccountModel toModel(@NonNull ProviderAccount entity) {
-        return null;
+
+        if (entity.getAccountType().equals("AwsAccount")) {
+            return toModel((AwsAccount) entity);
+        }
+
+        if (entity.getAccountType().equals("GcpAccount")) {
+            return toModel((GcpAccount) entity);
+        }
+
+        throw new UnsupportedOperationException("Account type of: " + entity.getAccountType() +
+                " is not supported by the model assembler");
     }
 
 

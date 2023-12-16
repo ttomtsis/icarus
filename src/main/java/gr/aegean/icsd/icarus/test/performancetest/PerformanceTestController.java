@@ -1,7 +1,6 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 
-import gr.aegean.icsd.icarus.util.PatchDocument;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -56,14 +55,6 @@ public class PerformanceTestController {
     public ResponseEntity<Void> updateTest(@PathVariable Long testId, @RequestBody PerformanceTestModel testModel) {
 
         service.updateTest(testId, testModel);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping(value = "/{testId}", consumes = "application/json")
-    public ResponseEntity<Void> updateTestMetrics(@PathVariable Long testId, @RequestBody PatchDocument patchDoc) {
-
-        service.updateTestMetrics(testId, patchDoc);
 
         return ResponseEntity.noContent().build();
     }

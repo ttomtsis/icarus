@@ -1,11 +1,10 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
+import gr.aegean.icsd.icarus.test.TestModel;
+import gr.aegean.icsd.icarus.test.TestModelAssembler;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfileModel;
-import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfileModelAssembler;
 import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfigurationModel;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfigurationModelAssembler;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -22,58 +21,35 @@ public class PerformanceTestModelAssembler
         extends RepresentationModelAssemblerSupport<PerformanceTest, PerformanceTestModel> {
 
 
-    private final LoadProfileModelAssembler loadProfileModelAssembler;
-    private final ResourceConfigurationModelAssembler resourceConfigurationModelAssembler;
+    private final TestModelAssembler testModelAssembler;
 
 
 
-    public PerformanceTestModelAssembler(LoadProfileModelAssembler loadProfileModelAssembler,
-                                         ResourceConfigurationModelAssembler resourceConfigurationModelAssembler) {
+    public PerformanceTestModelAssembler(TestModelAssembler testModelAssembler) {
 
         super(PerformanceTestController.class, PerformanceTestModel.class);
-        this.loadProfileModelAssembler = loadProfileModelAssembler;
-        this.resourceConfigurationModelAssembler = resourceConfigurationModelAssembler;
-
+        this.testModelAssembler = testModelAssembler;
     }
 
 
     @NonNull
     @Override
-    public PerformanceTestModel toModel(PerformanceTest entity) {
+    public PerformanceTestModel toModel(@NotNull PerformanceTest entity) {
 
-        PerformanceTestModel newModel = new PerformanceTestModel();
+        TestModel parentModel = testModelAssembler.toModel(entity);
 
-        newModel.setId(entity.getId());
-        newModel.setName(entity.getName());
-        newModel.setDescription(entity.getDescription());
-        newModel.setHttpMethod(entity.getHttpMethod());
-
-        // TODO: Create new Model for the author and function ?
-        newModel.setTestAuthor(entity.getTestAuthor().getId());
-
-        if (entity.getTargetFunction() != null) {
-            newModel.setTargetFunction(entity.getTargetFunction().getId());
-        }
-
-        newModel.setPath(entity.getPath());
-        newModel.setPathVariable(entity.getPathVariable());
-        newModel.setPathVariableValue(entity.getPathVariableValue());
-
-        newModel.setChosenMetrics(entity.getChosenMetrics());
-        newModel.setRequestBody(entity.getRequestBody());
-
-        Set<LoadProfileModel> loadProfiles = new HashSet<>();
+        Set<Long> loadProfiles = new HashSet<>();
         for (LoadProfile profile : entity.getLoadProfiles()) {
-            loadProfiles.add(loadProfileModelAssembler.toModel(profile));
+            loadProfiles.add(profile.getId());
         }
 
-        Set<ResourceConfigurationModel> resourceConfigurations = new HashSet<>();
+        Set<Long> resourceConfigurations = new HashSet<>();
         for (ResourceConfiguration configuration : entity.getResourceConfigurations()) {
-            resourceConfigurations.add(resourceConfigurationModelAssembler.toModel(configuration));
+            resourceConfigurations.add(configuration.getId());
         }
 
-        newModel.setLoadProfiles(loadProfiles);
-        newModel.setResourceConfigurations(resourceConfigurations);
+        PerformanceTestModel newModel = new PerformanceTestModel(parentModel, entity.getChosenMetrics(),
+                entity.getPathVariableValue(), entity.getRequestBody(), loadProfiles, resourceConfigurations);
 
         return addLinksToModel(newModel);
     }

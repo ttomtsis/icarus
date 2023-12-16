@@ -1,23 +1,16 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 import gr.aegean.icsd.icarus.test.TestRepository;
-import gr.aegean.icsd.icarus.util.PatchDocument;
-import gr.aegean.icsd.icarus.util.enums.Metric;
-import gr.aegean.icsd.icarus.util.enums.PatchOperation;
+import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
-import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
-
-import java.util.function.Consumer;
 
 
 @Service
-public class PerformanceTestService {
+public class PerformanceTestService extends TestService {
 
 
     private final TestRepository repository;
@@ -25,119 +18,48 @@ public class PerformanceTestService {
 
 
     public PerformanceTestService(TestRepository repository) {
+        super(repository);
         this.repository = repository;
     }
 
 
 
+    @Override
     public PerformanceTest searchTest(@NotNull @Positive Long testId) {
 
-        return (PerformanceTest) repository.findById(testId)
-                .orElseThrow(() -> new TestNotFoundException
-                        (testId));
-
+        return (PerformanceTest) super.searchTest(testId);
     }
 
     public PerformanceTest createTest(@NotNull PerformanceTest newTest) {
 
-        if (StringUtils.isBlank(newTest.getPath())) {
+        if (!StringUtils.isBlank(newTest.getPathVariableValue()) &&
+                StringUtils.isBlank(newTest.getPath())) {
 
-            if (!StringUtils.isBlank(newTest.getPathVariable())) {
-                throw new InvalidTestConfigurationException
-                        ("Cannot set a Path variable if the test does not expose a path");
-            }
-            if (!StringUtils.isBlank(newTest.getPathVariableValue())) {
-                throw new InvalidTestConfigurationException
-                        ("Cannot set a Path variable value if the test does not expose a path");
-            }
-
+            throw new InvalidTestConfigurationException
+                    ("Cannot set a Path variable value if the test does not expose a path");
         }
 
-        if (newTest.getChosenMetrics().isEmpty()) {
+        if (newTest.getChosenMetrics() == null) {
             throw new InvalidTestConfigurationException
                     ("A Performance test must utilize at least 1 Metric");
         }
 
-        return repository.save(newTest);
-
+        return (PerformanceTest) super.createTest(newTest);
     }
 
-    public void updateTest(@NotNull @Positive Long testId, @NotNull PerformanceTestModel test) {
+    public void updateTest(@NotNull @Positive Long testId, @NotNull PerformanceTestModel testModel) {
 
-        PerformanceTest requestedTest = (PerformanceTest) repository.findById(testId).orElseThrow( () ->
-                new TestNotFoundException
-                        (testId));
+        PerformanceTest requestedTest = (PerformanceTest) super.updateTest(testId, testModel);
 
-        setIfNotBlank(requestedTest::setName, test.getName());
-        setIfNotBlank(value -> requestedTest.setHttpMethod(HttpMethod.valueOf(value)), test.getHttpMethod());
-        setIfNotBlank(requestedTest::setDescription, test.getDescription());
-        setIfNotBlank(requestedTest::setPathVariable, test.getPathVariable());
-        setIfNotBlank(requestedTest::setPath, test.getPath());
-        setIfNotBlank(requestedTest::setPathVariableValue, test.getPathVariableValue());
-        setIfNotBlank(requestedTest::setRequestBody, test.getRequestBody());
+        super.setIfNotBlank(requestedTest::setPathVariableValue, testModel.getPathVariableValue());
+        super.setIfNotBlank(requestedTest::setRequestBody, testModel.getRequestBody());
 
-        if (!test.getChosenMetrics().isEmpty()) {
-            requestedTest.setChosenMetrics(test.getChosenMetrics());
+        if (testModel.getChosenMetrics() != null) {
+            requestedTest.setChosenMetrics(testModel.getChosenMetrics());
         }
 
         repository.save(requestedTest);
-
     }
-
-    private void setIfNotBlank(Consumer<String> setter, String value) {
-
-        if (StringUtils.isNotBlank(value)) {
-            setter.accept(value);
-        }
-    }
-
-    public void updateTestMetrics(@NotNull @Positive Long testId, @NotNull PatchDocument patchDoc) {
-
-        if (StringUtils.isBlank(patchDoc.getOp().toString()) ||
-                (StringUtils.isBlank(patchDoc.getValue()) && !patchDoc.getOp().equals(PatchOperation.REMOVE))
-        ) {
-
-            throw new HttpMessageNotReadableException("Patch document is missing required fields");
-
-        }
-
-        Metric patchedMetric;
-        try {
-            patchedMetric = Metric.valueOf(patchDoc.getValue());
-        }
-        catch (IllegalArgumentException ex) {
-            throw new HttpMessageNotReadableException(patchDoc.getValue() + " is not a valid Metric name", ex);
-        }
-
-
-        PerformanceTest requestedTest = (PerformanceTest) repository.findById(testId).orElseThrow( () ->
-                new TestNotFoundException(testId));
-
-
-        if (patchDoc.getOp().equals(PatchOperation.ADD)) {
-            requestedTest.addMetric(patchedMetric);
-        }
-
-        if (patchDoc.getOp().equals(PatchOperation.REMOVE)) {
-            requestedTest.removeMetric(patchedMetric);
-        }
-
-    }
-
-    public void deleteTest(@NotNull @Positive Long testId) {
-
-        if (repository.existsById(testId)) {
-
-            repository.deleteById(testId);
-
-        } else {
-
-            throw new TestNotFoundException(testId);
-
-        }
-
-    }
-
 
 
 }
