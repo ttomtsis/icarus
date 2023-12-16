@@ -104,7 +104,7 @@ public class AwsConstruct extends Construct {
         this.accessKey = awsAccessKey;
         this.secretKey = awsSecretKey;
 
-        this.functionSource = objectSource;
+        this.functionSource = objectSource + "/" + objectFileName;
         this.functionArchiveName = objectFileName;
 
         this.memoryConfigurations = memoryConfigurations;
@@ -148,11 +148,17 @@ public class AwsConstruct extends Construct {
 
                 Apigatewayv2Stage stage = createAPIGateway(provider, lambdaFunction, targetFunctionID);
 
+                String output = stage.getInvokeUrl();
+
+                if (StringUtils.isBlank(functionRoute)) {
+                    output = stage.getInvokeUrl() + "/";
+                }
+
                 // Create an output that will print the URL used to invoke the function
                 TerraformOutput.Builder.create(
                     this, "lambda_url-" + functionName + "-" + provider.getRegion() + "-" + memory )
                     .description("Base URL for API Gateway stage.")
-                    .value(stage.getInvokeUrl())
+                    .value(output)
                     .build();
             }
 
