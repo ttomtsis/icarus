@@ -13,6 +13,6 @@ public class FilePathValidator implements ConstraintValidator<ValidFilePath, Str
             return true;
         }
         File file = new File(value);
-        return file.exists() && file.isFile();
+        return file.exists() && file.isDirectory();
     }
 }
