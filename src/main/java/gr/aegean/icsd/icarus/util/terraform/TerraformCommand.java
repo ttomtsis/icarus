@@ -6,7 +6,7 @@ public enum TerraformCommand {
     INIT("terraform", "init"),
     APPLY("terraform", "apply", "-auto-approve"),
     DESTROY("terraform", "destroy", "-auto-approve"),
-    OUTPUT("terraform", "output", "-raw");
+    OUTPUT("terraform", "output");
 
 
     private final String[] command;
