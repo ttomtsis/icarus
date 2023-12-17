@@ -1,10 +1,15 @@
 package gr.aegean.icsd.icarus.util.restassured;
 
 import gr.aegean.icsd.icarus.util.enums.Platform;
+import io.micrometer.common.util.StringUtils;
 import io.restassured.RestAssured;
+import io.restassured.config.HttpClientConfig;
 import io.restassured.http.Method;
 import io.restassured.response.Response;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
 
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.REST_ASSURED_MAX_TIMEOUT;
 import static io.restassured.RestAssured.given;
 
 
@@ -40,30 +45,45 @@ public class RestAssuredTest {
      * @param path Path the function exposes
      * @param pathVariable Path variable present in the path
      * @param pathVariableValue Value of the path variable
-     * @param requestBody Body of the outbound request
+     * @param body Body of the outbound request
      * @param expectedStatusCode Expected status code from the response
      * @param expectedResponseBody Expected response body from the response
      * @param provider Cloud provider where the function is deployed
      */
     public RestAssuredTest(String functionURL, String path, String pathVariable,
-                           String pathVariableValue, String requestBody,
+                           String pathVariableValue, String body,
                            int expectedStatusCode, String expectedResponseBody, Platform provider) {
+
+        RestAssured.baseURI = functionURL;
+
+        RestAssured.config = RestAssured.config()
+                .httpClient(HttpClientConfig.httpClientConfig()
+                        .httpClientFactory(() -> HttpClientBuilder.create()
+                                .setDefaultRequestConfig(RequestConfig.custom()
+                                        .setConnectTimeout(REST_ASSURED_MAX_TIMEOUT)
+                                        .setSocketTimeout(REST_ASSURED_MAX_TIMEOUT)
+                                        .build())
+                                .build()));
 
         this.path = path;
         this.pathVariable = pathVariable;
 
         this.requestPathVariableValue = pathVariableValue;
-        this.requestBody = requestBody;
+
+        if (StringUtils.isBlank(body)) {
+            this.requestBody = "";
+        } else {
+            this.requestBody = body;
+        }
 
         this.expectedStatusCode = expectedStatusCode;
         this.expectedResponseBody = expectedResponseBody;
-
-        RestAssured.baseURI = functionURL;
 
         this.httpMethod = Method.GET;
 
         this.provider = provider;
 
+        runTest();
     }
 
 
@@ -76,7 +96,7 @@ public class RestAssuredTest {
         Response response =
                 given().
                         pathParam(this.pathVariable, this.requestPathVariableValue).
-                        body(requestBody).
+                        body(this.requestBody).
                 when().
                         request(this.httpMethod, this.path).
                 then().
@@ -123,6 +143,24 @@ public class RestAssuredTest {
      */
     public boolean getPass() {
         return this.pass;
+    }
+
+
+    @Override
+    public String toString() {
+        return "RestAssuredTest{" +
+                "httpMethod=" + httpMethod +
+                ", provider=" + provider +
+                ", path='" + path + '\'' +
+                ", pathVariable='" + pathVariable + '\'' +
+                ", requestPathVariableValue='" + requestPathVariableValue + '\'' +
+                ", requestBody='" + requestBody + '\'' +
+                ", expectedStatusCode=" + expectedStatusCode +
+                ", expectedResponseBody='" + expectedResponseBody + '\'' +
+                ", actualStatusCode=" + actualStatusCode +
+                ", actualResponseBody='" + actualResponseBody + '\'' +
+                ", pass=" + pass +
+                '}';
     }
 
 
