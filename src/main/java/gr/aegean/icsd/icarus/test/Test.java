@@ -59,11 +59,13 @@ public class Test {
     @JoinColumn(name = "target_function_id")
     private Function targetFunction;
 
-    @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class)
+    @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class,
+    fetch = FetchType.EAGER)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
 
     @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
-            targetEntity = ResourceConfiguration.class, orphanRemoval = true)
+            targetEntity = ResourceConfiguration.class, orphanRemoval = true,
+    fetch = FetchType.EAGER)
     private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
     // TODO: Merge this field with testAuthor field

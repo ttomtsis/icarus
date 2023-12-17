@@ -26,15 +26,15 @@ public class ResourceConfiguration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "resource_configuration_regions", joinColumns = @JoinColumn(name = "id"))
     private Set<String> regions = new HashSet<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "resource_configuration_memory", joinColumns = @JoinColumn(name = "id"))
     private Set<Integer> memoryConfigurations = new HashSet<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "resource_configuration_cpu", joinColumns = @JoinColumn(name = "id"))
     private Set<Integer> cpuConfigurations = new HashSet<>();
 
