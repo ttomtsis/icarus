@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
 import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;

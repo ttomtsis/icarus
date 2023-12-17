@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.testexecution;
 
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import jakarta.persistence.*;
 
 @Entity

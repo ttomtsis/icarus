@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.test.resourceconfiguration;
+package gr.aegean.icsd.icarus.resourceconfiguration;
 
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.PagedModel;

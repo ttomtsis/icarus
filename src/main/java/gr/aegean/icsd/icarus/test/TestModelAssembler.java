@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;

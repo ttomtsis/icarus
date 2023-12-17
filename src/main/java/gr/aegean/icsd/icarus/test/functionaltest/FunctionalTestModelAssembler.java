@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 import gr.aegean.icsd.icarus.test.TestModel;
 import gr.aegean.icsd.icarus.test.TestModelAssembler;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
