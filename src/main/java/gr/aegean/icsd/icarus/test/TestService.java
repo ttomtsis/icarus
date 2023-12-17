@@ -18,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 
@@ -191,6 +192,21 @@ public class TestService {
 
         test.setState(testState);
         repository.save(test);
+    }
+
+    protected HashMap<String, String> extractUrls(String functionUrls) {
+
+        HashMap<String, String> urlMap = new HashMap<>();
+        String[] lines = functionUrls.split("\\n");
+
+        for (String line : lines) {
+            String[] parts = line.split("=");
+            String key = parts[0].trim();
+            String value = parts[1].trim().replace("\"", "");
+            urlMap.put(key, value);
+        }
+
+        return urlMap;
     }
 
     protected StackDeployer getDeployer() {
