@@ -2,35 +2,39 @@ package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
-import gr.aegean.icsd.icarus.test.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestStateException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.function.Consumer;
 
 
 @Service
+@Transactional
+@Validated
 public class TestService {
 
 
     private final TestRepository repository;
 
-    @Autowired
-    private StackDeployer deployer;
+    private final StackDeployer deployer;
 
 
-    public TestService(TestRepository repository) {
+    public TestService(TestRepository repository, StackDeployer deployer) {
         this.repository = repository;
+        this.deployer = deployer;
     }
 
 
@@ -103,7 +107,7 @@ public class TestService {
 
     }
 
-    public void executeTest(@NotNull @Positive Long testId) {
+    public Test executeTest(@NotNull @Positive Long testId) {
 
         // Test exists
         Test requestedTest = repository.findById(testId)
@@ -133,8 +137,15 @@ public class TestService {
                     "configuration for every provider account");
         }
 
-        // deploy test
-        deployer.deploy(requestedTest);
+        setState(requestedTest, TestState.DEPLOYING);
+        return requestedTest;
+    }
+
+    public String getTestState(@NotNull @Positive Long testId) {
+
+        return repository.findById(testId)
+                .orElseThrow(() -> new TestNotFoundException(testId))
+                .getState().toString();
     }
 
 
@@ -174,6 +185,16 @@ public class TestService {
         if (StringUtils.isNotBlank(value)) {
             setter.accept(value);
         }
+    }
+
+    public void setState(@NotNull Test test, @NotBlank TestState testState) {
+
+        test.setState(testState);
+        repository.save(test);
+    }
+
+    protected StackDeployer getDeployer() {
+        return this.deployer;
     }
 
 
