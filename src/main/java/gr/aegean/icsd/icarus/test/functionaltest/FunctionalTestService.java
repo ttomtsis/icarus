@@ -2,12 +2,16 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 
 @Service
+@Transactional
+@Validated
 public class FunctionalTestService extends TestService {
 
 

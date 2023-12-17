@@ -4,15 +4,19 @@ import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.util.exceptions.FunctionNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.function.Consumer;
 
 
 @Service
+@Transactional
+@Validated
 public class FunctionService {
 
 

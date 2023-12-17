@@ -11,10 +11,12 @@ import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -23,6 +25,8 @@ import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.STACK_
 
 
 @Service
+@Validated
+@Transactional
 public class StackDeployer {
 
 

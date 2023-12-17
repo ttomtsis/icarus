@@ -7,16 +7,20 @@ import gr.aegean.icsd.icarus.util.exceptions.TestCaseMemberNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.function.Consumer;
 
 
 @Service
+@Transactional
+@Validated
 public class TestCaseMemberService {
     
     

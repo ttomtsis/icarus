@@ -3,13 +3,17 @@ package gr.aegean.icsd.icarus.test.performancetest;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 
 @Service
+@Transactional
+@Validated
 public class PerformanceTestService extends TestService {
 
 
