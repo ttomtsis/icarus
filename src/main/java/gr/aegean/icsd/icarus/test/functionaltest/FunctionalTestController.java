@@ -79,6 +79,13 @@ public class FunctionalTestController {
         return ResponseEntity.accepted().header("Location", location.toString()).build();
     }
 
+    @GetMapping("/{testId}/execute")
+    public ResponseEntity<String> getExecutionStatus(@PathVariable Long testId) {
+
+        String status = service.getTestState(testId);
+
+        return ResponseEntity.ok().body(status);
+    }
 
 
 }
