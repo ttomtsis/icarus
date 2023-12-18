@@ -3,13 +3,9 @@ package gr.aegean.icsd.icarus.util.restassured;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import io.micrometer.common.util.StringUtils;
 import io.restassured.RestAssured;
-import io.restassured.config.HttpClientConfig;
 import io.restassured.http.Method;
 import io.restassured.response.Response;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
 
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.REST_ASSURED_MAX_TIMEOUT;
 import static io.restassured.RestAssured.given;
 
 
@@ -24,8 +20,8 @@ public class RestAssuredTest {
     private final Platform provider;
 
     private final String path;
-    private final String pathVariable;
-    private final String requestPathVariableValue;
+    private String pathVariable;
+    private String requestPathVariableValue;
     private final String requestBody;
 
     private final int expectedStatusCode;
@@ -56,19 +52,12 @@ public class RestAssuredTest {
 
         RestAssured.baseURI = functionURL;
 
-        RestAssured.config = RestAssured.config()
-                .httpClient(HttpClientConfig.httpClientConfig()
-                        .httpClientFactory(() -> HttpClientBuilder.create()
-                                .setDefaultRequestConfig(RequestConfig.custom()
-                                        .setConnectTimeout(REST_ASSURED_MAX_TIMEOUT)
-                                        .setSocketTimeout(REST_ASSURED_MAX_TIMEOUT)
-                                        .build())
-                                .build()));
-
         this.path = path;
-        this.pathVariable = pathVariable;
 
-        this.requestPathVariableValue = pathVariableValue;
+        if (StringUtils.isNotBlank(this.path)) {
+            this.pathVariable = pathVariable;
+            this.requestPathVariableValue = pathVariableValue;
+        }
 
         if (StringUtils.isBlank(body)) {
             this.requestBody = "";
@@ -93,15 +82,28 @@ public class RestAssuredTest {
      */
     public void runTest() {
 
-        Response response =
-                given().
-                        pathParam(this.pathVariable, this.requestPathVariableValue).
-                        body(this.requestBody).
-                when().
-                        request(this.httpMethod, this.path).
-                then().
-                        extract().
-                        response();
+        Response response;
+        if (StringUtils.isBlank(this.path)) {
+            response =
+                    given().
+                            body(this.requestBody).
+                    when().
+                            request(this.httpMethod).
+                    then().
+                            extract().
+                            response();
+        }
+        else {
+            response =
+                    given().
+                            pathParam(this.pathVariable, this.requestPathVariableValue).
+                            body(this.requestBody).
+                            when().
+                            request(this.httpMethod, this.path).
+                            then().
+                            extract().
+                            response();
+        }
 
         this.actualStatusCode = response.getStatusCode();
 
