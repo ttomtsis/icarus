@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;

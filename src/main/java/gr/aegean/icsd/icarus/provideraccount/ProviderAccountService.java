@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
-import gr.aegean.icsd.icarus.util.exceptions.ProviderAccountNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.provideraccount.ProviderAccountNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.UserNotFoundException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;

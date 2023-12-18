@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseMemberNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -63,14 +63,14 @@ public class TestCaseMemberService {
     }
 
     public void updateTestCaseMember(@NotNull @Positive Long testId, @NotNull @Positive Long testCaseId,
-                                     @NotNull @Positive Long TestCaseMemberId,
+                                     @NotNull @Positive Long testCaseMemberId,
                                      @NotNull TestCaseMemberModel model) {
 
         checkIfTestExists(testId);
 
         checkIfTestCaseExists(testCaseId);
 
-        TestCaseMember existingTestCaseMember = checkIfTestCaseMemberExists(TestCaseMemberId);
+        TestCaseMember existingTestCaseMember = checkIfTestCaseMemberExists(testCaseMemberId);
 
         if (model.getExpectedResponseCode() != null && model.getExpectedResponseCode() >= 0) {
             existingTestCaseMember.setExpectedResponseCode(model.getExpectedResponseCode());
@@ -92,13 +92,13 @@ public class TestCaseMemberService {
 
     public void deleteTestCaseMember(@NotNull @Positive Long testId,
                                      @NotNull @Positive Long testCaseId,
-                                     @NotNull @Positive Long TestCaseMemberId) {
+                                     @NotNull @Positive Long testCaseMemberId) {
 
         checkIfTestExists(testId);
 
         checkIfTestCaseExists(testCaseId);
 
-        TestCaseMember existingTestCaseMember = checkIfTestCaseMemberExists(TestCaseMemberId);
+        TestCaseMember existingTestCaseMember = checkIfTestCaseMemberExists(testCaseMemberId);
 
         testCaseMemberRepository.delete(existingTestCaseMember);
     }
@@ -116,10 +116,10 @@ public class TestCaseMemberService {
                 .orElseThrow( () -> new TestCaseNotFoundException(parentTestCaseId));
     }
 
-    private TestCaseMember checkIfTestCaseMemberExists(Long TestCaseMemberId) {
+    private TestCaseMember checkIfTestCaseMemberExists(Long testCaseMemberId) {
 
-        return testCaseMemberRepository.findById(TestCaseMemberId)
-                .orElseThrow( () -> new TestCaseMemberNotFoundException(TestCaseMemberId));
+        return testCaseMemberRepository.findById(testCaseMemberId)
+                .orElseThrow( () -> new TestCaseMemberNotFoundException(testCaseMemberId));
     }
 
 

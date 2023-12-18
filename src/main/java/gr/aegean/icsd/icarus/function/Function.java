@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
-import gr.aegean.icsd.icarus.util.exceptions.FunctionConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.function.FunctionConfigurationException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.exceptions;
+package gr.aegean.icsd.icarus.util.exceptions.function;
 
 public class FunctionConfigurationException extends RuntimeException {
 

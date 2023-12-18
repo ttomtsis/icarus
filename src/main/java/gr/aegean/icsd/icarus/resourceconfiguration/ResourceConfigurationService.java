@@ -2,8 +2,8 @@ package gr.aegean.icsd.icarus.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
-import gr.aegean.icsd.icarus.util.exceptions.ResourceConfigurationNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.resourceconfiguration.ResourceConfigurationNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;

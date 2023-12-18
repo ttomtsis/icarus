@@ -6,7 +6,7 @@ import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.http.HttpMethod;
