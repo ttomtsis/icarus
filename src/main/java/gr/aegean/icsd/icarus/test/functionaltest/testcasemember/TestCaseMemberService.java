@@ -1,9 +1,11 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcasemember;
 
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
-import gr.aegean.icsd.icarus.util.exceptions.TestCaseMemberNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.testcasemember.InvalidTestCaseMemberConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.testcasemember.TestCaseMemberNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import io.micrometer.common.util.StringUtils;
@@ -54,9 +56,16 @@ public class TestCaseMemberService {
     public TestCaseMember createTestCaseMember(@NotNull TestCaseMember newTestCaseMember,
                                    @NotNull @Positive Long testId, @NotNull @Positive Long testCaseId) {
 
-        checkIfTestExists(testId);
+        Test parentTest = checkIfTestExists(testId);
 
         TestCase parentTestCase = checkIfTestCaseExists(testCaseId);
+
+        if (StringUtils.isBlank(parentTest.getPath()) &&
+                StringUtils.isNotBlank(newTestCaseMember.getRequestPathVariableValue())) {
+
+            throw new InvalidTestCaseMemberConfigurationException("A test case member cannot set a path variable " +
+                    " if the parent Test does not expose a path");
+        }
 
         newTestCaseMember.setParentTestCase(parentTestCase);
         return testCaseMemberRepository.save(newTestCaseMember);
@@ -66,7 +75,7 @@ public class TestCaseMemberService {
                                      @NotNull @Positive Long testCaseMemberId,
                                      @NotNull TestCaseMemberModel model) {
 
-        checkIfTestExists(testId);
+        Test parentTest = checkIfTestExists(testId);
 
         checkIfTestCaseExists(testCaseId);
 
@@ -77,9 +86,15 @@ public class TestCaseMemberService {
         }
 
         setIfNotBlank(existingTestCaseMember::setExpectedResponseBody, model.getExpectedResponseBody());
-        setIfNotBlank(existingTestCaseMember::setRequestPathVariable, model.getRequestPathVariable());
+        setIfNotBlank(existingTestCaseMember::setRequestPathVariableValue, model.getRequestPathVariableValue());
         setIfNotBlank(existingTestCaseMember::setRequestBody, model.getRequestBody());
 
+        if (StringUtils.isBlank(parentTest.getPath()) &&
+                StringUtils.isNotBlank(model.getRequestPathVariableValue())) {
+
+            throw new InvalidTestCaseMemberConfigurationException("A test case member cannot set a path variable " +
+                    " if the parent Test does not expose a path");
+        }
         testCaseMemberRepository.save(existingTestCaseMember);
     }
 
@@ -104,9 +119,9 @@ public class TestCaseMemberService {
     }
 
 
-    private void checkIfTestExists(Long parentTestId) {
+    private Test checkIfTestExists(Long parentTestId) {
 
-        testRepository.findById(parentTestId)
+        return testRepository.findById(parentTestId)
                 .orElseThrow(() -> new TestNotFoundException(parentTestId));
     }
 
