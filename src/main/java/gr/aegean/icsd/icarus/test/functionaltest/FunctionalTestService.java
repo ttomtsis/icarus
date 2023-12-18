@@ -9,6 +9,7 @@ import gr.aegean.icsd.icarus.testexecution.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.TestCaseResultRepository;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
@@ -93,28 +94,39 @@ public class FunctionalTestService extends TestService {
             super.setState(requestedTest, TestState.RUNNING);
             HashMap<String, String> functionUrls = super.extractUrls(result);
 
-            for (Map.Entry<String, String> entry : functionUrls.entrySet()) {
-                for (TestCase testCase : requestedTest.getTestCases()) {
-                    for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
+            try {
 
-                        LoggerFactory.getLogger("Functional Test Service").warn("Running test");
+                for (Map.Entry<String, String> entry : functionUrls.entrySet()) {
+                    for (TestCase testCase : requestedTest.getTestCases()) {
+                        for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
 
-                        // Create rest assured test
-                        RestAssuredTest test = new RestAssuredTest(entry.getValue(), requestedTest.getPath(),
-                                requestedTest.getPathVariable(), testCaseMember.getRequestPathVariable(),
-                                testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
-                                testCaseMember.getExpectedResponseBody(),
-                                testCase.getTargetConfiguration().getProviderPlatform());
+                            LoggerFactory.getLogger("Functional Test Service").warn("Running test");
 
-                        LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
+                            // Create rest assured test
+                            RestAssuredTest test = new RestAssuredTest(entry.getValue(), requestedTest.getPath(),
+                                    requestedTest.getPathVariable(), testCaseMember.getRequestPathVariable(),
+                                    testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
+                                    testCaseMember.getExpectedResponseBody(),
+                                    requestedTest.getResourceConfigurations().stream().iterator().next()
+                                            .getProviderPlatform());
 
-                        // Save results
-                        TestCaseResult testResult = new TestCaseResult(testCaseMember, testCase.getTargetConfiguration(),
-                                test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+                            LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
 
-                        testCaseResultRepository.save(testResult);
+                            // Save results
+                            TestCaseResult testResult = new TestCaseResult(testCaseMember,
+                                    requestedTest.getResourceConfigurations().stream().iterator().next(),
+                                    test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+
+                            testCaseResultRepository.save(testResult);
+                        }
                     }
                 }
+
+            }
+            catch (Exception e) {
+                super.setState(requestedTest, TestState.ERROR);
+                throw new TestExecutionFailedException(requestedTest.getId(), FunctionalTest.class.getSimpleName(),
+                        e.getMessage());
             }
 
             super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName());
