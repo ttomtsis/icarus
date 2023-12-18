@@ -38,13 +38,6 @@ public class TestCase {
 
 
 
-    public TestCase(String name, String description, FunctionalTest parentTest, Set<TestCaseMember> testCaseMembers) {
-        this.name = name;
-        this.description = description;
-        this.parentTest = parentTest;
-        this.testCaseMembers.addAll(testCaseMembers);
-    }
-
     public TestCase(String name, String description, FunctionalTest parentTest) {
         this.name = name;
         this.description = description;
@@ -97,22 +90,6 @@ public class TestCase {
 
     public void setParentTest(FunctionalTest parentTest) {
         this.parentTest = parentTest;
-    }
-
-    public void addMember(TestCaseMember newMember) {
-        this.testCaseMembers.add(newMember);
-    }
-
-    public void addMember(Set<TestCaseMember> newMembers) {
-        this.testCaseMembers.addAll(newMembers);
-    }
-
-    public void removeMember(TestCaseMember member) {
-        this.testCaseMembers.remove(member);
-    }
-
-    public void removeMember(Set<TestCaseMember> members) {
-        this.testCaseMembers.removeAll(members);
     }
 
 

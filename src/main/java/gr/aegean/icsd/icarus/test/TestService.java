@@ -82,6 +82,7 @@ public class TestService {
 
         if (testModel.getAccountsList() != null) {
 
+            requestedTest.clearAccountsList();
             for (Long accountId : testModel.getAccountsList()) {
 
                 ProviderAccount account = new ProviderAccount();

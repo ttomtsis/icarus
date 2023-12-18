@@ -20,40 +20,39 @@ import org.springframework.validation.annotation.Validated;
 public class TestCaseService {
 
     
-    private final TestCaseRepository TestCaseRepository;
+    private final TestCaseRepository testCaseRepository;
     private final TestRepository testRepository;
 
 
 
     public TestCaseService(TestCaseRepository repository, TestRepository testRepository) {
-        this.TestCaseRepository = repository;
+        this.testCaseRepository = repository;
         this.testRepository = testRepository;
     }
 
 
 
-    public Page<TestCase> getTestCases(@NotNull @Positive Long testId,
-                                                                 @NotNull Pageable pageable) {
+    public Page<TestCase> getTestCases(@NotNull @Positive Long testId, @NotNull Pageable pageable) {
 
         FunctionalTest parentTest = checkIfTestExists(testId);
 
-        return TestCaseRepository.findAllByParentTest(parentTest, pageable);
+        return testCaseRepository.findAllByParentTest(parentTest, pageable);
     }
 
-    public TestCase createTestCase(@NotNull TestCase newTestCase,
-                                                     @NotNull @Positive Long testId) {
+    public TestCase createTestCase(@NotNull TestCase newTestCase, @NotNull @Positive Long testId) {
 
         FunctionalTest parentTest = checkIfTestExists(testId);
 
         newTestCase.setParentTest(parentTest);
-        return TestCaseRepository.save(newTestCase);
+        return testCaseRepository.save(newTestCase);
     }
 
-    public void updateTestCase(Long testId, Long TestCaseId, TestCaseModel model) {
+    public void updateTestCase(@NotNull @Positive Long testId, @NotNull @Positive Long testCaseId,
+                               @NotNull TestCaseModel model) {
 
         checkIfTestExists(testId);
 
-        TestCase existingTestCase = checkIfTestCaseExists(TestCaseId);
+        TestCase existingTestCase = checkIfTestCaseExists(testCaseId);
 
         if (StringUtils.isNotBlank(model.getName())) {
             existingTestCase.setName(model.getName());
@@ -63,29 +62,30 @@ public class TestCaseService {
             existingTestCase.setDescription(model.getDescription());
         }
 
-        TestCaseRepository.save(existingTestCase);
+        testCaseRepository.save(existingTestCase);
     }
 
-    public void deleteTestCase(Long testId, Long TestCaseId) {
+    public void deleteTestCase(@NotNull @Positive Long testId, @NotNull @Positive Long testCaseId) {
 
         checkIfTestExists(testId);
 
-        TestCase existingTestCase = checkIfTestCaseExists(TestCaseId);
+        TestCase existingTestCase = checkIfTestCaseExists(testCaseId);
 
-        TestCaseRepository.delete(existingTestCase);
+        testCaseRepository.delete(existingTestCase);
     }
 
 
-    private FunctionalTest checkIfTestExists(Long parentTestId) {
+    private FunctionalTest checkIfTestExists(@NotNull @Positive Long parentTestId) {
 
         return (FunctionalTest) testRepository.findById(parentTestId)
                 .orElseThrow( () -> new TestNotFoundException(parentTestId));
     }
 
-    private TestCase checkIfTestCaseExists(Long TestCaseId) {
+    private TestCase checkIfTestCaseExists(@NotNull @Positive Long testCaseId) {
 
-        return TestCaseRepository.findById(TestCaseId)
-                .orElseThrow( () -> new TestCaseNotFoundException(TestCaseId));
+        return testCaseRepository.findById(testCaseId)
+                .orElseThrow( () -> new TestCaseNotFoundException(testCaseId));
     }
+
 
 }

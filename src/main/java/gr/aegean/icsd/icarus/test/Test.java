@@ -8,7 +8,6 @@ import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.http.HttpMethod;
@@ -42,13 +41,9 @@ public class Test {
     @NotBlank(message = "Http Method used by the Test cannot be blank")
     private String httpMethod;
 
-    @Pattern(regexp = "^/([a-zA-Z]+/?)*(\\{[a-zA-Z]+\\}/([a-zA-Z]+/?)*)?$",
-            message = "The exposed path is not in a valid format")
+    // TODO: Add validation for path and pathVariable
     private String path;
 
-    @Pattern(regexp = "\\{(?!\\d*\\})[a-zA-Z0-9_]+\\}",
-            message = "Path variable exposed in the test is not in a valid format." +
-                    " Path variable must be in the format {A-Z, a-z, 0-9} e.g. {variable1}")
     private String pathVariable;
 
     @ManyToOne(cascade = CascadeType.REFRESH)
@@ -106,10 +101,6 @@ public class Test {
         this.state = state;
     }
 
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
-    }
-
     public String getAuthorUsername() {
         return authorUsername;
     }
@@ -154,9 +145,8 @@ public class Test {
 
     public void addProviderAccount(ProviderAccount newAccount) {accountsList.add(newAccount);}
 
-    public void setAccountsList(Set<ProviderAccount> newList) {
+    public void clearAccountsList() {
         accountsList.clear();
-        accountsList.addAll(newList);
     }
 
     public String getPathVariable() {
