@@ -33,6 +33,7 @@ public class FunctionalTestService extends TestService {
     private final TestCaseResultRepository testCaseResultRepository;
 
 
+
     public FunctionalTestService(TestRepository repository, StackDeployer deployer,
                                  TestCaseResultRepository testCaseResultRepository) {
         super(repository, deployer);
@@ -89,51 +90,64 @@ public class FunctionalTestService extends TestService {
                     "associated with it");
         }
 
-        super.getDeployer().deploy(requestedTest).thenAccept(result -> {
+            super.getDeployer().deploy(requestedTest)
 
-            super.setState(requestedTest, TestState.RUNNING);
-            HashMap<String, String> functionUrls = super.extractUrls(result);
+                .exceptionally(ex -> {
 
-            try {
+                    super.setState(requestedTest, TestState.ERROR);
+                    throw new TestExecutionFailedException(ex);
+                })
 
-                for (Map.Entry<String, String> entry : functionUrls.entrySet()) {
-                    for (TestCase testCase : requestedTest.getTestCases()) {
-                        for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
+                .thenAccept(result -> {
 
-                            LoggerFactory.getLogger("Functional Test Service").warn("Running test");
+                    super.setState(requestedTest, TestState.RUNNING);
+                    HashMap<String, String> functionUrls = super.extractUrls(result);
 
-                            // Create rest assured test
-                            RestAssuredTest test = new RestAssuredTest(entry.getValue(), requestedTest.getPath(),
-                                    requestedTest.getPathVariable(), testCaseMember.getRequestPathVariable(),
-                                    testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
-                                    testCaseMember.getExpectedResponseBody(),
-                                    requestedTest.getResourceConfigurations().stream().iterator().next()
-                                            .getProviderPlatform());
+                    try {
 
-                            LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
+                        createRestAssuredTests(requestedTest, functionUrls);
 
-                            // Save results
-                            TestCaseResult testResult = new TestCaseResult(testCaseMember,
-                                    requestedTest.getResourceConfigurations().stream().iterator().next(),
-                                    test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+                    } catch (Exception ex) {
 
-                            testCaseResultRepository.save(testResult);
-                        }
+                        super.setState(requestedTest, TestState.ERROR);
+                        throw new TestExecutionFailedException(ex);
                     }
-                }
 
-            }
-            catch (Exception e) {
-                super.setState(requestedTest, TestState.ERROR);
-                throw new TestExecutionFailedException(requestedTest.getId(), FunctionalTest.class.getSimpleName(),
-                        e.getMessage());
-            }
-
-            super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName());
-            super.setState(requestedTest, TestState.FINISHED);
-        });
+                    super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName());
+                    super.setState(requestedTest, TestState.FINISHED);
+                });
 
         return null;
+    }
+
+    private void createRestAssuredTests(FunctionalTest requestedTest, HashMap<String, String> functionUrls) {
+
+        for (Map.Entry<String, String> entry : functionUrls.entrySet()) {
+            for (TestCase testCase : requestedTest.getTestCases()) {
+                for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
+
+                    LoggerFactory.getLogger("Functional Test Service").warn("Running test");
+
+                    // Create rest assured test
+                    RestAssuredTest test = new RestAssuredTest(entry.getValue(), requestedTest.getPath(),
+                            requestedTest.getPathVariable(), testCaseMember.getRequestPathVariableValue(),
+                            testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
+                            testCaseMember.getExpectedResponseBody(),
+                            requestedTest.getResourceConfigurations().stream().iterator().next()
+                                    .getProviderPlatform());
+
+                    LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
+
+                    // Save results
+                    TestCaseResult testResult = new TestCaseResult(testCaseMember,
+                            requestedTest.getResourceConfigurations().stream().iterator().next(),
+                            test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+
+                    testCaseResultRepository.save(testResult);
+                }
+            }
+        }
+
     }
 
 

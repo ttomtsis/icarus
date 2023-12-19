@@ -8,6 +8,14 @@ import java.util.Arrays;
 
 public class StackDeploymentException extends RuntimeException {
 
+
+    public StackDeploymentException(File errorFile, int exitCode, String... command) {
+        super("Exception occurred when running command: " + Arrays.toString(command)
+                + "\nTerraform returned exit code: " + exitCode
+                + "\nError file:  \n" + getErrorFileContents(errorFile));
+    }
+
+
     public StackDeploymentException(File errorFile, String... command) {
         super("Exception occurred when running command: " + Arrays.toString(command)
                 + "\nError file:  \n" + getErrorFileContents(errorFile));

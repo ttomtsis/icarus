@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.exceptions;
+package gr.aegean.icsd.icarus.util.exceptions.testcasemember;
 
 public class TestCaseMemberNotFoundException extends RuntimeException {
 

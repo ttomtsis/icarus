@@ -8,9 +8,10 @@ public class TestCaseMemberModel extends RepresentationModel<TestCaseMemberModel
     private Long id;
     private Integer expectedResponseCode;
     private String expectedResponseBody;
-    private String requestPathVariable;
+    private String requestPathVariableValue;
     private String requestBody;
     private Long parentTestCase;
+
 
 
     public Long getId() {
@@ -37,12 +38,12 @@ public class TestCaseMemberModel extends RepresentationModel<TestCaseMemberModel
         this.expectedResponseBody = expectedResponseBody;
     }
 
-    public String getRequestPathVariable() {
-        return requestPathVariable;
+    public String getRequestPathVariableValue() {
+        return requestPathVariableValue;
     }
 
-    public void setRequestPathVariable(String requestPathVariable) {
-        this.requestPathVariable = requestPathVariable;
+    public void setRequestPathVariableValue(String requestPathVariableValue) {
+        this.requestPathVariableValue = requestPathVariableValue;
     }
 
     public String getRequestBody() {
@@ -60,4 +61,6 @@ public class TestCaseMemberModel extends RepresentationModel<TestCaseMemberModel
     public void setParentTestCase(Long parentTestCase) {
         this.parentTestCase = parentTestCase;
     }
+
+
 }
