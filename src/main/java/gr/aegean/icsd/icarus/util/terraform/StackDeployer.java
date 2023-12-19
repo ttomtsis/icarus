@@ -10,6 +10,7 @@ import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.StackDeploymentException;
+import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.transaction.Transactional;
@@ -22,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class StackDeployer {
     @Async
     public CompletableFuture<String> deploy(@NotNull Test associatedTest) {
 
-        String name = associatedTest.getTargetFunction().getName();
+        String name = associatedTest.getTargetFunction().getName() + UUID.randomUUID().toString().substring(0, 5);
         String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
         String stackDir = outputDir + "\\stacks\\" + name;
 
@@ -179,24 +181,25 @@ public class StackDeployer {
         processBuilder.directory(stackDirectory);
         processBuilder.command(commands);
 
-        // Redirect normal output to output.txt
-        File outputFile = new File(processBuilder.directory().getPath() + "\\output.txt");
+        String commandString = "\\" + String.join(" ", commands);
+        commandString = commandString.replace(" ", "_").replace("-", "_");
+
+        File outputFile = new File(processBuilder.directory().getPath() + commandString + "output.txt");
         processBuilder.redirectOutput(outputFile);
 
-        File errorFile = new File(processBuilder.directory().getPath() + "\\error.txt");
+        File errorFile = new File(processBuilder.directory().getPath() + commandString + "error_output.txt");
         processBuilder.redirectError(errorFile);
 
         try {
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
 
-            if (exitCode < 0) {
-
-                throw new StackDeploymentException(errorFile, commands);
+            if (exitCode != 0) {
+                throw new StackDeploymentException(errorFile, exitCode, commands);
             }
         }
         catch (InterruptedException | IOException ex) {
-            log.error(ex.getMessage());
+            throw new TestExecutionFailedException(ex);
         }
 
     }
