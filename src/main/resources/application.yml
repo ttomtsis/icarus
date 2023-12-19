@@ -33,3 +33,17 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 60
+        queue-capacity: 10
+        #allow-core-thread-timeout: true
+        keep-alive: 15s
+      thread-name-prefix: 'Icarus-Task-'
+
+      shutdown:
+        await-termination: true
+        await-termination-period: 10s
