@@ -11,10 +11,7 @@ import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import software.constructs.Construct;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Class used to model GCF Functions in the Terraform CDK as Constructs <br>
@@ -25,28 +22,19 @@ public class GcpConstruct extends Construct
     /**
      * Unique 8-digit ID that identifies all resources deployed as
      * part of a GCP Construct. <br>
-     * Every GCP Construct uses a different GUID
+     * Every GCP Construct uses a different guid
      */
-    private final String GUID;
+    private final String guid;
 
-    private final String functionName;
     private final String functionDescription;
-    private final String functionSource;
     private final GcfRuntime functionRuntime;
     private final String functionEntrypoint;
 
-    private final String credentials;
-
-    /**
-     * The GCP project that resources will be deployed at
-     */
-    private final String project;
-
-    private final Set<Integer> memoryConfigurations;
-    private Set<Integer> cpuConfigurations;
-    private final Set<String> locations = new HashSet<>();
-
     ArrayList<ITerraformDependable> dependencies = new ArrayList<>();
+
+
+    private final List<String> terraformOutputsList = new ArrayList<>();
+
 
 
     /**
@@ -81,46 +69,46 @@ public class GcpConstruct extends Construct
 
         super(scope, id);
 
-        this.GUID = UUID.randomUUID().toString().substring(0, 8);
-        this.credentials = gcpCredentials;
-        this.project = gcpProject;
+        this.guid = UUID.randomUUID().toString().substring(0, 8);
 
-        this.functionSource = gcfFunctionSource + "/" + gcfFunctionSourceFileName;
+        String functionSource = gcfFunctionSource + "/" + gcfFunctionSourceFileName;
         this.functionRuntime = gcfRuntime;
         this.functionEntrypoint = gcfFunctionEntrypoint;
         this.functionDescription = gcfFunctionDescription;
-        this.functionName = gcfFunctionName;
 
-        this.memoryConfigurations = memoryConfigs;
-        this.cpuConfigurations = cpuConfigs;
+        Set<Integer> cpuConfigurations = cpuConfigs;
 
+        Set<String> locations = new HashSet<>();
         for (GcpRegion region : regions) {
-            this.locations.add(region.get());
+            locations.add(region.get());
         }
 
 
-        GoogleProvider.Builder.create(this, "google-" + GUID)
-                .project(project)
-                .credentials(credentials)
+        GoogleProvider.Builder.create(this, "google-" + guid)
+                .project(gcpProject)
+                .credentials(gcpCredentials)
                 .build();
 
         if (cpuConfigurations == null || cpuConfigurations.isEmpty()) {
-            this.cpuConfigurations = new HashSet<>();
+            cpuConfigurations = new HashSet<>();
             cpuConfigurations.add(1);
         }
 
         for (String location: locations) {
 
-            String bucketName = "bucket-" + location + "-" + GUID;
-            String objectName = "function_source-" + location + "-" + GUID;
+            String bucketName = "bucket-" + location + "-" + guid;
+            String objectName = "function_source-" + location + "-" + guid;
             StorageBucketObject object = createBucket(bucketName, objectName, functionSource, location);
 
-            for (int memory: memoryConfigurations) {
+            for (int memory: memoryConfigs) {
 
                 for (int cpu: cpuConfigurations) {
 
-                    String name = functionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + GUID;
+                    String name = gcfFunctionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + guid;
                     name = name.toLowerCase();
+
+                    String terraformOutputName = "gcpConstruct_gcf_url" + name;
+                    terraformOutputsList.add(terraformOutputName);
 
                     String functionMemory = memory + "M";
 
@@ -133,9 +121,9 @@ public class GcpConstruct extends Construct
 
                     dependencies.clear();
                     dependencies.add(newFunction);
-                    createServiceIAMmember(location, name);
+                    createServiceIamMember(location, name);
 
-                    createOutput("gcfURI-" + name, newFunction);
+                    createOutput(terraformOutputName, newFunction);
 
                 }
             }
@@ -157,7 +145,7 @@ public class GcpConstruct extends Construct
     private StorageBucketObject createBucket(String bucketName, String objectName,
                                              String objectLocation, String location) {
 
-        StorageBucket bucket = StorageBucket.Builder.create(this, "bucket-" + location + "-" + GUID)
+        StorageBucket bucket = StorageBucket.Builder.create(this, "bucket-" + location + "-" + guid)
                 .name(bucketName)
                 .location(location)
                 .uniformBucketLevelAccess(true)
@@ -166,7 +154,7 @@ public class GcpConstruct extends Construct
         dependencies.clear();
         dependencies.add(bucket);
 
-        return StorageBucketObject.Builder.create(this, "object-" + location + "-" + GUID)
+        return StorageBucketObject.Builder.create(this, "object-" + location + "-" + guid)
                 .name(objectName)
                 .bucket(bucketName)
                 .source(objectLocation)
@@ -234,7 +222,7 @@ public class GcpConstruct extends Construct
      * @param location Region where the member will be created
      * @param name Name of the service that will assume this member
      */
-    private void createServiceIAMmember(String location, String name) {
+    private void createServiceIamMember(String location, String name) {
 
         CloudRunServiceIamMember.Builder.create(this, "iam_member-" + name)
                 .location(location)
@@ -256,6 +244,11 @@ public class GcpConstruct extends Construct
         TerraformOutput.Builder.create(this, id)
                 .value(function.getServiceConfig().getUri())
                 .build();
+    }
+
+
+    public List<String> getTerraformOutputsList() {
+        return this.terraformOutputsList;
     }
 
 

@@ -26,10 +26,7 @@ import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import io.micrometer.common.util.StringUtils;
 import software.constructs.Construct;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Class used to model AWS Lambda Functions in the Terraform CDK as Constructs <br>
@@ -40,26 +37,28 @@ public class AwsConstruct extends Construct {
     /**
      * Unique 8-digit ID that identifies all resources deployed as
      * part of an AWS Construct. <br>
-     * Every AWS Construct uses a different GUID
+     * Every AWS Construct uses a different guid
      */
-    private final String GUID;
+    private final String guid;
 
     private final Set<String> locations = new HashSet<>();
-    private final Set<Integer> memoryConfigurations;
 
     private final String accessKey;
     private final String secretKey;
     private final String functionSource;
     private final String functionArchiveName;
 
-    private final String functionName;
     private final String functionRuntime;
     private final String functionHandler;
     private final String functionRoute;
     private final String functionMethod;
 
+    private final List<String> terraformOutputsList = new ArrayList<>();
+
     // Currently not supported due to restrictions on AWS starter accounts
     // private final int concurrentExecutions = 10;
+
+
 
     /**
      * Default constructor of the class, used to model an AWS Lambda function <br><br>
@@ -99,33 +98,23 @@ public class AwsConstruct extends Construct {
 
         super(scope, id);
 
-        this.GUID = UUID.randomUUID().toString().substring(0, 8);
+        this.guid = UUID.randomUUID().toString().substring(0, 8);
 
         this.accessKey = awsAccessKey;
         this.secretKey = awsSecretKey;
 
-        this.functionSource = objectSource + "/" + objectFileName;
+        this.functionSource = objectSource + "\\" + objectFileName;
         this.functionArchiveName = objectFileName;
-
-        this.memoryConfigurations = memoryConfigurations;
 
         for ( AwsRegion region : awsRegions ) {
             locations.add(region.get());
         }
 
-        this.functionName = awsFunctionName;
         this.functionRuntime = awsFunctionRuntime.get();
         this.functionHandler = awsFunctionHandler;
         this.functionRoute = awsFunctionRoute;
         this.functionMethod = awsFunctionMethod;
 
-        // Default, empty provider. Used solely because Terraform requires a default provider.
-        // This provider is never used.
-        AwsProvider.Builder.create(this, "awsProvider")
-                .region("ap-northeast-3")
-                .accessKey(accessKey)
-                .secretKey(secretKey)
-                .build();
 
         Set<AwsProvider> providers = createProviders();
 
@@ -139,9 +128,12 @@ public class AwsConstruct extends Construct {
             S3Object bucketObject = createBucketObject(provider, myBucket, provider.getRegion());
 
             // Create a function and api gateway for every requested memory configuration
-            for (Integer memory: this.memoryConfigurations) {
+            for (Integer memory: memoryConfigurations) {
 
-                String targetFunctionID = functionName + "-" + memory + "mb-" + provider.getRegion();
+                String targetFunctionID = awsFunctionName + "-" + memory + "mb-" + provider.getRegion()  + "-" + guid;
+                String terraformOutputName = "awsConstruct_lambda_url_" + targetFunctionID;
+
+                terraformOutputsList.add(terraformOutputName);
 
                 LambdaFunction lambdaFunction = createFunction(myBucket, bucketObject,
                         functionRole, provider, memory, targetFunctionID);
@@ -156,7 +148,7 @@ public class AwsConstruct extends Construct {
 
                 // Create an output that will print the URL used to invoke the function
                 TerraformOutput.Builder.create(
-                    this, "lambda_url-" + functionName + "-" + provider.getRegion() + "-" + memory )
+                    this, terraformOutputName)
                     .description("Base URL for API Gateway stage.")
                     .value(output)
                     .build();
@@ -165,6 +157,8 @@ public class AwsConstruct extends Construct {
         }
 
     }
+
+
 
     /**
      * Creates a list of AWS Providers according to the list of locations specified <br>
@@ -179,17 +173,18 @@ public class AwsConstruct extends Construct {
 
         for (String location : locations) {
             providers.add(
-                    AwsProvider.Builder.create(this, "awsProvider-"+location)
+                    AwsProvider.Builder.create(this, "awsProvider-" + location + "-" + guid)
                             .region(location)
                             .accessKey(accessKey)
                             .secretKey(secretKey)
-                            .alias("aws-" + location)
+                            .alias("aws-" + location + "-" + guid)
                             .build()
             );
         }
 
         return providers;
     }
+
 
     /**
      * Creates an IamRole that all functions created by this construct will assume when executing
@@ -199,18 +194,19 @@ public class AwsConstruct extends Construct {
     private IamRole createIamRole() {
 
         DataAwsIamPolicyDocument policyDocument = createDocument();
-        IamRole functionRole = IamRole.Builder.create(this, "lambda_exec-" + GUID)
-                .name("serverless_lambda-" + GUID)
+        IamRole functionRole = IamRole.Builder.create(this, "lambda_exec-" + guid)
+                .name("serverless_lambda-" + guid)
                 .assumeRolePolicy(policyDocument.getJson())
                 .build();
 
-        IamRolePolicyAttachment.Builder.create(this, "lambda_policy-" + GUID)
+        IamRolePolicyAttachment.Builder.create(this, "lambda_policy-" + guid)
             .role(functionRole.getName())
             .policyArn("arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole")
             .build();
 
         return functionRole;
     }
+
 
     /**
      * Creates an Iam Policy Document that specifies the privileges the Iam Role can use <br>
@@ -246,11 +242,12 @@ public class AwsConstruct extends Construct {
         );
 
         // Document
-        return DataAwsIamPolicyDocument.Builder.create(this, "policy_document-" + GUID)
+        return DataAwsIamPolicyDocument.Builder.create(this, "policy_document-" + guid)
                 .version("2012-10-17")
                 .statement(statements)
                 .build();
     }
+
 
     /**
      * Creates a Bucket that will be used to store the function's source code
@@ -262,14 +259,14 @@ public class AwsConstruct extends Construct {
      */
     private S3Bucket createBucket(AwsProvider provider, String location) {
 
-        S3Bucket myBucket = S3Bucket.Builder.create(this, "lambda_bucket-" + location + GUID)
-                .bucket("lambda-bucket-" + location + "-" + GUID)
+        S3Bucket myBucket = S3Bucket.Builder.create(this, "lambda_bucket-" + location + guid)
+                .bucket("lambda-bucket-" + location + "-" + guid)
                 .provider(provider)
                 .build();
 
 
         S3BucketOwnershipControls bucketControls = S3BucketOwnershipControls.Builder.create(
-                this, "lambda_bucket_controls-" + location + "-" + GUID)
+                this, "lambda_bucket_controls-" + location + "-" + guid)
                 .bucket(myBucket.getId())
                 .rule(
                         S3BucketOwnershipControlsRule.builder()
@@ -284,7 +281,7 @@ public class AwsConstruct extends Construct {
         dependencies.add(bucketControls);
 
         S3BucketAcl.Builder.create(
-            this, "lambda_bucket_acl-" + location + "-" + GUID)
+            this, "lambda_bucket_acl-" + location + "-" + guid)
             .bucket(myBucket.getId())
             .acl("private")
             .dependsOn(dependencies)
@@ -294,6 +291,7 @@ public class AwsConstruct extends Construct {
         return myBucket;
 
     }
+
 
     /**
      * Creates an S3 Object that will contain the function's source code
@@ -306,13 +304,14 @@ public class AwsConstruct extends Construct {
      */
     private S3Object createBucketObject(AwsProvider provider, S3Bucket bucket, String location){
 
-        return S3Object.Builder.create(this, "lambda_object-" + location + "-" + GUID)
+        return S3Object.Builder.create(this, "lambda_object-" + location + "-" + guid)
                 .bucket(bucket.getId())
                 .key(functionArchiveName)
                 .source(functionSource)
                 .provider(provider)
                 .build();
     }
+
 
     /**
      * Creates a Lambda function and associates a CloudWatch log group with it
@@ -330,8 +329,8 @@ public class AwsConstruct extends Construct {
                                           AwsProvider provider, int memory, String targetFunctionID) {
 
         LambdaFunction lambdaFunction = LambdaFunction.Builder.create(
-                this, targetFunctionID + "-" + GUID)
-                .functionName(targetFunctionID + "-" + GUID )
+                this, targetFunctionID)
+                .functionName(targetFunctionID)
                 .s3Bucket(bucket.getId())
                 .s3Key(bucketObject.getKey())
                 .runtime(functionRuntime)
@@ -343,7 +342,7 @@ public class AwsConstruct extends Construct {
                 .build();
 
         CloudwatchLogGroup.Builder.create(
-                    this, "log_group-" + targetFunctionID + "-" + GUID)
+                    this, "log_group-" + targetFunctionID + "-" + guid)
             .name("/aws/lambda/"+lambdaFunction.getFunctionName())
             .retentionInDays(30)
             .build();
@@ -351,6 +350,7 @@ public class AwsConstruct extends Construct {
         return lambdaFunction;
 
     }
+
 
     /**
      * Create an API Gateway, that will expose the function to the internet
@@ -364,17 +364,17 @@ public class AwsConstruct extends Construct {
     private Apigatewayv2Stage createAPIGateway(AwsProvider provider, LambdaFunction lambdaFunction,
                                                String targetFunctionID) {
 
-        String apiName = "lambda_api-" + targetFunctionID + "-" + GUID;
+        String apiName = "lambda_api-" + targetFunctionID + "-" + guid;
 
         Apigatewayv2Api api = Apigatewayv2Api.Builder.create(this, apiName)
-                .name("serverless_lambda_gw-" + GUID + "-" + lambdaFunction.getFunctionName())
+                .name("serverless_lambda_gw-" + guid + "-" + lambdaFunction.getFunctionName())
                 .protocolType("HTTP")
                 .provider(provider)
                 .build();
 
         CloudwatchLogGroup apiLogGroup = CloudwatchLogGroup.Builder.create(
                 this, "api_log_group-" + apiName)
-                .name("/aws/apigateway/" + api.getName())
+                .name("/aws/vendedlogs/" + api.getName())
                 .retentionInDays(30)
                 .provider(provider)
                 .build();
@@ -417,7 +417,7 @@ public class AwsConstruct extends Construct {
                 .build();
 
         LambdaPermission.Builder.create(this,
-                    "permission-" + targetFunctionID + "-" + GUID)
+                    "permission-" + targetFunctionID + "-" + guid)
             .statementId("AllowExecutionFromAPIGateway")
             .action("lambda:InvokeFunction")
             .functionName(lambdaFunction.getFunctionName())
@@ -428,5 +428,19 @@ public class AwsConstruct extends Construct {
 
         return stage;
     }
+
+
+    public List<String> getTerraformOutputsList() {
+        return terraformOutputsList;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
 
 }

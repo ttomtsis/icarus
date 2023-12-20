@@ -1,14 +1,15 @@
 package gr.aegean.icsd.icarus.util.terraform;
 
 import com.hashicorp.cdktf.TerraformStack;
+import com.hashicorp.cdktf.providers.aws.provider.AwsProvider;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
-import org.springframework.http.HttpMethod;
 import software.constructs.Construct;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Parent Stack, used in conjunction with constructs in order to deploy functions from
@@ -19,11 +20,15 @@ import java.util.Set;
 public class MainStack extends TerraformStack {
 
 
+    private boolean defaultAwsProviderExists = false;
+
+
+
     public MainStack(final Construct scope, final String id) {
 
         super(scope, id);
-
     }
+
 
 
     /**
@@ -36,27 +41,42 @@ public class MainStack extends TerraformStack {
      * @param objectFileName Name of the zip archive containing the function's source code <br>
      *
      * @param awsRegions List of regions where the function will be deployed <br>
-     * @param memoryConfs List of memory configurations according to which the function will be deployed <br>
+     * @param memoryConfigurations List of memory configurations according to which the function will be deployed <br>
      *
      * @param awsFunctionName Name of the function, this is used in a variety of supporting
      *                        resources as well as the function <br>
      * @param awsFunctionRuntime Runtime that will be used to execute the function <br>
      * @param awsFunctionHandler The appropriate handler that AWS Lambda will use to execute the function <br>
      */
-    public void createAwsConstruct(String awsAccessKey, String awsSecretKey,
+    public AwsConstruct createAwsConstruct(String awsAccessKey, String awsSecretKey,
                                    String objectSource, String objectFileName,
-                                   Set<AwsRegion> awsRegions, Set<Integer> memoryConfs,
+                                   Set<AwsRegion> awsRegions, Set<Integer> memoryConfigurations,
                                    String awsFunctionName, LambdaRuntime awsFunctionRuntime,
                                    String awsFunctionHandler, String awsFunctionRoute, String awsFunctionMethod) {
 
-        new AwsConstruct(this, "awsConstruct",
+        AwsConstruct newAwsConstruct = new AwsConstruct(this, "awsConstruct-" + UUID.randomUUID().toString().substring(0, 5),
                 awsAccessKey, awsSecretKey,
                 objectSource, objectFileName,
-                awsRegions, memoryConfs,
+                awsRegions, memoryConfigurations,
                 awsFunctionName, awsFunctionRuntime, awsFunctionHandler,
                 awsFunctionRoute, awsFunctionMethod);
 
+        if (!defaultAwsProviderExists) {
+
+            // Default, empty provider. Used solely because Terraform requires a default provider.
+            // This provider is never used.
+            AwsProvider.Builder.create(newAwsConstruct, "awsProvider")
+                    .region("ap-northeast-3")
+                    .accessKey(newAwsConstruct.getAccessKey())
+                    .secretKey(newAwsConstruct.getSecretKey())
+                    .build();
+
+            defaultAwsProviderExists = true;
+        }
+
+        return newAwsConstruct;
     }
+
 
     /**
      * Creates a GCP construct in the scope of this Stack, used to model a GCF function <br><br>
@@ -75,17 +95,17 @@ public class MainStack extends TerraformStack {
      * @param cpuConfigs CPU configurations for the GCF function <br>
      * @param regions Regions where the GCF function will be deployed <br>
      */
-    public void createGcpConstruct(String gcpCredentials, String gcfFunctionSource, String gcfFunctionSourceFileName,
+    public GcpConstruct createGcpConstruct(String gcpCredentials, String gcfFunctionSource, String gcfFunctionSourceFileName,
                                    String gcfFunctionName, String gcfFunctionDescription,
                                    String gcpProject, GcfRuntime gcfRuntime, String gcfFunctionEntrypoint,
                                    Set<Integer> memoryConfigs, Set<Integer> cpuConfigs, Set<GcpRegion> regions) {
 
-        new GcpConstruct(this, "gcpConstruct",
-                gcpCredentials, gcfFunctionSource, gcfFunctionSourceFileName,
-                gcfFunctionName, gcfFunctionDescription,
-                gcpProject, gcfRuntime, gcfFunctionEntrypoint,
-                memoryConfigs, cpuConfigs, regions);
-
+        return new GcpConstruct(this, "gcpConstruct-" + UUID.randomUUID().toString().substring(0, 5),
+                        gcpCredentials, gcfFunctionSource, gcfFunctionSourceFileName,
+                        gcfFunctionName, gcfFunctionDescription,
+                        gcpProject, gcfRuntime, gcfFunctionEntrypoint,
+                        memoryConfigs, cpuConfigs, regions);
     }
+
 
 }
