@@ -10,6 +10,7 @@ import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.protobuf.Timestamp;
+import gr.aegean.icsd.icarus.util.enums.Metric;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,30 +30,35 @@ public class GcpMetricRequest {
     private final String functionId;
     private final String metricId;
 
+    private final MetricServiceClient metricServiceClient;
+    private final ListTimeSeriesRequest listTimeSeriesRequest;
     private final HashMap<String, String> metricResults = new HashMap<>();
 
 
 
-    public GcpMetricRequest(String credentials, String projectId, String functionId, String metricId)
+    public GcpMetricRequest(String credentials, String projectId, String functionId, Metric metricId)
             throws IOException {
 
         this.credentials = credentials;
         this.projectName = projectId;
         this.functionId = functionId;
-        this.metricId = metricId;
+        this.metricId = metricId.getGcpMetricName();
 
-        try (MetricServiceClient metricServiceClient = MetricServiceClient.create(createMetricServiceSettings())) {
+        try (MetricServiceClient client = MetricServiceClient.create(createMetricServiceSettings())) {
 
-            ListTimeSeriesRequest request = createRequest();
-
-            MetricServiceClient.ListTimeSeriesPagedResponse response = metricServiceClient.listTimeSeries(request);
-
-            getMetricResults(response);
-
+            this.metricServiceClient = client;
+            this.listTimeSeriesRequest = createRequest();
             }
 
         }
 
+
+
+     public void sendRequest() {
+
+         MetricServiceClient.ListTimeSeriesPagedResponse response = metricServiceClient.listTimeSeries(listTimeSeriesRequest);
+         getMetricResults(response);
+     }
 
 
     private MetricServiceSettings createMetricServiceSettings() throws IOException {

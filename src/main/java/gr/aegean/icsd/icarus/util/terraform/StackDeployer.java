@@ -116,7 +116,7 @@ public class StackDeployer {
                     );
 
                     addOutputNamesToMap(outputNamesAndUrlsMap,
-                            newAwsConstruct.getTerraformOutputsList(), configuration);
+                            newAwsConstruct.getTerraformOutputsList(), configuration, account);
                 }
 
                 if (account.getAccountType().equals("GcpAccount") &&
@@ -141,7 +141,7 @@ public class StackDeployer {
                     );
 
                     addOutputNamesToMap(outputNamesAndUrlsMap,
-                            newGcpConstruct.getTerraformOutputsList(), configuration);
+                            newGcpConstruct.getTerraformOutputsList(), configuration, account);
                 }
             }
         }
@@ -290,10 +290,11 @@ public class StackDeployer {
 
     private void addOutputNamesToMap(@NotNull HashMap<CompositeKey, String> outputNamesAndUrlsMap,
                                      @NotNull List<String> terraformOutputsList,
-                                     @NotNull ResourceConfiguration configuration) {
+                                     @NotNull ResourceConfiguration configuration,
+                                     @NotNull ProviderAccount accountUsed) {
 
         for (String outputName : terraformOutputsList) {
-            CompositeKey key = new CompositeKey(outputName, configuration);
+            CompositeKey key = new CompositeKey(outputName, configuration, accountUsed);
             outputNamesAndUrlsMap.put(key, null);
         }
     }

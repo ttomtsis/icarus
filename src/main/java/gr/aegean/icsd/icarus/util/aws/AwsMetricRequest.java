@@ -27,9 +27,10 @@ public final class AwsMetricRequest {
     private final String metricName;
     private final String metricNamespace;
 
-    private final HashMap<Instant, Double> metricResults = new HashMap<>();
+    private final HashMap<String, String> metricResults = new HashMap<>();
 
-
+    private final CloudWatchClient client;
+    private final GetMetricDataRequest request;
 
     public AwsMetricRequest(String awsAccessKey, String awsSecretKey, String lambdaFunctionName,
                             AwsRegion functionRegion, Metric cloudwatchMetric) {
@@ -43,12 +44,17 @@ public final class AwsMetricRequest {
         this.metricName = cloudwatchMetric.getAwsMetricName();
         this.metricNamespace = cloudwatchMetric.getAwsNamespace();
 
-        CloudWatchClient client = buildCloudwatchClient();
-        GetMetricDataRequest request = createMetricRequest();
+        this.client = buildCloudwatchClient();
+        this.request = createMetricRequest();
+
+    }
+
+
+
+    public void sendRequest() {
 
         getMetricDataResults(client, request);
     }
-
 
 
     private CloudWatchClient buildCloudwatchClient() {
@@ -100,14 +106,14 @@ public final class AwsMetricRequest {
 
             for (int i = 0; i < timestamps.size(); i++) {
 
-                metricResults.put(timestamps.get(i), values.get(i));
+                metricResults.put(timestamps.get(i).toString(), values.get(i).toString());
             }
         }
 
     }
 
 
-    public Map<Instant, Double> getMetricResults() {
+    public Map<String, String> getMetricResults() {
         return this.metricResults;
     }
 

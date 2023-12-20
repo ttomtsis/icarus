@@ -1,14 +1,35 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
+import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
+import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
-import gr.aegean.icsd.icarus.util.exceptions.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
+import gr.aegean.icsd.icarus.testexecution.MetricResult;
+import gr.aegean.icsd.icarus.testexecution.MetricResultRepository;
+import gr.aegean.icsd.icarus.util.aws.AwsMetricRequest;
+import gr.aegean.icsd.icarus.util.aws.AwsRegion;
+import gr.aegean.icsd.icarus.util.enums.Metric;
+import gr.aegean.icsd.icarus.util.enums.Platform;
+import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.gcp.GcpMetricRequest;
+import gr.aegean.icsd.icarus.util.jmeter.LoadTest;
+import gr.aegean.icsd.icarus.util.terraform.CompositeKey;
+import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.io.IOException;
+import java.util.*;
 
 
 @Service
@@ -18,12 +39,16 @@ public class PerformanceTestService extends TestService {
 
 
     private final TestRepository repository;
+    private final MetricResultRepository metricResultRepository;
 
 
 
-    public PerformanceTestService(TestRepository repository) {
-        super(repository);
+    public PerformanceTestService(TestRepository repository, StackDeployer deployer,
+                                  MetricResultRepository metricResultRepository) {
+
+        super(repository, deployer);
         this.repository = repository;
+        this.metricResultRepository = metricResultRepository;
     }
 
 
@@ -63,6 +88,138 @@ public class PerformanceTestService extends TestService {
         }
 
         repository.save(requestedTest);
+    }
+
+    @Override
+    public Test executeTest(@NotNull @Positive Long testId) {
+
+        PerformanceTest requestedTest = (PerformanceTest) super.executeTest(testId);
+
+        if (requestedTest.getLoadProfiles().isEmpty()) {
+            throw new InvalidTestConfigurationException(testId, " does not have any Load Profiles" +
+                    " associated with it");
+        }
+
+        if (requestedTest.getChosenMetrics().isEmpty()) {
+            throw new InvalidTestConfigurationException(testId, " does not have any Metrics" +
+                    " associated with it");
+        }
+
+        super.setState(requestedTest, TestState.DEPLOYING);
+
+        String deploymentId = UUID.randomUUID().toString().substring(0, 5);
+
+        super.getDeployer().deploy(requestedTest, deploymentId)
+
+            .exceptionally(ex -> {
+                super.setState(requestedTest, TestState.ERROR);
+                throw new TestExecutionFailedException(ex);
+            })
+
+            .thenAccept(result -> {
+
+                super.setState(requestedTest, TestState.RUNNING);
+
+                try {
+
+                    createLoadTests(requestedTest, result);
+
+                } catch (RuntimeException ex) {
+
+                    super.setState(requestedTest, TestState.ERROR);
+                    throw new TestExecutionFailedException(ex);
+                }
+
+                //super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+                super.setState(requestedTest, TestState.FINISHED);
+            });
+
+        return null;
+    }
+
+    private void createLoadTests(PerformanceTest requestedTest, HashMap<CompositeKey, String> functionUrls) {
+
+        for (Map.Entry<CompositeKey, String> entry : functionUrls.entrySet()) {
+
+            LoadTest test = new LoadTest(requestedTest.getName(), entry.getValue(),
+                    requestedTest.getPath(), requestedTest.getPathVariable(),
+                    requestedTest.getPathVariableValue(), HttpMethod.valueOf(requestedTest.getHttpMethod()));
+
+            for (LoadProfile loadProfile : requestedTest.getLoadProfiles()) {
+
+                test.addLoadProfile(loadProfile.getConcurrentUsers(), loadProfile.getRampUp(),
+                        loadProfile.getLoadTime(), loadProfile.getThinkTime(), loadProfile.getStartDelay());
+
+            }
+
+            test.runTest();
+
+            try {
+                Thread.sleep(120000);
+            }
+            catch (InterruptedException ex) {
+                LoggerFactory.getLogger("bobz").warn("Thread could not sleep demnit");
+            }
+
+            createMetrics(requestedTest, entry.getKey(), entry.getValue(), requestedTest.getLoadProfiles());
+        }
+
+    }
+
+    private void createMetrics(PerformanceTest requestedTest, CompositeKey key,
+                               String functionUrl, Set<LoadProfile> profiles) {
+
+        for (Metric metric : requestedTest.getChosenMetrics()) {
+
+            if (key.configurationUsed().getProviderPlatform().equals(Platform.AWS)) {
+
+                AwsAccount awsAccount = (AwsAccount) key.accountUsed();
+                Set<AwsMetricRequest> requests = createAwsMetricRequests(key, awsAccount, requestedTest, metric);
+
+                for (AwsMetricRequest request : requests) {
+
+                    request.sendRequest();
+                    metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(), functionUrl,
+                            request.getMetricResults(), metric.toString()));
+                }
+            }
+
+            if (key.configurationUsed().getProviderPlatform().equals(Platform.GCP)) {
+
+                GcpAccount gcpAccount = (GcpAccount) key.accountUsed();
+                GcpMetricRequest request = createGcpMetricRequest(gcpAccount, requestedTest, metric);
+
+                request.sendRequest();
+                metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(), functionUrl,
+                        request.getMetricResults(), metric.toString()));
+            }
+        }
+    }
+
+    private Set<AwsMetricRequest> createAwsMetricRequests(CompositeKey key, AwsAccount account, PerformanceTest test, Metric metric) {
+
+        Set<AwsMetricRequest> requests = new HashSet<>();
+        for (String region : key.configurationUsed().getRegions()) {
+
+            AwsMetricRequest metricRequest = new AwsMetricRequest(account.getAwsAccessKey(), account.getAwsSecretKey(),
+                    test.getTargetFunction().getName(), AwsRegion.valueOf(region),
+                    metric);
+            requests.add(metricRequest);
+        }
+
+        return requests;
+    }
+
+    private GcpMetricRequest createGcpMetricRequest(GcpAccount account, PerformanceTest test, Metric metric) {
+
+        try {
+            return  new GcpMetricRequest(account.getGcpKeyfile(), account.getGcpProjectId(),
+                    test.getTargetFunction().getName(), metric);
+        }
+        catch (IOException ex) {
+            throw new TestExecutionFailedException(ex);
+        }
+
     }
 
 
