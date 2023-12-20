@@ -1,5 +1,7 @@
 package gr.aegean.icsd.icarus.util.jmeter;
 
+import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
+import io.micrometer.common.util.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
 import org.apache.jmeter.control.LoopController;
@@ -7,7 +9,6 @@ import org.apache.jmeter.control.gui.LoopControlPanel;
 import org.apache.jmeter.control.gui.TestPlanGui;
 import org.apache.jmeter.engine.StandardJMeterEngine;
 import org.apache.jmeter.protocol.http.sampler.HTTPSampler;
-import org.apache.jmeter.reporters.ResultCollector;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.TestPlan;
 import org.apache.jmeter.threads.ThreadGroup;
@@ -55,32 +56,26 @@ public class LoadTest {
      *
      * @param name Name of the Load Test
      *
-     * @param URL URL that invokes the target function
+     * @param url url that invokes the target function
      * @param path Path that the function exposes ( optional )
      * @param pathVariable Path variable that a function exposes ( optional )
      * @param pathVariableValue Value that will be associated with the path variable
      *                          when invoking the function
      *
-     * @param concurrentUsers Number of concurrent users that will generate requests
-     * @param rampUp Ramp up period for the users
-     * @param loadDuration Duration where the load will be applied
-     * @param thinkTime Think time per user
-     *
      * @param invokeHTTPMethod HTTP Method that invokes the function
      */
-    public LoadTest(String name, String URL, String path, String pathVariable, String pathVariableValue,
-                    int concurrentUsers, int rampUp, int loadDuration, int thinkTime,
+    public LoadTest(String name, String url, String path, String pathVariable, String pathVariableValue,
                     HttpMethod invokeHTTPMethod) {
 
         this.testName = name;
-        if ( path.isBlank() ) {
-            this.functionURL = URL;
+
+        if (StringUtils.isBlank(path)) {
+            this.functionURL = url;
         }
         else {
             path = path.replace("{" + pathVariable + "}", pathVariableValue);
-            this.functionURL = URL + path;
+            this.functionURL = url + path;
         }
-        //this.functionURL = path.isBlank() ? URL : URL + path.replace("{" + pathVariable + "}", pathVariableValue);
 
         this.functionMethod = invokeHTTPMethod.toString();
 
@@ -91,27 +86,6 @@ public class LoadTest {
 
         this.testPlan = createTestPlan();
         this.testPlanTree = new ListedHashTree();
-
-
-        LoopController baseLoopController = createLoopController();
-        HTTPSampler request = createSampler();
-
-        ThreadGroup threadGroup = createThreadGroup(baseLoopController, concurrentUsers, rampUp,
-                loadDuration, 0, thinkTime);
-
-        // Create base test plan
-        HashTree threadGroupTree = testPlanTree.add(testPlan, threadGroup);
-        threadGroupTree.add(baseLoopController);
-        threadGroupTree.add(request);
-
-        // Store execution results into a .jtl file
-        String GUID = UUID.randomUUID().toString().substring(0, 8);
-        String outputLogFile = JMETER_LOG_OUTPUT_DIRECTORY + testName + "-" + GUID + "-logs.jtl";
-
-        ResultCollector logger = new ResultCollector();
-        logger.setFilename(outputLogFile);
-        testPlanTree.add(testPlanTree.getArray()[0], logger);
-
     }
 
 
@@ -144,13 +118,13 @@ public class LoadTest {
      */
     private StandardJMeterEngine initJMeter() {
 
-        StandardJMeterEngine jmeter = new StandardJMeterEngine();
+        StandardJMeterEngine standardJMeterEngine = new StandardJMeterEngine();
 
         JMeterUtils.setJMeterHome(jmeterHome.getPath());
         JMeterUtils.loadJMeterProperties(jmeterProperties.getPath());
         JMeterUtils.initLocale();
 
-        return jmeter;
+        return standardJMeterEngine;
     }
 
 
@@ -161,13 +135,13 @@ public class LoadTest {
      */
     private TestPlan createTestPlan() {
 
-        TestPlan testPlan = new TestPlan(testName + "-TestPlan");
+        TestPlan newTestPlan = new TestPlan(testName + "-TestPlan");
 
-        testPlan.setProperty(TestElement.TEST_CLASS, TestPlan.class.getName());
-        testPlan.setProperty(TestElement.GUI_CLASS, TestPlanGui.class.getName());
-        testPlan.setUserDefinedVariables((Arguments) new ArgumentsPanel().createTestElement());
+        newTestPlan.setProperty(TestElement.TEST_CLASS, TestPlan.class.getName());
+        newTestPlan.setProperty(TestElement.GUI_CLASS, TestPlanGui.class.getName());
+        newTestPlan.setUserDefinedVariables((Arguments) new ArgumentsPanel().createTestElement());
 
-        return testPlan;
+        return newTestPlan;
     }
 
 
@@ -192,9 +166,9 @@ public class LoadTest {
     private LoopController createLoopController() {
 
         LoopController loopController = new LoopController();
-        String GUID = UUID.randomUUID().toString().substring(0, 8);
+        String guid = UUID.randomUUID().toString().substring(0, 8);
 
-        loopController.setName(testName + "Loop Controller-" + GUID);
+        loopController.setName(testName + "Loop Controller-" + guid);
         loopController.setLoops(-1);
         loopController.setContinueForever(true);
         loopController.setProperty(TestElement.TEST_CLASS, LoopController.class.getName());
@@ -213,9 +187,9 @@ public class LoadTest {
     private HTTPSampler createSampler() {
 
         HTTPSampler request = new HTTPSampler();
-        String GUID = UUID.randomUUID().toString().substring(0, 8);
+        String guid = UUID.randomUUID().toString().substring(0, 8);
 
-        request.setName(testName + "-Function Request-" + GUID);
+        request.setName(testName + "-Function Request-" + guid);
         request.setEnabled(true);
         request.setMethod(functionMethod);
         request.setPath(functionURL);
@@ -244,9 +218,9 @@ public class LoadTest {
                                           int rampUp, int loadDuration, int startTime, int thinkTime) {
 
         ThreadGroup threadGroup = new ThreadGroup();
-        String GUID = UUID.randomUUID().toString().substring(0, 8);
+        String guid = UUID.randomUUID().toString().substring(0, 8);
 
-        threadGroup.setName(testName + "-Thread Group-" + GUID);
+        threadGroup.setName(testName + "-Thread Group-" + guid);
         threadGroup.setNumThreads(desiredUsers);
         threadGroup.setDelay(startTime);
         threadGroup.setRampUp(rampUp);
@@ -268,6 +242,12 @@ public class LoadTest {
      * Runs the entire test
      */
     public void runTest() {
+
+        if (testPlanTree.isEmpty()) {
+            throw new TestExecutionFailedException("Load Test failed to execute," +
+                    " no load profiles are associated with it");
+        }
+
         jmeter.configure(testPlanTree);
         jmeter.run();
     }
