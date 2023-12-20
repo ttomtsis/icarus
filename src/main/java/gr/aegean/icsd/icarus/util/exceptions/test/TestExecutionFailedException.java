@@ -11,16 +11,47 @@ public class TestExecutionFailedException extends RuntimeException {
 
 
     public TestExecutionFailedException(Throwable throwable) {
-
         super();
 
-        String errorMessage = String.format("Async exception caught: " +
-                        "%nCause: %s" +
-                        " %nMessage: %s",
-                throwable.getCause().getClass().getSimpleName(), throwable.getCause().getMessage());
+        if (throwable.getCause() != null) {
 
-        log.error(errorMessage);
+            StringBuilder stackTrace = new StringBuilder();
+            for (StackTraceElement element : throwable.getCause().getStackTrace()) {
+                stackTrace.append("\n\tat ").append(element);
+            }
+
+            String errorMessage = String.format("Async exception caught: " +
+                            "%nCause: %s" +
+                            "%nMessage: %s" +
+                            "%nStack Trace: %s",
+                    throwable.getCause().getClass().getSimpleName(),
+                    throwable.getCause().getMessage(),
+                    stackTrace
+            );
+
+            log.error(errorMessage);
+        }
+        else {
+
+            StringBuilder stackTrace = new StringBuilder();
+            for (StackTraceElement element : throwable.getStackTrace()) {
+                stackTrace.append("\n\tat ").append(element);
+            }
+
+            String errorMessage = String.format("Async exception caught: " +
+                            "%nCause: %s" +
+                            "%nMessage: %s" +
+                            "%nStack Trace: %s",
+                    throwable.getClass().getSimpleName(),
+                    throwable.getMessage(),
+                    stackTrace
+            );
+
+            log.error(errorMessage);
+        }
+
     }
+
 
 
 
