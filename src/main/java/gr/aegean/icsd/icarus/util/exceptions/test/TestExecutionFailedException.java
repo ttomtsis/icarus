@@ -52,6 +52,14 @@ public class TestExecutionFailedException extends RuntimeException {
 
     }
 
+    public TestExecutionFailedException(String message) {
+
+        super(message);
+
+        String errorMessage = String.format("Async exception caught: %s",  message);
+        log.error(errorMessage);
+    }
+
 
 
 
