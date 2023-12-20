@@ -7,6 +7,7 @@ import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class LoadProfileService {
 
 
 
-    public LoadProfile createLoadProfile(@NotNull LoadProfile newLoadProfile, @NotNull @Positive Long testId) {
+    public LoadProfile createLoadProfile(@NotNull LoadProfile newLoadProfile, @NotNull @PositiveOrZero Long testId) {
 
         PerformanceTest parentTest = checkIfTestExists(testId);
         newLoadProfile.setParentTest(parentTest);
