@@ -139,7 +139,6 @@ public class TestService {
                     "configuration for every provider account");
         }
 
-        setState(requestedTest, TestState.DEPLOYING);
         return requestedTest;
     }
 
