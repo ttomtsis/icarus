@@ -22,6 +22,11 @@ public class StackDeploymentException extends RuntimeException {
     }
 
 
+    public StackDeploymentException(String message) {
+        super(message);
+    }
+
+
     private static String getErrorFileContents(File errorFile) {
         try {
             return new String(Files.readAllBytes(Paths.get(errorFile.getPath())));
