@@ -252,4 +252,18 @@ public class ResourceConfiguration {
     }
 
 
+    @Override
+    public String toString() {
+        return "ResourceConfiguration{" +
+                "id=" + id +
+                ", regions=" + regions +
+                ", memoryConfigurations=" + memoryConfigurations +
+                ", cpuConfigurations=" + cpuConfigurations +
+                ", functionRuntime='" + functionRuntime + '\'' +
+                ", providerPlatform=" + providerPlatform +
+                ", parentTest=" + parentTest +
+                '}';
+    }
+
+
 }
