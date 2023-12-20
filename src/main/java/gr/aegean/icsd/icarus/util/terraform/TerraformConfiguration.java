@@ -15,7 +15,7 @@ public class TerraformConfiguration {
 
 
     @Value("${terraform.stackOutputDirectory}")
-    public void setJmeterHomeFile(String stackOutputDirectory) {
+    public void setStackOutputDirectory(String stackOutputDirectory) {
         TerraformConfiguration.STACK_OUTPUT_DIRECTORY = stackOutputDirectory;
     }
 
