@@ -3,6 +3,7 @@ package gr.aegean.icsd.icarus.testexecution;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class MetricResult {
@@ -12,6 +13,9 @@ public class MetricResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    private String functionUrl;
+
     @ManyToOne(targetEntity = LoadProfile.class, optional = false)
     private LoadProfile loadProfile;
 
@@ -20,9 +24,10 @@ public class MetricResult {
 
 
 
-    public MetricResult(LoadProfile loadProfile, ResourceConfiguration resourceConfiguration) {
+    public MetricResult(LoadProfile loadProfile, ResourceConfiguration resourceConfiguration, String functionUrl) {
         this.loadProfile = loadProfile;
         this.resourceConfiguration = resourceConfiguration;
+        this.functionUrl = functionUrl;
     }
 
     public MetricResult() {}
