@@ -14,6 +14,7 @@ import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -39,10 +42,13 @@ public class StackDeployer {
     private static final Logger log = LoggerFactory.getLogger("Stack Deployer");
 
 
-    @Async
-    public CompletableFuture<String> deploy(@NotNull Test associatedTest) {
 
-        String name = associatedTest.getTargetFunction().getName() + UUID.randomUUID().toString().substring(0, 5);
+    @Async
+    public CompletableFuture<HashMap<CompositeKey, String>> deploy(@NotNull Test associatedTest,
+                                                                   @NotBlank String id) {
+
+        String name = associatedTest.getTargetFunction().getName() + "-" + id;
+
         String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
         String stackDir = outputDir + "\\stacks\\" + name;
 
@@ -51,27 +57,39 @@ public class StackDeployer {
                 .build();
 
         // Create stack
-        createStack(name, app, associatedTest);
+        log.warn("Creating stack");
+
+        HashMap<CompositeKey, String> terraformOutputNames = createStack(name, app, associatedTest);
         log.warn("Finished creating");
 
         // Synthesize it
+        log.warn("Synthesizing stack");
+
         app.synth();
         log.warn("Finished synthesizing");
 
         // Deploy
+        log.warn("Deploying stack");
+
         deployStack(stackDir);
         log.warn("Finished deploying");
 
         // Get functionUrls
-        String functionUrls = getFunctionUrls(stackDir);
+        log.warn("Getting function URLs");
+        HashMap<CompositeKey, String> functionUrls = getFunctionUrls(stackDir, terraformOutputNames);
 
         return CompletableFuture.completedFuture(functionUrls);
     }
 
 
-    private void createStack(String name, App app, Test associatedTest) {
+
+    private HashMap<CompositeKey, String> createStack(@NotBlank String name,
+                                                      @NotNull App app,
+                                                      @NotNull Test associatedTest) {
 
         MainStack mainStack = new MainStack(app, name);
+
+        HashMap<CompositeKey, String> outputNamesAndUrlsMap = new HashMap<>();
 
         for (ProviderAccount account : associatedTest.getAccountsList()) {
 
@@ -80,9 +98,10 @@ public class StackDeployer {
                 if (account.getAccountType().equals("AwsAccount") &&
                         configuration.getProviderPlatform().equals(Platform.AWS)) {
 
+                    assert account instanceof AwsAccount;
                     AwsAccount awsAccount = (AwsAccount) account;
 
-                    mainStack.createAwsConstruct(
+                    AwsConstruct newAwsConstruct = mainStack.createAwsConstruct(
                             awsAccount.getAwsAccessKey(), awsAccount.getAwsSecretKey(),
                             associatedTest.getTargetFunction().getFunctionSourceDirectory(),
                             associatedTest.getTargetFunction().getFunctionSourceFileName(),
@@ -95,14 +114,18 @@ public class StackDeployer {
                             associatedTest.getPath(),
                             associatedTest.getHttpMethod()
                     );
+
+                    addOutputNamesToMap(outputNamesAndUrlsMap,
+                            newAwsConstruct.getTerraformOutputsList(), configuration);
                 }
 
                 if (account.getAccountType().equals("GcpAccount") &&
                         configuration.getProviderPlatform().equals(Platform.GCP)) {
 
+                    assert account instanceof GcpAccount;
                     GcpAccount gcpAccount = (GcpAccount) account;
 
-                    mainStack.createGcpConstruct(
+                    GcpConstruct newGcpConstruct = mainStack.createGcpConstruct(
                             gcpAccount.getGcpKeyfile(),
                             associatedTest.getTargetFunction().getFunctionSourceDirectory(),
                             associatedTest.getTargetFunction().getFunctionSourceFileName(),
@@ -116,37 +139,63 @@ public class StackDeployer {
                             configuration.getRegions().stream().map(GcpRegion::valueOf)
                                     .collect(Collectors.toCollection(HashSet::new))
                     );
+
+                    addOutputNamesToMap(outputNamesAndUrlsMap,
+                            newGcpConstruct.getTerraformOutputsList(), configuration);
                 }
             }
         }
 
+        return outputNamesAndUrlsMap;
     }
 
-    private void deployStack(String stackDir) {
 
-            File terraformDirectory = new File(stackDir + "\\.terraform");
-            File stackDirectory = new File(stackDir);
+    private void deployStack(@NotBlank String stackDir) {
 
-            // Initialize terraform
-            if (!terraformDirectory.exists()) {
+        File terraformDirectory = new File(stackDir + "\\.terraform");
+        File stackDirectory = new File(stackDir);
 
-                createProcess(stackDirectory, TerraformCommand.INIT.get());
-            }
+        // Initialize terraform
+        if (!terraformDirectory.exists()) {
+
+            createProcess(stackDirectory, TerraformCommand.INIT.get());
+        }
+
+        try {
 
             // Deploy infrastructure
             createProcess(stackDirectory, TerraformCommand.APPLY.get());
+        }
+        catch (RuntimeException ex) {
+
+            deleteStack(stackDir);
+            throw new StackDeploymentException(ex.getMessage() + "\nStack was deleted\n");
+        }
+
+
     }
 
-    public void deleteStack(String stackName) {
 
-        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + stackName;
-        String stackDir = outputDir + "\\stacks\\" + stackName;
+    public void deleteStack(@NotBlank String stackName, @NotBlank String deploymentId) {
+
+        String name = stackName + "-" + deploymentId;
+        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
+        String stackDir = outputDir + "\\stacks\\" + name;
+
         File stackDirectory = new File(stackDir);
 
         createProcess(stackDirectory, TerraformCommand.DESTROY.get());
     }
 
-    private String getFunctionUrls(String stackDirectory) {
+    public void deleteStack(@NotBlank String stackDir) {
+
+        File stackDirectory = new File(stackDir);
+
+        createProcess(stackDirectory, TerraformCommand.DESTROY.get());
+    }
+
+    private HashMap<CompositeKey, String> getFunctionUrls(@NotBlank String stackDirectory,
+                                                          @NotNull HashMap<CompositeKey, String> terraformOutputNames) {
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(new File(stackDirectory));
@@ -161,12 +210,17 @@ public class StackDeployer {
             BufferedReader br = new BufferedReader(isr);
 
             // Read and print each line of the output
-            return br.readLine();
+            StringBuilder rawTerraformOutputs = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                rawTerraformOutputs.append(line).append("\n");
+            }
+            return extractUrls(terraformOutputNames, rawTerraformOutputs.toString());
         }
         catch (IOException ex) {
-
             log.error(ex.getMessage());
         }
+
 
         File errorFile = new File(processBuilder.directory().getPath() + "\\output-errors.txt");
         processBuilder.redirectError(errorFile);
@@ -175,7 +229,36 @@ public class StackDeployer {
     }
 
 
-    private void createProcess(File stackDirectory, String ... commands) {
+
+    private HashMap<CompositeKey, String> extractUrls(@NotNull HashMap<CompositeKey, String> urlMap,
+                                                      @NotBlank String functionUrls) {
+
+        String[] lines = functionUrls.split("\\n");
+
+        for (String line : lines) {
+
+            String[] parts = line.split("=");
+            String outputName = parts[0].trim();
+            String functionUrl = parts[1].trim().replace("\"", "");
+
+            for (Map.Entry<CompositeKey, String> entry : urlMap.entrySet()) {
+
+                // Using contains instead of equals since terraform appends a unique id
+                // in the final output name
+                if(outputName.contains(entry.getKey().outputName())) {
+
+                    urlMap.put(entry.getKey(), functionUrl);
+                }
+
+            }
+
+        }
+
+        return urlMap;
+    }
+
+
+    private void createProcess(@NotNull File stackDirectory, @NotNull String ... commands) {
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(stackDirectory);
@@ -184,10 +267,10 @@ public class StackDeployer {
         String commandString = "\\" + String.join(" ", commands);
         commandString = commandString.replace(" ", "_").replace("-", "_");
 
-        File outputFile = new File(processBuilder.directory().getPath() + commandString + "output.txt");
+        File outputFile = new File(processBuilder.directory().getPath() + commandString + "_output.txt");
         processBuilder.redirectOutput(outputFile);
 
-        File errorFile = new File(processBuilder.directory().getPath() + commandString + "error_output.txt");
+        File errorFile = new File(processBuilder.directory().getPath() + commandString + "_error_output.txt");
         processBuilder.redirectError(errorFile);
 
         try {
@@ -202,6 +285,17 @@ public class StackDeployer {
             throw new TestExecutionFailedException(ex);
         }
 
+    }
+
+
+    private void addOutputNamesToMap(@NotNull HashMap<CompositeKey, String> outputNamesAndUrlsMap,
+                                     @NotNull List<String> terraformOutputsList,
+                                     @NotNull ResourceConfiguration configuration) {
+
+        for (String outputName : terraformOutputsList) {
+            CompositeKey key = new CompositeKey(outputName, configuration);
+            outputNamesAndUrlsMap.put(key, null);
+        }
     }
 
 

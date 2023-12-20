@@ -11,6 +11,7 @@ import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
+import gr.aegean.icsd.icarus.util.terraform.CompositeKey;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 @Service
@@ -90,39 +92,41 @@ public class FunctionalTestService extends TestService {
                     "associated with it");
         }
 
-            super.getDeployer().deploy(requestedTest)
+        super.setState(requestedTest, TestState.DEPLOYING);
 
-                .exceptionally(ex -> {
+        String deploymentId = UUID.randomUUID().toString().substring(0, 5);
+
+        super.getDeployer().deploy(requestedTest, deploymentId)
+
+            .exceptionally(ex -> {
+                super.setState(requestedTest, TestState.ERROR);
+                throw new TestExecutionFailedException(ex);
+            })
+
+            .thenAccept(result -> {
+
+                super.setState(requestedTest, TestState.RUNNING);
+
+                try {
+
+                    createRestAssuredTests(requestedTest, result);
+
+                } catch (RuntimeException ex) {
 
                     super.setState(requestedTest, TestState.ERROR);
                     throw new TestExecutionFailedException(ex);
-                })
+                }
 
-                .thenAccept(result -> {
-
-                    super.setState(requestedTest, TestState.RUNNING);
-                    HashMap<String, String> functionUrls = super.extractUrls(result);
-
-                    try {
-
-                        createRestAssuredTests(requestedTest, functionUrls);
-
-                    } catch (Exception ex) {
-
-                        super.setState(requestedTest, TestState.ERROR);
-                        throw new TestExecutionFailedException(ex);
-                    }
-
-                    super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName());
-                    super.setState(requestedTest, TestState.FINISHED);
-                });
+                super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+                super.setState(requestedTest, TestState.FINISHED);
+            });
 
         return null;
     }
 
-    private void createRestAssuredTests(FunctionalTest requestedTest, HashMap<String, String> functionUrls) {
+    private void createRestAssuredTests(FunctionalTest requestedTest, HashMap<CompositeKey, String> functionUrls) {
 
-        for (Map.Entry<String, String> entry : functionUrls.entrySet()) {
+        for (Map.Entry<CompositeKey, String> entry : functionUrls.entrySet()) {
             for (TestCase testCase : requestedTest.getTestCases()) {
                 for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
 
@@ -133,15 +137,16 @@ public class FunctionalTestService extends TestService {
                             requestedTest.getPathVariable(), testCaseMember.getRequestPathVariableValue(),
                             testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
                             testCaseMember.getExpectedResponseBody(),
-                            requestedTest.getResourceConfigurations().stream().iterator().next()
-                                    .getProviderPlatform());
+                            entry.getKey().configurationUsed().getProviderPlatform()
+                    );
 
                     LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
 
                     // Save results
                     TestCaseResult testResult = new TestCaseResult(testCaseMember,
-                            requestedTest.getResourceConfigurations().stream().iterator().next(),
-                            test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+                            entry.getKey().configurationUsed(),
+                            test.getActualResponseCode(), test.getActualResponseBody(), test.getPass(),
+                            entry.getValue());
 
                     testCaseResultRepository.save(testResult);
                 }
