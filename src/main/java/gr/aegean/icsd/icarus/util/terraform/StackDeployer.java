@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -58,20 +55,20 @@ public class StackDeployer {
 
         // Create stack
         log.warn("Creating stack");
+        HashMap<CompositeKey, String> terraformOutputNames = createStack(name, app, associatedTest, id);
 
-        HashMap<CompositeKey, String> terraformOutputNames = createStack(name, app, associatedTest);
         log.warn("Finished creating");
 
         // Synthesize it
         log.warn("Synthesizing stack");
-
         app.synth();
+
         log.warn("Finished synthesizing");
 
         // Deploy
         log.warn("Deploying stack");
-
         deployStack(stackDir);
+
         log.warn("Finished deploying");
 
         // Get functionUrls
@@ -85,7 +82,8 @@ public class StackDeployer {
 
     private HashMap<CompositeKey, String> createStack(@NotBlank String name,
                                                       @NotNull App app,
-                                                      @NotNull Test associatedTest) {
+                                                      @NotNull Test associatedTest,
+                                                      @NotBlank String id) {
 
         MainStack mainStack = new MainStack(app, name);
 
@@ -101,7 +99,7 @@ public class StackDeployer {
                     assert account instanceof AwsAccount;
                     AwsAccount awsAccount = (AwsAccount) account;
 
-                    AwsConstruct newAwsConstruct = mainStack.createAwsConstruct(
+                    AwsConstruct newAwsConstruct = mainStack.createAwsConstruct(id,
                             awsAccount.getAwsAccessKey(), awsAccount.getAwsSecretKey(),
                             associatedTest.getTargetFunction().getFunctionSourceDirectory(),
                             associatedTest.getTargetFunction().getFunctionSourceFileName(),
@@ -125,7 +123,7 @@ public class StackDeployer {
                     assert account instanceof GcpAccount;
                     GcpAccount gcpAccount = (GcpAccount) account;
 
-                    GcpConstruct newGcpConstruct = mainStack.createGcpConstruct(
+                    GcpConstruct newGcpConstruct = mainStack.createGcpConstruct(id,
                             gcpAccount.getGcpKeyfile(),
                             associatedTest.getTargetFunction().getFunctionSourceDirectory(),
                             associatedTest.getTargetFunction().getFunctionSourceFileName(),
