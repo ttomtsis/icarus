@@ -72,6 +72,7 @@ public class AwsConstruct extends Construct {
      *
      * @param scope Scope of the construct <br>
      * @param id ID of the construct <br>
+     * @param deploymentId ID of deployment
      *
      * @param awsAccessKey Access key of the account used to deploy the function <br>
      * @param awsSecretKey Secret key of the account used to deploy the function <br>
@@ -89,7 +90,7 @@ public class AwsConstruct extends Construct {
      * @param awsFunctionRoute Route that the function is exposed at in AWS ApiGateway
      * @param awsFunctionMethod HTTP Method used to invoke the function
      */
-    public AwsConstruct(final Construct scope, final String id,
+    public AwsConstruct(final Construct scope, final String id, String deploymentId,
                         String awsAccessKey, String awsSecretKey,
                         String objectSource, String objectFileName,
                         Set<AwsRegion> awsRegions, Set<Integer> memoryConfigurations,
@@ -98,7 +99,7 @@ public class AwsConstruct extends Construct {
 
         super(scope, id);
 
-        this.guid = UUID.randomUUID().toString().substring(0, 8);
+        this.guid = deploymentId;
 
         this.accessKey = awsAccessKey;
         this.secretKey = awsSecretKey;

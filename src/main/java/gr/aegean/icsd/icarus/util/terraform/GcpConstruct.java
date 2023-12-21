@@ -46,6 +46,7 @@ public class GcpConstruct extends Construct
      *
      * @param scope Scope of the Construct <br>
      * @param id ID of the Construct <br>
+     * @param deploymentId ID of deployment
      *
      * @param gcpCredentials GCP keyfile.json file in String format <br>
      *
@@ -61,7 +62,7 @@ public class GcpConstruct extends Construct
      * @param cpuConfigs CPU configurations for the GCF function <br>
      * @param regions Regions where the GCF function will be deployed <br>
      */
-    public GcpConstruct(final Construct scope, final String id,
+    public GcpConstruct(final Construct scope, final String id, String deploymentId,
                         String gcpCredentials, String gcfFunctionSource, String gcfFunctionSourceFileName,
                         String gcfFunctionName, String gcfFunctionDescription,
                         String gcpProject, GcfRuntime gcfRuntime, String gcfFunctionEntrypoint,
@@ -69,7 +70,7 @@ public class GcpConstruct extends Construct
 
         super(scope, id);
 
-        this.guid = UUID.randomUUID().toString().substring(0, 8);
+        this.guid = deploymentId;
 
         String functionSource = gcfFunctionSource + "/" + gcfFunctionSourceFileName;
         this.functionRuntime = gcfRuntime;

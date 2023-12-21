@@ -48,13 +48,14 @@ public class MainStack extends TerraformStack {
      * @param awsFunctionRuntime Runtime that will be used to execute the function <br>
      * @param awsFunctionHandler The appropriate handler that AWS Lambda will use to execute the function <br>
      */
-    public AwsConstruct createAwsConstruct(String awsAccessKey, String awsSecretKey,
+    public AwsConstruct createAwsConstruct(String deploymentId, String awsAccessKey, String awsSecretKey,
                                    String objectSource, String objectFileName,
                                    Set<AwsRegion> awsRegions, Set<Integer> memoryConfigurations,
                                    String awsFunctionName, LambdaRuntime awsFunctionRuntime,
                                    String awsFunctionHandler, String awsFunctionRoute, String awsFunctionMethod) {
 
-        AwsConstruct newAwsConstruct = new AwsConstruct(this, "awsConstruct-" + UUID.randomUUID().toString().substring(0, 5),
+        AwsConstruct newAwsConstruct = new AwsConstruct(this,
+                "awsConstruct-" + UUID.randomUUID().toString().substring(0, 5), deploymentId,
                 awsAccessKey, awsSecretKey,
                 objectSource, objectFileName,
                 awsRegions, memoryConfigurations,
@@ -95,12 +96,14 @@ public class MainStack extends TerraformStack {
      * @param cpuConfigs CPU configurations for the GCF function <br>
      * @param regions Regions where the GCF function will be deployed <br>
      */
-    public GcpConstruct createGcpConstruct(String gcpCredentials, String gcfFunctionSource, String gcfFunctionSourceFileName,
-                                   String gcfFunctionName, String gcfFunctionDescription,
+    public GcpConstruct createGcpConstruct(String deploymentId, String gcpCredentials, String gcfFunctionSource,
+                                           String gcfFunctionSourceFileName, String gcfFunctionName,
+                                           String gcfFunctionDescription,
                                    String gcpProject, GcfRuntime gcfRuntime, String gcfFunctionEntrypoint,
                                    Set<Integer> memoryConfigs, Set<Integer> cpuConfigs, Set<GcpRegion> regions) {
 
         return new GcpConstruct(this, "gcpConstruct-" + UUID.randomUUID().toString().substring(0, 5),
+                        deploymentId,
                         gcpCredentials, gcfFunctionSource, gcfFunctionSourceFileName,
                         gcfFunctionName, gcfFunctionDescription,
                         gcpProject, gcfRuntime, gcfFunctionEntrypoint,
