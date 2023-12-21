@@ -1,11 +1,12 @@
 package gr.aegean.icsd.icarus.testexecution;
 
-import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,68 +19,44 @@ public class MetricResult {
     private Long id;
 
     @NotBlank
-    private String functionUrl;
+    private String metricName;
 
     @NotBlank
-    private String metricName;
+    private String deploymentId;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "metric_result_metric_values", joinColumns = @JoinColumn(name = "id"))
-    private HashMap<String, String> metricValues;
+    private final Map<String, String> metricValues = new HashMap<>();
 
-    @CollectionTable(name = "metric_result_load_profiles", joinColumns = @JoinColumn(name = "id"))
     @ManyToMany(targetEntity = LoadProfile.class)
-    private Set<LoadProfile> loadProfiles;
+    private final Set<LoadProfile> loadProfiles = new HashSet<>();
 
     @ManyToOne(targetEntity = ResourceConfiguration.class, optional = false)
+    @JoinColumn(name = "configuration_used", updatable = false)
     private ResourceConfiguration resourceConfiguration;
 
 
 
     public MetricResult(Set<LoadProfile> profiles, ResourceConfiguration resourceConfiguration,
-                        String functionUrl, Map<String, String> values, String metricName) {
+                        Map<String, String> values, String metricName, String deploymentId) {
 
-        this.loadProfiles = profiles;
+        this.loadProfiles.addAll(profiles);
         this.resourceConfiguration = resourceConfiguration;
-        this.functionUrl = functionUrl;
-        this.metricValues = (HashMap<String, String>) values;
+        this.metricValues.putAll(values);
         this.metricName = metricName;
+        this.deploymentId = deploymentId;
     }
 
     public MetricResult() {}
 
 
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setLoadProfiles(Set<LoadProfile> loadProfiles) {
-        this.loadProfiles = loadProfiles;
-    }
-
-    public void setResourceConfiguration(ResourceConfiguration resourceConfiguration) {
-        this.resourceConfiguration = resourceConfiguration;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public Set<LoadProfile> getLoadProfiles() {
-        return loadProfiles;
-    }
-
-    public ResourceConfiguration getResourceConfiguration() {
-        return resourceConfiguration;
-    }
-
-    public String getFunctionUrl() {
-        return functionUrl;
-    }
-
-    public void setFunctionUrl(String functionUrl) {
-        this.functionUrl = functionUrl;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getMetricName() {
@@ -90,12 +67,28 @@ public class MetricResult {
         this.metricName = metricName;
     }
 
-    public HashMap<String, String> getMetricValues() {
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+
+    public Map<String, String> getMetricValues() {
         return metricValues;
     }
 
-    public void setMetricValues(HashMap<String, String> metricValues) {
-        this.metricValues = metricValues;
+    public Set<LoadProfile> getLoadProfiles() {
+        return loadProfiles;
+    }
+
+    public ResourceConfiguration getResourceConfiguration() {
+        return resourceConfiguration;
+    }
+
+    public void setResourceConfiguration(ResourceConfiguration resourceConfiguration) {
+        this.resourceConfiguration = resourceConfiguration;
     }
 
 
