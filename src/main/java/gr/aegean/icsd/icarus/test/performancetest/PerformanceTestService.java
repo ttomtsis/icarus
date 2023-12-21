@@ -122,7 +122,7 @@ public class PerformanceTestService extends TestService {
 
                 try {
 
-                    createLoadTests(requestedTest, result);
+                    createLoadTests(requestedTest, result, deploymentId);
 
                 } catch (RuntimeException ex) {
 
@@ -130,14 +130,19 @@ public class PerformanceTestService extends TestService {
                     throw new TestExecutionFailedException(ex);
                 }
 
-                //super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+                super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
                 super.setState(requestedTest, TestState.FINISHED);
             });
 
         return null;
     }
 
-    private void createLoadTests(PerformanceTest requestedTest, HashMap<CompositeKey, String> functionUrls) {
+
+    private void createLoadTests(PerformanceTest requestedTest,
+                                 HashMap<CompositeKey, String> functionUrls,
+                                 String deploymentId) {
+
+        Set<Thread> threadSet = new HashSet<>();
 
         for (Map.Entry<CompositeKey, String> entry : functionUrls.entrySet()) {
 
@@ -152,35 +157,55 @@ public class PerformanceTestService extends TestService {
 
             }
 
+            Thread newThread = runTest(test, requestedTest, entry.getKey(), deploymentId);
+            threadSet.add(newThread);
+        }
+
+        for (Thread thread : threadSet) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new TestExecutionFailedException(e);
+            }
+        }
+
+        LoggerFactory.getLogger("Performance Test Service").warn("TESTS COMPLETE");
+    }
+
+    private Thread runTest(LoadTest test, PerformanceTest requestedTest, CompositeKey key, String deploymentId) {
+
+        Thread thread = new Thread(() -> {
+
             test.runTest();
 
             try {
                 Thread.sleep(120000);
-            }
-            catch (InterruptedException ex) {
-                LoggerFactory.getLogger("bobz").warn("Thread could not sleep demnit");
+            } catch (InterruptedException e) {
+                throw new TestExecutionFailedException(e);
             }
 
-            createMetrics(requestedTest, entry.getKey(), entry.getValue(), requestedTest.getLoadProfiles());
-        }
+            createMetrics(requestedTest, key, requestedTest.getLoadProfiles(), deploymentId);
+        });
 
+        thread.start();
+
+        return thread;
     }
 
     private void createMetrics(PerformanceTest requestedTest, CompositeKey key,
-                               String functionUrl, Set<LoadProfile> profiles) {
+                               Set<LoadProfile> profiles, String deploymentId) {
 
         for (Metric metric : requestedTest.getChosenMetrics()) {
 
             if (key.configurationUsed().getProviderPlatform().equals(Platform.AWS)) {
 
                 AwsAccount awsAccount = (AwsAccount) key.accountUsed();
-                Set<AwsMetricRequest> requests = createAwsMetricRequests(key, awsAccount, requestedTest, metric);
+                Set<AwsMetricRequest> requests = createAwsMetricRequests(key, awsAccount, metric);
 
                 for (AwsMetricRequest request : requests) {
-
                     request.sendRequest();
-                    metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(), functionUrl,
-                            request.getMetricResults(), metric.toString()));
+                    metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(),
+                            request.getMetricResults(), metric.toString(), deploymentId));
                 }
             }
 
@@ -190,19 +215,21 @@ public class PerformanceTestService extends TestService {
                 GcpMetricRequest request = createGcpMetricRequest(gcpAccount, requestedTest, metric);
 
                 request.sendRequest();
-                metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(), functionUrl,
-                        request.getMetricResults(), metric.toString()));
+                metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(),
+                        request.getMetricResults(), metric.toString(), deploymentId));
             }
         }
+
     }
 
-    private Set<AwsMetricRequest> createAwsMetricRequests(CompositeKey key, AwsAccount account, PerformanceTest test, Metric metric) {
+    private Set<AwsMetricRequest> createAwsMetricRequests(CompositeKey key, AwsAccount account,
+                                                          Metric metric) {
 
         Set<AwsMetricRequest> requests = new HashSet<>();
         for (String region : key.configurationUsed().getRegions()) {
 
             AwsMetricRequest metricRequest = new AwsMetricRequest(account.getAwsAccessKey(), account.getAwsSecretKey(),
-                    test.getTargetFunction().getName(), AwsRegion.valueOf(region),
+                    key.outputName(), AwsRegion.valueOf(region),
                     metric);
             requests.add(metricRequest);
         }
