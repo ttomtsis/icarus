@@ -132,9 +132,9 @@ public class AwsConstruct extends Construct {
             for (Integer memory: memoryConfigurations) {
 
                 String targetFunctionID = awsFunctionName + "-" + memory + "mb-" + provider.getRegion()  + "-" + guid;
-                String terraformOutputName = "awsConstruct_lambda_url_" + targetFunctionID;
+                //String terraformOutputName = "awsConstruct_lambda_url_" + targetFunctionID;
 
-                terraformOutputsList.add(terraformOutputName);
+                terraformOutputsList.add(targetFunctionID);
 
                 LambdaFunction lambdaFunction = createFunction(myBucket, bucketObject,
                         functionRole, provider, memory, targetFunctionID);
@@ -149,7 +149,7 @@ public class AwsConstruct extends Construct {
 
                 // Create an output that will print the URL used to invoke the function
                 TerraformOutput.Builder.create(
-                    this, terraformOutputName)
+                    this, "lambda_url_" + targetFunctionID)
                     .description("Base URL for API Gateway stage.")
                     .value(output)
                     .build();

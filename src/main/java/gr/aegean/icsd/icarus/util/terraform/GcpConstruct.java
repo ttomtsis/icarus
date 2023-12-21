@@ -11,7 +11,10 @@ import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import software.constructs.Construct;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Class used to model GCF Functions in the Terraform CDK as Constructs <br>
@@ -108,8 +111,7 @@ public class GcpConstruct extends Construct
                     String name = gcfFunctionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + guid;
                     name = name.toLowerCase();
 
-                    String terraformOutputName = "gcpConstruct_gcf_url" + name;
-                    terraformOutputsList.add(terraformOutputName);
+                    terraformOutputsList.add(name);
 
                     String functionMemory = memory + "M";
 
@@ -124,7 +126,7 @@ public class GcpConstruct extends Construct
                     dependencies.add(newFunction);
                     createServiceIamMember(location, name);
 
-                    createOutput(terraformOutputName, newFunction);
+                    createOutput("gcf_url_" + name, newFunction);
 
                 }
             }
