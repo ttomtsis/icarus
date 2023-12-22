@@ -30,7 +30,7 @@ public class ProviderAccount {
     @Column(name = "dtype", insertable = false, updatable = false)
     private String accountType;
 
-    @ManyToMany(mappedBy = "accountsList", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
+    @ManyToMany(mappedBy = "accountsList", cascade = CascadeType.REFRESH,
             targetEntity = Test.class)
     private final Set<Test> associatedTests = new HashSet<>();
 
@@ -47,6 +47,15 @@ public class ProviderAccount {
 
     public ProviderAccount() {}
 
+
+
+    @PreRemove
+    private void removeForeignKeyConstraints() {
+
+        for (Test associatedTest : this.associatedTests) {
+            associatedTest.removeAccount(this);
+        }
+    }
 
 
     // GETTERS - SETTERS

@@ -149,6 +149,10 @@ public class Test {
         accountsList.clear();
     }
 
+    public void removeAccount(ProviderAccount providerAccount) {
+        this.accountsList.remove(providerAccount);
+    }
+
     public String getPathVariable() {
         return pathVariable;
     }
