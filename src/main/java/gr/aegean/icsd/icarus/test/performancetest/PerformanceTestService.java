@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,8 @@ public class PerformanceTestService extends TestService {
 
     private final TestRepository repository;
     private final MetricResultRepository metricResultRepository;
+    
+    private static final Logger log = LoggerFactory.getLogger("Performance Test Service");
 
 
 
@@ -121,15 +124,17 @@ public class PerformanceTestService extends TestService {
                 super.setState(requestedTest, TestState.RUNNING);
 
                 try {
-
-                    createLoadTests(requestedTest, result, deploymentId);
+                    
+                    log.warn("Creating Load Tests");
+                    createAndRunLoadTests(requestedTest, result, deploymentId);
 
                 } catch (RuntimeException ex) {
 
                     super.setState(requestedTest, TestState.ERROR);
                     throw new TestExecutionFailedException(ex);
                 }
-
+                
+                log.warn("Test Completed, Deleting Stack");
                 super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
                 super.setState(requestedTest, TestState.FINISHED);
             });
@@ -138,26 +143,17 @@ public class PerformanceTestService extends TestService {
     }
 
 
-    private void createLoadTests(PerformanceTest requestedTest,
-                                 HashMap<CompositeKey, String> functionUrls,
-                                 String deploymentId) {
+    private void createAndRunLoadTests(PerformanceTest requestedTest,
+                                       HashMap<CompositeKey, String> functionUrls,
+                                       String deploymentId) {
 
         Set<Thread> threadSet = new HashSet<>();
 
         for (Map.Entry<CompositeKey, String> entry : functionUrls.entrySet()) {
 
-            LoadTest test = new LoadTest(requestedTest.getName(), entry.getValue(),
-                    requestedTest.getPath(), requestedTest.getPathVariable(),
-                    requestedTest.getPathVariableValue(), HttpMethod.valueOf(requestedTest.getHttpMethod()));
+            LoadTest test = createLoadTest(requestedTest, entry);
 
-            for (LoadProfile loadProfile : requestedTest.getLoadProfiles()) {
-
-                test.addLoadProfile(loadProfile.getConcurrentUsers(), loadProfile.getRampUp(),
-                        loadProfile.getLoadTime(), loadProfile.getThinkTime(), loadProfile.getStartDelay());
-
-            }
-
-            Thread newThread = runTest(test, requestedTest, entry.getKey(), deploymentId);
+            Thread newThread = runLoadTest(test, requestedTest, entry.getKey(), deploymentId);
             threadSet.add(newThread);
         }
 
@@ -169,21 +165,40 @@ public class PerformanceTestService extends TestService {
             }
         }
 
-        LoggerFactory.getLogger("Performance Test Service").warn("TESTS COMPLETE");
+        log.warn("All Load Tests have been executed");
     }
 
-    private Thread runTest(LoadTest test, PerformanceTest requestedTest, CompositeKey key, String deploymentId) {
+    private LoadTest createLoadTest(PerformanceTest requestedTest, Map.Entry<CompositeKey, String> entry) {
+
+        LoadTest test = new LoadTest(requestedTest.getName(), entry.getValue(),
+                requestedTest.getPath(), requestedTest.getPathVariable(),
+                requestedTest.getPathVariableValue(), HttpMethod.valueOf(requestedTest.getHttpMethod()));
+
+        for (LoadProfile loadProfile : requestedTest.getLoadProfiles()) {
+
+            test.addLoadProfile(loadProfile.getConcurrentUsers(), loadProfile.getRampUp(),
+                    loadProfile.getLoadTime(), loadProfile.getThinkTime(), loadProfile.getStartDelay());
+
+        }
+
+        return test;
+    }
+
+    private Thread runLoadTest(LoadTest test, PerformanceTest requestedTest, CompositeKey key, String deploymentId) {
 
         Thread thread = new Thread(() -> {
-
+            
+            log.warn("Executing Load Test");
             test.runTest();
-
+            
+            log.warn("Test Completed, thread will sleep until metrics are logged in provider platform");
             try {
                 Thread.sleep(120000);
             } catch (InterruptedException e) {
                 throw new TestExecutionFailedException(e);
             }
-
+            
+            log.warn("Thread has awoken, querying metrics");
             createMetrics(requestedTest, key, requestedTest.getLoadProfiles(), deploymentId);
         });
 
@@ -191,6 +206,7 @@ public class PerformanceTestService extends TestService {
 
         return thread;
     }
+
 
     private void createMetrics(PerformanceTest requestedTest, CompositeKey key,
                                Set<LoadProfile> profiles, String deploymentId) {
