@@ -135,8 +135,11 @@ public class PerformanceTestService extends TestService {
                 }
                 
                 log.warn("Test Completed, Deleting Stack");
+
                 super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
                 super.setState(requestedTest, TestState.FINISHED);
+
+                log.warn("Finished");
             });
 
         return null;
