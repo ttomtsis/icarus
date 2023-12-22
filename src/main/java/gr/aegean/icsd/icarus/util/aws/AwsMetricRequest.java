@@ -26,6 +26,7 @@ public final class AwsMetricRequest {
 
     private final String metricName;
     private final String metricNamespace;
+    private final String metricStatistic;
 
     private final HashMap<String, String> metricResults = new HashMap<>();
 
@@ -43,10 +44,10 @@ public final class AwsMetricRequest {
 
         this.metricName = cloudwatchMetric.getAwsMetricName();
         this.metricNamespace = cloudwatchMetric.getAwsNamespace();
+        this.metricStatistic = cloudwatchMetric.getAwsStatistic();
 
         this.client = buildCloudwatchClient();
         this.request = createMetricRequest();
-
     }
 
 
@@ -87,7 +88,7 @@ public final class AwsMetricRequest {
                                                 .build()
                                         )
                                         .period(60)
-                                        .stat("Sum")
+                                        .stat(this.metricStatistic)
                                         .build()
                                 )
                                 .returnData(true)
