@@ -32,8 +32,7 @@ public final class AwsMetricRequest {
 
     private final HashMap<String, String> metricResults = new HashMap<>();
 
-    private final CloudWatchClient client;
-    private final GetMetricDataRequest request;
+
 
     public AwsMetricRequest(String awsAccessKey, String awsSecretKey, String lambdaFunctionName,
                             AwsRegion functionRegion, Metric cloudwatchMetric) {
@@ -48,16 +47,12 @@ public final class AwsMetricRequest {
         this.metricNamespace = cloudwatchMetric.getAwsNamespace();
         this.metricStatistic = cloudwatchMetric.getAwsStatistic();
 
-        this.client = buildCloudwatchClient();
-        this.request = createMetricRequest();
-    }
-
-
-
-    public void sendRequest() {
+        CloudWatchClient client = buildCloudwatchClient();
+        GetMetricDataRequest request = createMetricRequest();
 
         getMetricDataResults(client, request);
     }
+
 
 
     private CloudWatchClient buildCloudwatchClient() {

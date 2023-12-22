@@ -5,10 +5,8 @@ import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.monitoring.v3.MetricServiceClient;
 import com.google.cloud.monitoring.v3.MetricServiceSettings;
-import com.google.monitoring.v3.ListTimeSeriesRequest;
-import com.google.monitoring.v3.Point;
-import com.google.monitoring.v3.TimeInterval;
-import com.google.monitoring.v3.TimeSeries;
+import com.google.monitoring.v3.*;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 
@@ -26,39 +24,35 @@ public class GcpMetricRequest {
 
 
     private final String credentials;
-    private final String projectName;
+    private final ProjectName projectName;
     private final String functionId;
     private final String metricId;
 
-    private final MetricServiceClient metricServiceClient;
-    private final ListTimeSeriesRequest listTimeSeriesRequest;
     private final HashMap<String, String> metricResults = new HashMap<>();
 
 
 
-    public GcpMetricRequest(String credentials, String projectId, String functionId, Metric metricId)
+    public GcpMetricRequest(String credentials, String projectId, String functionId, Metric metric)
             throws IOException {
 
         this.credentials = credentials;
-        this.projectName = projectId;
+        this.projectName = ProjectName.of(projectId);
+
         this.functionId = functionId;
-        this.metricId = metricId.getGcpMetricName();
+        this.metricId = metric.getGcpMetricName();
+
 
         try (MetricServiceClient client = MetricServiceClient.create(createMetricServiceSettings())) {
 
-            this.metricServiceClient = client;
-            this.listTimeSeriesRequest = createRequest();
-            }
+            ListTimeSeriesRequest listTimeSeriesRequest = createRequest();
 
+            MetricServiceClient.ListTimeSeriesPagedResponse response = client.listTimeSeries(listTimeSeriesRequest);
+
+            getMetricResults(response);
         }
 
+    }
 
-
-     public void sendRequest() {
-
-         MetricServiceClient.ListTimeSeriesPagedResponse response = metricServiceClient.listTimeSeries(listTimeSeriesRequest);
-         getMetricResults(response);
-     }
 
 
     private MetricServiceSettings createMetricServiceSettings() throws IOException {
@@ -90,10 +84,27 @@ public class GcpMetricRequest {
 
     private ListTimeSeriesRequest createRequest() {
 
-        String filter = "metric.type=\"" + metricId + "\" AND resource.labels.function_name=\"" + functionId + "\"";
+        String filter = "metric.type=\"" + this.metricId + "\" AND resource.labels.function_name=\"" + functionId + "\"";
+
+        if (this.metricId.equals(Metric.EXECUTION_TIME.getGcpMetricName())) {
+
+            return ListTimeSeriesRequest.newBuilder()
+                    .setName(projectName.toString())
+                    .setFilter(filter)
+                    .setInterval(createTimeInterval())
+                    .setView(ListTimeSeriesRequest.TimeSeriesView.FULL)
+                    .setAggregation(
+                            Aggregation.newBuilder()
+                                .setAlignmentPeriod(Duration.newBuilder().setSeconds(60).build())
+                                .setCrossSeriesReducer(Aggregation.Reducer.REDUCE_MEAN)
+                                .setPerSeriesAligner(Aggregation.Aligner.ALIGN_PERCENTILE_99)
+                            .build()
+                    )
+                    .build();
+        }
 
         return ListTimeSeriesRequest.newBuilder()
-                .setName(projectName)
+                .setName(projectName.toString())
                 .setFilter(filter)
                 .setInterval(createTimeInterval())
                 .setView(ListTimeSeriesRequest.TimeSeriesView.FULL)
@@ -113,7 +124,13 @@ public class GcpMetricRequest {
                         .withZone(ZoneId.systemDefault())
                         .format(instant);
 
-                metricResults.put(formattedTimestamp, String.valueOf(dataPoint.getValue()));
+                String formattedValue = String.valueOf(dataPoint.getValue().getInt64Value());
+
+                if (this.metricId.equals(Metric.EXECUTION_TIME.getGcpMetricName())) {
+                    formattedValue = dataPoint.getValue().getDoubleValue() / 1_000_000 + "ms";
+                }
+
+                metricResults.put(formattedTimestamp, formattedValue);
             }
 
         }
