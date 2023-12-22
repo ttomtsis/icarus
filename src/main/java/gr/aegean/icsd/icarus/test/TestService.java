@@ -117,8 +117,13 @@ public class TestService {
                         (testId));
 
         // Test is in correct state
-        if (!requestedTest.getState().equals(TestState.CREATED)) {
-            throw new InvalidTestStateException(testId, requestedTest.getState(), TestState.CREATED);
+        if (!(requestedTest.getState().equals(TestState.CREATED) ||
+                requestedTest.getState().equals(TestState.FINISHED) ||
+                        requestedTest.getState().equals(TestState.ERROR))
+        ) {
+            String[] expectedStates = {TestState.CREATED.toString(), TestState.FINISHED.toString(),
+                    TestState.ERROR.toString()};
+            throw new InvalidTestStateException(testId, requestedTest.getState(), expectedStates);
         }
 
         // Test has a Function associated with it
