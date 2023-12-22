@@ -9,6 +9,8 @@ import software.amazon.awssdk.services.cloudwatch.model.*;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +109,11 @@ public final class AwsMetricRequest {
 
             for (int i = 0; i < timestamps.size(); i++) {
 
-                metricResults.put(timestamps.get(i).toString(), values.get(i).toString());
+                String timeString = DateTimeFormatter.ofPattern("MMM dd yyyy h:mm:ss a")
+                        .withZone(ZoneId.systemDefault())
+                        .format(timestamps.get(i));
+
+                metricResults.put(timeString, values.get(i).toString());
             }
         }
 
