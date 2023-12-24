@@ -17,7 +17,7 @@ public class IcarusConstants {
 
     public static final int FUNCTION_MEMORY_MIN = 128;
 
-    public static final int REST_ASSURED_MAX_TIMEOUT = 15000;
+    public static final int METRIC_QUERY_MAX_TIMEOUT = 10;
 
 
     private IcarusConstants() {}

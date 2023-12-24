@@ -14,6 +14,7 @@ import gr.aegean.icsd.icarus.util.enums.Metric;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.test.MetricsTimeoutException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.gcp.GcpMetricRequest;
 import gr.aegean.icsd.icarus.util.jmeter.LoadTest;
@@ -30,7 +31,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
 
 
 @Service
@@ -41,7 +48,7 @@ public class PerformanceTestService extends TestService {
 
     private final TestRepository repository;
     private final MetricResultRepository metricResultRepository;
-
+    
     private static final Logger log = LoggerFactory.getLogger("Performance Test Service");
 
 
@@ -125,7 +132,7 @@ public class PerformanceTestService extends TestService {
                 super.setState(requestedTest, TestState.RUNNING);
 
                 try {
-
+                    
                     log.warn("Creating Load Tests");
                     createAndRunLoadTests(requestedTest, result, deploymentId);
 
@@ -134,7 +141,7 @@ public class PerformanceTestService extends TestService {
                     super.setState(requestedTest, TestState.ERROR);
                     throw new TestExecutionFailedException(ex);
                 }
-
+                
                 log.warn("Test Completed, Deleting Stack");
 
                 super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
@@ -161,7 +168,7 @@ public class PerformanceTestService extends TestService {
             threadSet.add(newThread);
         }
 
-        log.warn("Waiting for tests to be complete");
+        log.warn("Waiting for all tests to execute");
         for (Thread thread : threadSet) {
             try {
                 thread.join();
@@ -190,23 +197,31 @@ public class PerformanceTestService extends TestService {
         return test;
     }
 
+    // run load test
+    // create metric request
+    // query metric
+
     private Thread runLoadTest(LoadTest test, PerformanceTest requestedTest, CompositeKey key, String deploymentId) {
 
         Thread thread = new Thread(() -> {
-
+            
             log.warn("Executing Load Test");
             test.runTest();
 
+            Instant testDoneInstant = Instant.now();
+
+            String formattedTestDoneInstant = DateTimeFormatter.ofPattern("MMM dd yyyy h:mm:ss a")
+                    .withZone(ZoneId.systemDefault())
+                    .format(testDoneInstant);
+
+            log.warn("Test finished at " + formattedTestDoneInstant);
+
             log.warn("Test Completed, thread will sleep until metrics are logged in provider platform");
 
-            try {
-                Thread.sleep(120000);
-            } catch (InterruptedException e) {
-                throw new TestExecutionFailedException(e);
-            }
-
+            sleep(120000L);
+            
             log.warn("Thread has awoken, querying metrics");
-            createMetrics(requestedTest, key, requestedTest.getLoadProfiles(), deploymentId);
+            createMetrics(requestedTest, key, requestedTest.getLoadProfiles(), deploymentId, testDoneInstant);
         });
 
         thread.start();
@@ -216,7 +231,7 @@ public class PerformanceTestService extends TestService {
 
 
     private void createMetrics(PerformanceTest requestedTest, CompositeKey key,
-                               Set<LoadProfile> profiles, String deploymentId) {
+                               Set<LoadProfile> profiles, String deploymentId, Instant testCompletionInstant) {
 
         for (Metric metric : requestedTest.getChosenMetrics()) {
 
@@ -224,23 +239,22 @@ public class PerformanceTestService extends TestService {
 
                 AwsAccount awsAccount = (AwsAccount) key.accountUsed();
 
-                createAwsMetricRequests(key, awsAccount, metric, profiles, deploymentId);
+                createAwsMetricRequests(key, awsAccount, metric, profiles, deploymentId, testCompletionInstant);
             }
 
             if (key.configurationUsed().getProviderPlatform().equals(Platform.GCP)) {
 
                 GcpAccount gcpAccount = (GcpAccount) key.accountUsed();
 
-                createGcpMetricRequest(key, gcpAccount, requestedTest, metric, profiles, deploymentId);
+                createGcpMetricRequest(key, gcpAccount, metric, profiles, deploymentId, testCompletionInstant);
             }
         }
 
     }
 
-
     private void createAwsMetricRequests(CompositeKey key, AwsAccount account,
                                                           Metric metric, Set<LoadProfile> profiles,
-                                                          String deploymentId) {
+                                                          String deploymentId, Instant testDone) {
 
         for (String region : key.configurationUsed().getRegions()) {
 
@@ -248,26 +262,101 @@ public class PerformanceTestService extends TestService {
                     key.outputName(), AwsRegion.valueOf(region),
                     metric);
 
-            metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(),
-                    metricRequest.getMetricResults(), metric.toString(), deploymentId));
+            int minutes = 0;
+            boolean foundMetrics = compareTimestamps(metricRequest.getInstants(), testDone);
+            while (!foundMetrics && minutes < METRIC_QUERY_MAX_TIMEOUT) {
+
+                log.warn("Metrics are not logged, will sleep and retry");
+
+                minutes++;
+
+                log.warn(minutes + " minutes have passed");
+
+                sleep(60000L);
+
+                metricRequest = new AwsMetricRequest(account.getAwsAccessKey(), account.getAwsSecretKey(),
+                        key.outputName(), AwsRegion.valueOf(region),
+                        metric);
+
+                foundMetrics = compareTimestamps(metricRequest.getInstants(), testDone);
+            }
+
+            if (foundMetrics) {
+                metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(),
+                        metricRequest.getMetricResults(), metric.toString(), deploymentId));
+            }
+            else {
+                throw new MetricsTimeoutException(minutes);
+            }
         }
 
     }
 
-    private void createGcpMetricRequest(CompositeKey key, GcpAccount account, PerformanceTest test, Metric metric,
-                                        Set<LoadProfile> profiles, String deploymentId) {
+    private void createGcpMetricRequest(CompositeKey key, GcpAccount account, Metric metric,
+                                        Set<LoadProfile> profiles, String deploymentId, Instant testDone) {
 
         try {
             GcpMetricRequest request = new GcpMetricRequest(account.getGcpKeyfile(), account.getGcpProjectId(),
-                    test.getTargetFunction().getName(), metric);
+                    key.outputName(), metric);
 
-            metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(),
-                    request.getMetricResults(), metric.toString(), deploymentId));
+            int minutes = 0;
+            boolean foundMetrics = compareTimestamps(request.getInstants(), testDone);
+            while (!foundMetrics && minutes < METRIC_QUERY_MAX_TIMEOUT) {
+
+                log.warn("Metrics are not logged, will sleep and retry");
+
+                minutes++;
+
+                log.warn(minutes + " minutes have passed");
+
+                sleep(60000L);
+
+                request = new GcpMetricRequest(account.getGcpKeyfile(), account.getGcpProjectId(),
+                        key.outputName(), metric);
+
+                foundMetrics = compareTimestamps(request.getInstants(), testDone);
+            }
+
+            if (foundMetrics) {
+                metricResultRepository.save(new MetricResult(profiles, key.configurationUsed(),
+                        request.getMetricResults(), metric.toString(), deploymentId));
+            }
+            else {
+                throw new MetricsTimeoutException(minutes);
+            }
+
         }
         catch (IOException ex) {
             throw new TestExecutionFailedException(ex);
         }
 
+    }
+
+
+    private boolean compareTimestamps(Set<Instant> instants, Instant testExecutionCompleted) {
+
+        for (Instant currentInstant : instants) {
+
+            if (testExecutionCompleted.isBefore(currentInstant) ||
+                    testExecutionCompleted.truncatedTo(ChronoUnit.MINUTES)
+                            .equals(currentInstant.truncatedTo(ChronoUnit.MINUTES))
+            ) {
+
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+    private void sleep(Long millis) {
+
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new TestExecutionFailedException(e);
+        }
     }
 
 

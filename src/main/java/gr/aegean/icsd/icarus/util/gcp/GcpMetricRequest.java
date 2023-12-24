@@ -18,7 +18,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class GcpMetricRequest {
 
@@ -30,6 +32,8 @@ public class GcpMetricRequest {
 
     private final HashMap<String, String> metricResults = new HashMap<>();
 
+    private final Set<Instant> instants = new HashSet<>();
+
 
 
     public GcpMetricRequest(String credentials, String projectId, String functionId, Metric metric)
@@ -40,7 +44,6 @@ public class GcpMetricRequest {
 
         this.functionId = functionId;
         this.metricId = metric.getGcpMetricName();
-
 
         try (MetricServiceClient client = MetricServiceClient.create(createMetricServiceSettings())) {
 
@@ -120,6 +123,8 @@ public class GcpMetricRequest {
                 Timestamp timestamp = dataPoint.getInterval().getStartTime();
                 Instant instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
 
+                this.instants.add(instant);
+
                 String formattedTimestamp = DateTimeFormatter.ofPattern("MMM dd yyyy h:mm:ss a")
                         .withZone(ZoneId.systemDefault())
                         .format(instant);
@@ -140,6 +145,8 @@ public class GcpMetricRequest {
     public Map<String, String> getMetricResults() {
         return this.metricResults;
     }
+
+    public Set<Instant> getInstants(){return this.instants;}
 
 
 }

@@ -11,10 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public final class AwsMetricRequest {
@@ -31,6 +28,8 @@ public final class AwsMetricRequest {
     private final String metricStatistic;
 
     private final HashMap<String, String> metricResults = new HashMap<>();
+
+    private final Set<Instant> instants = new HashSet<>();
 
 
 
@@ -104,11 +103,13 @@ public final class AwsMetricRequest {
 
             for (int i = 0; i < timestamps.size(); i++) {
 
-                String timeString = DateTimeFormatter.ofPattern("MMM dd yyyy h:mm:ss a")
+                instants.add(timestamps.get(i));
+
+                String formattedTimestamp = DateTimeFormatter.ofPattern("MMM dd yyyy h:mm:ss a")
                         .withZone(ZoneId.systemDefault())
                         .format(timestamps.get(i));
 
-                metricResults.put(timeString, values.get(i).toString());
+                metricResults.put(formattedTimestamp, String.valueOf(values.get(i).intValue()));
             }
         }
 
@@ -117,6 +118,10 @@ public final class AwsMetricRequest {
 
     public Map<String, String> getMetricResults() {
         return this.metricResults;
+    }
+
+    public Set<Instant> getInstants() {
+        return instants;
     }
 
 
