@@ -254,4 +254,10 @@ public class LoadTest {
     }
 
 
+    public String getName() {
+
+        return this.testName;
+    }
+
+
 }
