@@ -7,13 +7,13 @@ import com.hashicorp.cdktf.providers.google.cloudfunctions2_function.*;
 import com.hashicorp.cdktf.providers.google.provider.GoogleProvider;
 import com.hashicorp.cdktf.providers.google.storage_bucket.StorageBucket;
 import com.hashicorp.cdktf.providers.google.storage_bucket_object.StorageBucketObject;
+import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import software.constructs.Construct;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,7 +36,7 @@ public class GcpConstruct extends Construct
     ArrayList<ITerraformDependable> dependencies = new ArrayList<>();
 
 
-    private final List<String> terraformOutputsList = new ArrayList<>();
+    private final Set<DeploymentRecord> deploymentRecords = new HashSet<>();
 
 
 
@@ -111,7 +111,10 @@ public class GcpConstruct extends Construct
                     String name = gcfFunctionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + guid;
                     name = name.toLowerCase();
 
-                    terraformOutputsList.add(name);
+                    DeploymentRecord newRecord = new DeploymentRecord(name, location, memory, guid, Platform.GCP);
+                    newRecord.deployedCpu = cpu;
+
+                    deploymentRecords.add(newRecord);
 
                     String functionMemory = memory + "M";
 
@@ -250,8 +253,8 @@ public class GcpConstruct extends Construct
     }
 
 
-    public List<String> getTerraformOutputsList() {
-        return this.terraformOutputsList;
+    public Set<DeploymentRecord> getDeploymentRecords() {
+        return this.deploymentRecords;
     }
 
 

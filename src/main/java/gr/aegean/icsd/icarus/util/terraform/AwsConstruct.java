@@ -23,10 +23,13 @@ import com.hashicorp.cdktf.providers.aws.s3_bucket_ownership_controls.S3BucketOw
 import com.hashicorp.cdktf.providers.aws.s3_object.S3Object;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
+import gr.aegean.icsd.icarus.util.enums.Platform;
 import io.micrometer.common.util.StringUtils;
 import software.constructs.Construct;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class used to model AWS Lambda Functions in the Terraform CDK as Constructs <br>
@@ -53,7 +56,7 @@ public class AwsConstruct extends Construct {
     private final String functionRoute;
     private final String functionMethod;
 
-    private final List<String> terraformOutputsList = new ArrayList<>();
+    private final Set<DeploymentRecord> deploymentRecords = new HashSet<>();
 
     // Currently not supported due to restrictions on AWS starter accounts
     // private final int concurrentExecutions = 10;
@@ -132,9 +135,11 @@ public class AwsConstruct extends Construct {
             for (Integer memory: memoryConfigurations) {
 
                 String targetFunctionID = awsFunctionName + "-" + memory + "mb-" + provider.getRegion()  + "-" + guid;
-                //String terraformOutputName = "awsConstruct_lambda_url_" + targetFunctionID;
 
-                terraformOutputsList.add(targetFunctionID);
+                DeploymentRecord newRecord = new DeploymentRecord(targetFunctionID, provider.getRegion(),
+                        memory, guid, Platform.AWS);
+
+                deploymentRecords.add(newRecord);
 
                 LambdaFunction lambdaFunction = createFunction(myBucket, bucketObject,
                         functionRole, provider, memory, targetFunctionID);
@@ -431,8 +436,8 @@ public class AwsConstruct extends Construct {
     }
 
 
-    public List<String> getTerraformOutputsList() {
-        return terraformOutputsList;
+    public Set<DeploymentRecord> getDeploymentRecords() {
+        return deploymentRecords;
     }
 
     public String getAccessKey() {
