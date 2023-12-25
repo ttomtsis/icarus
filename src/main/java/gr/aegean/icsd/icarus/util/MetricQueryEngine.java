@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public class MetricQueryEngine {
     private final Set<LoadProfile> loadProfiles;
     private final Set<Metric> chosenMetrics;
 
-    private final List<MetricResult> resultList = new ArrayList<>();
+    private final List<MetricResult> resultList = Collections.synchronizedList(new ArrayList<>());
 
 
     private static final Logger log = LoggerFactory.getLogger("Metric Query Engine");
@@ -54,15 +55,7 @@ public class MetricQueryEngine {
 
         for (DeploymentRecord deploymentRecord : deploymentRecords) {
 
-            LoadTest test = new LoadTest(deploymentRecord.deployedFunctionName, deploymentRecord.deployedUrl,
-                    requestedTest.getPath(), requestedTest.getPathVariable(),
-                    requestedTest.getPathVariableValue(), HttpMethod.valueOf(requestedTest.getHttpMethod()));
-
-            for (LoadProfile loadProfile : requestedTest.getLoadProfiles()) {
-
-                test.addLoadProfile(loadProfile.getConcurrentUsers(), loadProfile.getRampUp(),
-                        loadProfile.getLoadTime(), loadProfile.getThinkTime(), loadProfile.getStartDelay());
-            }
+            LoadTest test = createLoadTest(requestedTest, deploymentRecord);
 
             threadList.add(runLoadTest(test, deploymentRecord));
         }
@@ -74,11 +67,29 @@ public class MetricQueryEngine {
     }
 
 
+
+    private LoadTest createLoadTest(PerformanceTest requestedTest, DeploymentRecord deploymentRecord) {
+
+        LoadTest test = new LoadTest(deploymentRecord.deployedFunctionName, deploymentRecord.deployedUrl,
+                requestedTest.getPath(), requestedTest.getPathVariable(),
+                requestedTest.getPathVariableValue(), HttpMethod.valueOf(requestedTest.getHttpMethod()));
+
+        for (LoadProfile loadProfile : requestedTest.getLoadProfiles()) {
+
+            test.addLoadProfile(loadProfile.getConcurrentUsers(), loadProfile.getRampUp(),
+                    loadProfile.getLoadTime(), loadProfile.getThinkTime(), loadProfile.getStartDelay());
+        }
+
+        return test;
+    }
+
+
+
     private Thread runLoadTest(LoadTest test, DeploymentRecord deploymentRecord) {
 
-        Thread thread = new Thread(() -> {
+        Thread loadTestExecutionThread = new Thread(() -> {
 
-            log.error("Executing Load Test: " + test.getName());
+            log.error("Executing Load Test for: " + deploymentRecord.deployedFunctionName);
             test.runTest();
 
             Instant testDoneInstant = Instant.now();
@@ -88,17 +99,19 @@ public class MetricQueryEngine {
 
             sleep(2);
 
-            log.warn("Thread has awoken, querying metrics");
-            createMetrics(deploymentRecord, testDoneInstant);
+            log.warn("Thread has awoken, querying metrics for " + deploymentRecord.deployedFunctionName);
+
+            List<Thread> metricQueryThreadsList = createMetrics(deploymentRecord, testDoneInstant);
+            waitForThreadsToFinish(metricQueryThreadsList);
+
         });
 
-        thread.start();
-
-        return thread;
+        loadTestExecutionThread.start();
+        return loadTestExecutionThread;
     }
 
 
-    private void createMetrics(DeploymentRecord deploymentRecord, Instant testCompletionInstant) {
+    private List<Thread> createMetrics(DeploymentRecord deploymentRecord, Instant testCompletionInstant) {
 
         List<Thread> threadList = new ArrayList<>();
 
@@ -129,8 +142,7 @@ public class MetricQueryEngine {
             thread.start();
         }
 
-        waitForThreadsToFinish(threadList);
-        log.warn("Metrics for: " + deploymentRecord.deployedFunctionName + " finished");
+        return threadList;
     }
 
 
