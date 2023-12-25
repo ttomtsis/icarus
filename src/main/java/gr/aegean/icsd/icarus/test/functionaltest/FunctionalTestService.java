@@ -11,7 +11,7 @@ import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
-import gr.aegean.icsd.icarus.util.terraform.CompositeKey;
+import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -124,29 +123,29 @@ public class FunctionalTestService extends TestService {
         return null;
     }
 
-    private void createRestAssuredTests(FunctionalTest requestedTest, HashMap<CompositeKey, String> functionUrls) {
 
-        for (Map.Entry<CompositeKey, String> entry : functionUrls.entrySet()) {
+    private void createRestAssuredTests(FunctionalTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+
+        for (DeploymentRecord deploymentRecord : deploymentRecords) {
             for (TestCase testCase : requestedTest.getTestCases()) {
                 for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
 
                     LoggerFactory.getLogger("Functional Test Service").warn("Running test");
 
                     // Create rest assured test
-                    RestAssuredTest test = new RestAssuredTest(entry.getValue(), requestedTest.getPath(),
+                    RestAssuredTest test = new RestAssuredTest(deploymentRecord.deployedUrl, requestedTest.getPath(),
                             requestedTest.getPathVariable(), testCaseMember.getRequestPathVariableValue(),
                             testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
                             testCaseMember.getExpectedResponseBody(),
-                            entry.getKey().configurationUsed().getProviderPlatform()
+                            deploymentRecord.deployedPlatform
                     );
 
                     LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
 
                     // Save results
                     TestCaseResult testResult = new TestCaseResult(testCaseMember,
-                            entry.getKey().configurationUsed(),
-                            test.getActualResponseCode(), test.getActualResponseBody(), test.getPass(),
-                            entry.getValue());
+                            deploymentRecord.configurationUsed,
+                            test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
 
                     testCaseResultRepository.save(testResult);
                 }

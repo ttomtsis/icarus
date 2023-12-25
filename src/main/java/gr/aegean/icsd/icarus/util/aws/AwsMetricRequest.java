@@ -34,13 +34,13 @@ public final class AwsMetricRequest {
 
 
     public AwsMetricRequest(String awsAccessKey, String awsSecretKey, String lambdaFunctionName,
-                            AwsRegion functionRegion, Metric cloudwatchMetric) {
+                            String functionRegion, Metric cloudwatchMetric) {
 
         this.accessKey = awsAccessKey;
         this.secretKey = awsSecretKey;
 
         this.functionName = lambdaFunctionName;
-        this.functionRegion = functionRegion.get();
+        this.functionRegion = functionRegion;
 
         this.metricName = cloudwatchMetric.getAwsMetricName();
         this.metricNamespace = cloudwatchMetric.getAwsNamespace();
