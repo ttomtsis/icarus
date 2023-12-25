@@ -23,7 +23,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
-import java.util.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -41,8 +47,8 @@ public class StackDeployer {
 
 
     @Async
-    public CompletableFuture<HashMap<CompositeKey, String>> deploy(@NotNull Test associatedTest,
-                                                                   @NotBlank String id) {
+    public CompletableFuture<Set<DeploymentRecord>> deploy(@NotNull Test associatedTest,
+                                                           @NotBlank String id) {
 
         String name = associatedTest.getTargetFunction().getName() + "-" + id;
 
@@ -55,7 +61,7 @@ public class StackDeployer {
 
         // Create stack
         log.warn("Creating stack");
-        HashMap<CompositeKey, String> terraformOutputNames = createStack(name, app, associatedTest, id);
+        Set<DeploymentRecord> incompleteDeploymentRecords = createStack(name, app, associatedTest, id);
 
         log.warn("Finished creating");
 
@@ -73,21 +79,19 @@ public class StackDeployer {
 
         // Get functionUrls
         log.warn("Getting function URLs");
-        HashMap<CompositeKey, String> functionUrls = getFunctionUrls(stackDir, terraformOutputNames);
+        Set<DeploymentRecord> completeDeploymentRecords = getFunctionUrls(stackDir, incompleteDeploymentRecords);
 
-        return CompletableFuture.completedFuture(functionUrls);
+        return CompletableFuture.completedFuture(completeDeploymentRecords);
     }
 
 
 
-    private HashMap<CompositeKey, String> createStack(@NotBlank String name,
-                                                      @NotNull App app,
-                                                      @NotNull Test associatedTest,
-                                                      @NotBlank String id) {
+    private Set<DeploymentRecord> createStack(@NotBlank String name, @NotNull App app,
+                                              @NotNull Test associatedTest, @NotBlank String id) {
 
         MainStack mainStack = new MainStack(app, name);
 
-        HashMap<CompositeKey, String> outputNamesAndUrlsMap = new HashMap<>();
+        Set<DeploymentRecord> deploymentRecordSet = new HashSet<>();
 
         for (ProviderAccount account : associatedTest.getAccountsList()) {
 
@@ -113,8 +117,8 @@ public class StackDeployer {
                             associatedTest.getHttpMethod()
                     );
 
-                    addOutputNamesToMap(outputNamesAndUrlsMap,
-                            newAwsConstruct.getTerraformOutputsList(), configuration, account);
+                    deploymentRecordSet.addAll(newAwsConstruct.getDeploymentRecords());
+                    addConfigurationAndAccountToRecords(deploymentRecordSet, configuration, account);
                 }
 
                 if (account.getAccountType().equals("GcpAccount") &&
@@ -138,36 +142,33 @@ public class StackDeployer {
                                     .collect(Collectors.toCollection(HashSet::new))
                     );
 
-                    addOutputNamesToMap(outputNamesAndUrlsMap,
-                            newGcpConstruct.getTerraformOutputsList(), configuration, account);
+                    deploymentRecordSet.addAll(newGcpConstruct.getDeploymentRecords());
+                    addConfigurationAndAccountToRecords(deploymentRecordSet, configuration, account);
                 }
             }
         }
 
-        return outputNamesAndUrlsMap;
+        return deploymentRecordSet;
     }
 
 
     private void deployStack(@NotBlank String stackDir) {
 
-        File terraformDirectory = new File(stackDir + "\\.terraform");
         File stackDirectory = new File(stackDir);
-
-        // Initialize terraform
-        if (!terraformDirectory.exists()) {
-
-            createProcess(stackDirectory, TerraformCommand.INIT.get());
-        }
 
         try {
 
+            // Initialize terraform
+            log.warn("Initializing terraform...");
+            createProcess(stackDirectory, TerraformCommand.INIT.get());
+
             // Deploy infrastructure
+            log.warn("Deploying infrastructure...");
             createProcess(stackDirectory, TerraformCommand.APPLY.get());
         }
         catch (RuntimeException ex) {
 
-            deleteStack(stackDir);
-            throw new StackDeploymentException(ex.getMessage() + "\nStack was deleted\n");
+            throw new StackDeploymentException(ex.getMessage());
         }
 
 
@@ -183,17 +184,37 @@ public class StackDeployer {
         File stackDirectory = new File(stackDir);
 
         createProcess(stackDirectory, TerraformCommand.DESTROY.get());
+        deleteDirectory(outputDir);
     }
 
-    public void deleteStack(@NotBlank String stackDir) {
 
-        File stackDirectory = new File(stackDir);
+    private void deleteDirectory(String dir) {
 
-        createProcess(stackDirectory, TerraformCommand.DESTROY.get());
+        try {
+
+            Files.walkFileTree(Path.of(dir), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+
+        }
+        catch (IOException ex) {
+            throw new TestExecutionFailedException(ex);
+        }
     }
 
-    private HashMap<CompositeKey, String> getFunctionUrls(@NotBlank String stackDirectory,
-                                                          @NotNull HashMap<CompositeKey, String> terraformOutputNames) {
+
+    private Set<DeploymentRecord> getFunctionUrls(@NotBlank String stackDirectory,
+                                                  @NotNull Set<DeploymentRecord> deploymentRecords) {
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(new File(stackDirectory));
@@ -209,11 +230,13 @@ public class StackDeployer {
 
             // Read and print each line of the output
             StringBuilder rawTerraformOutputs = new StringBuilder();
+
             String line;
             while ((line = br.readLine()) != null) {
                 rawTerraformOutputs.append(line).append("\n");
             }
-            return extractUrls(terraformOutputNames, rawTerraformOutputs.toString());
+
+            return extractUrls(deploymentRecords, rawTerraformOutputs.toString());
         }
         catch (IOException ex) {
             log.error(ex.getMessage());
@@ -227,32 +250,31 @@ public class StackDeployer {
     }
 
 
+    private Set<DeploymentRecord> extractUrls(@NotNull Set<DeploymentRecord> deploymentRecords,
+                                              @NotBlank String terraformOutputs) {
 
-    private HashMap<CompositeKey, String> extractUrls(@NotNull HashMap<CompositeKey, String> urlMap,
-                                                      @NotBlank String functionUrls) {
-
-        String[] lines = functionUrls.split("\\n");
+        String[] lines = terraformOutputs.split("\\n");
 
         for (String line : lines) {
 
             String[] parts = line.split("=");
-            String outputName = parts[0].trim();
+            String terraformOutputName = parts[0].trim();
             String functionUrl = parts[1].trim().replace("\"", "");
 
-            for (Map.Entry<CompositeKey, String> entry : urlMap.entrySet()) {
+            for (DeploymentRecord deploymentRecord : deploymentRecords) {
 
                 // Using contains instead of equals since terraform appends a unique id
                 // in the final output name
-                if(outputName.contains(entry.getKey().outputName())) {
+                if(terraformOutputName.contains(deploymentRecord.deployedFunctionName)) {
 
-                    urlMap.put(entry.getKey(), functionUrl);
+                    deploymentRecord.deployedUrl = functionUrl;
                 }
 
             }
 
         }
 
-        return urlMap;
+        return deploymentRecords;
     }
 
 
@@ -286,14 +308,14 @@ public class StackDeployer {
     }
 
 
-    private void addOutputNamesToMap(@NotNull HashMap<CompositeKey, String> outputNamesAndUrlsMap,
-                                     @NotNull List<String> terraformOutputsList,
-                                     @NotNull ResourceConfiguration configuration,
-                                     @NotNull ProviderAccount accountUsed) {
+    private void addConfigurationAndAccountToRecords(@NotNull Set<DeploymentRecord> deploymentRecordSet,
+                                                     @NotNull ResourceConfiguration configuration,
+                                                     @NotNull ProviderAccount accountUsed) {
 
-        for (String outputName : terraformOutputsList) {
-            CompositeKey key = new CompositeKey(outputName, configuration, accountUsed);
-            outputNamesAndUrlsMap.put(key, null);
+        for (DeploymentRecord deploymentRecord : deploymentRecordSet) {
+
+            deploymentRecord.accountUsed = accountUsed;
+            deploymentRecord.configurationUsed = configuration;
         }
     }
 
