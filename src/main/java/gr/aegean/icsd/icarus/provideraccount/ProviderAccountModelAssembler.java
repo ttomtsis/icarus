@@ -1,10 +1,15 @@
 package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.util.security.UserUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static org.springframework.beans.support.PagedListHolder.DEFAULT_PAGE_SIZE;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -48,7 +53,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
         );
 
         awsAccountModel.add(linkTo(methodOn(ProviderAccountController.class)
-                .getUsersAccounts(UserUtils.getUsername()))
+                .getUsersAccounts(UserUtils.getUsername(), 0, DEFAULT_PAGE_SIZE))
                 .withRel("View All Accounts")
         );
 
@@ -85,13 +90,43 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
         );
 
         gcpAccountModel.add(linkTo(methodOn(ProviderAccountController.class)
-                .getUsersAccounts(UserUtils.getUsername()))
+                .getUsersAccounts(UserUtils.getUsername(), 0 , DEFAULT_PAGE_SIZE))
                 .withRel("View All Accounts")
         );
 
         return gcpAccountModel;
     }
 
+    
+    public PagedModel<ProviderAccountModel> createPagedModel(Page<ProviderAccount> profiles, String username) {
+
+        PagedModel<ProviderAccountModel> pagedModel = createPagedModelFromPage(profiles);
+
+        pagedModel.add(linkTo(methodOn(ProviderAccountController.class).getUsersAccounts(username,
+                profiles.getNumber(), profiles.getSize())).withSelfRel());
+
+        if (profiles.hasNext()) {
+            pagedModel.add(linkTo(methodOn(ProviderAccountController.class).getUsersAccounts(username,
+                    profiles.getNumber() + 1, profiles.getSize())).withRel("next"));
+        }
+
+        if (profiles.hasPrevious()) {
+            pagedModel.add(linkTo(methodOn(ProviderAccountController.class).getUsersAccounts(username,
+                    profiles.getNumber() - 1, profiles.getSize())).withRel("previous"));
+        }
+
+        return pagedModel;
+    }
+
+    private PagedModel<ProviderAccountModel> createPagedModelFromPage (Page<ProviderAccount> accountsPage) {
+
+        List<ProviderAccountModel> providerAccountModels = accountsPage.getContent().stream().map(this::toModel).toList();
+
+        PagedModel.PageMetadata pageMetadata = new PagedModel.PageMetadata
+                (accountsPage.getSize(), accountsPage.getNumber(), accountsPage.getTotalElements());
+
+        return PagedModel.of(providerAccountModels, pageMetadata);
+    }
 
     @NonNull
     @Override

@@ -2,16 +2,21 @@ package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
-import gr.aegean.icsd.icarus.util.exceptions.provideraccount.ProviderAccountNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.UserNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.provideraccount.ProviderAccountNotFoundException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -31,21 +36,31 @@ public class ProviderAccountService {
     }
 
 
+
+    public Page<ProviderAccount> getAccounts(String username, Pageable pageable) {
+
+        IcarusUser user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+
+        // Convert the Set to a List
+        List<ProviderAccount> accounts = new ArrayList<>(user.getAccounts());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), accounts.size());
+
+        return new PageImpl<>(accounts.subList(start, end), pageable, accounts.size());
+    }
+
     public ProviderAccount attachProviderAccount(@NotBlank String username, @NotNull ProviderAccount account) {
 
-        Optional<IcarusUser> icarusUser = userRepository.findUserByUsername(username);
+        IcarusUser icarusUser = checkIfUserExists(username);
 
-        if (icarusUser.isPresent()) {
+        ProviderAccount savedAccount = accountRepository.save(account);
 
-            ProviderAccount savedAccount = accountRepository.save(account);
+        icarusUser.addAccount(account);
+        userRepository.saveAndFlush(icarusUser);
 
-            icarusUser.get().addAccount(account);
-            userRepository.saveAndFlush(icarusUser.get());
-
-            return savedAccount;
-        }
-
-        throw new UserNotFoundException(username);
+        return savedAccount;
     }
 
     public void updateProviderAccount(@NotBlank String awsAccountName, @NotNull AwsAccount updatedAwsAccount) {
@@ -103,5 +118,10 @@ public class ProviderAccountService {
         accountRepository.deleteByName(accountName);
     }
 
+    private IcarusUser checkIfUserExists(String username) {
 
+        return userRepository.findUserByUsername(username).orElseThrow(
+                () -> new UserNotFoundException(username)
+        );
+    }
 }
