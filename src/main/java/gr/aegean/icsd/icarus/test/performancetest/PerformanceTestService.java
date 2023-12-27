@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.test.performancetest;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
-import gr.aegean.icsd.icarus.testexecution.MetricResultRepository;
+import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
 import gr.aegean.icsd.icarus.util.MetricQueryEngine;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;

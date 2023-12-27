@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.testexecution;
+package gr.aegean.icsd.icarus.testexecution.metricresult;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

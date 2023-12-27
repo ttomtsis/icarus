@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.testexecution;
+package gr.aegean.icsd.icarus.testexecution.metricresult;
 
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
