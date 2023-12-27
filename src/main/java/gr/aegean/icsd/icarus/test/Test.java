@@ -58,7 +58,7 @@ public class Test {
     fetch = FetchType.EAGER)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
+    @OneToMany(mappedBy = "parentTest", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
             targetEntity = ResourceConfiguration.class, orphanRemoval = true,
     fetch = FetchType.EAGER)
     private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
