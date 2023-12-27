@@ -45,7 +45,7 @@ public class TestCaseModelAssembler extends RepresentationModelAssemblerSupport<
 
         Set<TestCaseMemberModel> members = new HashSet<>();
         for (TestCaseMember member : entity.getTestCaseMembers()) {
-            members.add(testCaseMemberModelAssembler.toModel(member));
+            members.add(testCaseMemberModelAssembler.toModel(member, entity.getParentTest().getId()));
         }
         
         newModel.setTestCaseMembers(members);

@@ -65,4 +65,27 @@ public class FunctionalTestController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{testId}/execute")
+    public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
+
+        service.executeTest(testId);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/v0/tests/functional/{testId}/execute")
+                .buildAndExpand(testId)
+                .toUri();
+
+        return ResponseEntity.accepted().header("Location", location.toString()).build();
+    }
+
+    @GetMapping("/{testId}/execute")
+    public ResponseEntity<String> getExecutionStatus(@PathVariable Long testId) {
+
+        String status = service.getTestState(testId);
+
+        return ResponseEntity.ok().body(status);
+    }
+
+
 }

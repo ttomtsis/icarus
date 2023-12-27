@@ -21,11 +21,11 @@ public class TestCase {
     private Long id;
 
     @NotBlank(message = "Test case name cannot be blank")
-    @Size(min = minLength, max = maxLength, message = "Test case name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Test case name does not conform to length limitations")
     @Column(unique = true)
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength,
+    @Size(min = MIN_LENGTH, max = MAX_DESCRIPTION_LENGTH,
             message = "Test case description does not conform to length limitations")
     private String description;
 
@@ -37,13 +37,6 @@ public class TestCase {
     private final Set<TestCaseMember> testCaseMembers = new HashSet<>();
 
 
-
-    public TestCase(String name, String description, FunctionalTest parentTest, Set<TestCaseMember> testCaseMembers) {
-        this.name = name;
-        this.description = description;
-        this.parentTest = parentTest;
-        this.testCaseMembers.addAll(testCaseMembers);
-    }
 
     public TestCase(String name, String description, FunctionalTest parentTest) {
         this.name = name;
@@ -97,22 +90,6 @@ public class TestCase {
 
     public void setParentTest(FunctionalTest parentTest) {
         this.parentTest = parentTest;
-    }
-
-    public void addMember(TestCaseMember newMember) {
-        this.testCaseMembers.add(newMember);
-    }
-
-    public void addMember(Set<TestCaseMember> newMembers) {
-        this.testCaseMembers.addAll(newMembers);
-    }
-
-    public void removeMember(TestCaseMember member) {
-        this.testCaseMembers.remove(member);
-    }
-
-    public void removeMember(Set<TestCaseMember> members) {
-        this.testCaseMembers.removeAll(members);
     }
 
 

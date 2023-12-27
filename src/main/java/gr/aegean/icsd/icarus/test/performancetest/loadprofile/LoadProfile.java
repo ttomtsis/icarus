@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 
 @Entity
@@ -15,23 +16,23 @@ public class LoadProfile {
     private Long id;
 
     @NotNull(message = "Load Profile's load time cannot be null")
-    @Positive(message = "Load time cannot be less than zero")
+    @Positive(message = "Load time cannot be less than or equal to zero")
     private Integer loadTime;
 
     @NotNull(message = "Load Profile's ramp up cannot be null")
-    @Positive(message = "Ramp up cannot be less than zero")
+    @PositiveOrZero(message = "Ramp up cannot be less than zero")
     private Integer rampUp;
 
     @NotNull(message = "Load Profile's number of users cannot be null")
-    @Positive(message = "Concurrent users cannot be less than zero")
+    @Positive(message = "Concurrent users cannot be less than or equal to zero")
     private Integer concurrentUsers;
 
     @NotNull(message = "Load Profile's start delay cannot be null")
-    @Positive(message = "Start delay cannot be less than zero")
+    @PositiveOrZero(message = "Start delay cannot be less than zero")
     private Integer startDelay;
 
     @NotNull(message = "Load Profile's think time cannot be null")
-    @Positive(message = "Think time cannot be less than zero")
+    @PositiveOrZero(message = "Think time cannot be less than zero")
     private Integer thinkTime;
 
     @ManyToOne(targetEntity = PerformanceTest.class, optional = false)

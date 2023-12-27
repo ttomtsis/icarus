@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.util.restassured;
 
 import gr.aegean.icsd.icarus.util.enums.Platform;
+import io.micrometer.common.util.StringUtils;
 import io.restassured.RestAssured;
 import io.restassured.http.Method;
 import io.restassured.response.Response;
@@ -19,8 +20,8 @@ public class RestAssuredTest {
     private final Platform provider;
 
     private final String path;
-    private final String pathVariable;
-    private final String requestPathVariableValue;
+    private String pathVariable;
+    private String requestPathVariableValue;
     private final String requestBody;
 
     private final int expectedStatusCode;
@@ -40,30 +41,38 @@ public class RestAssuredTest {
      * @param path Path the function exposes
      * @param pathVariable Path variable present in the path
      * @param pathVariableValue Value of the path variable
-     * @param requestBody Body of the outbound request
+     * @param body Body of the outbound request
      * @param expectedStatusCode Expected status code from the response
      * @param expectedResponseBody Expected response body from the response
      * @param provider Cloud provider where the function is deployed
      */
     public RestAssuredTest(String functionURL, String path, String pathVariable,
-                           String pathVariableValue, String requestBody,
+                           String pathVariableValue, String body,
                            int expectedStatusCode, String expectedResponseBody, Platform provider) {
 
-        this.path = path;
-        this.pathVariable = pathVariable;
+        RestAssured.baseURI = functionURL;
 
-        this.requestPathVariableValue = pathVariableValue;
-        this.requestBody = requestBody;
+        this.path = path;
+
+        if (StringUtils.isNotBlank(this.path)) {
+            this.pathVariable = pathVariable;
+            this.requestPathVariableValue = pathVariableValue;
+        }
+
+        if (StringUtils.isBlank(body)) {
+            this.requestBody = "";
+        } else {
+            this.requestBody = body;
+        }
 
         this.expectedStatusCode = expectedStatusCode;
         this.expectedResponseBody = expectedResponseBody;
-
-        RestAssured.baseURI = functionURL;
 
         this.httpMethod = Method.GET;
 
         this.provider = provider;
 
+        runTest();
     }
 
 
@@ -73,15 +82,28 @@ public class RestAssuredTest {
      */
     public void runTest() {
 
-        Response response =
-                given().
-                        pathParam(this.pathVariable, this.requestPathVariableValue).
-                        body(requestBody).
-                when().
-                        request(this.httpMethod, this.path).
-                then().
-                        extract().
-                        response();
+        Response response;
+        if (StringUtils.isBlank(this.path)) {
+            response =
+                    given().
+                            body(this.requestBody).
+                    when().
+                            request(this.httpMethod).
+                    then().
+                            extract().
+                            response();
+        }
+        else {
+            response =
+                    given().
+                            pathParam(this.pathVariable, this.requestPathVariableValue).
+                            body(this.requestBody).
+                            when().
+                            request(this.httpMethod, this.path).
+                            then().
+                            extract().
+                            response();
+        }
 
         this.actualStatusCode = response.getStatusCode();
 
@@ -123,6 +145,24 @@ public class RestAssuredTest {
      */
     public boolean getPass() {
         return this.pass;
+    }
+
+
+    @Override
+    public String toString() {
+        return "RestAssuredTest{" +
+                "httpMethod=" + httpMethod +
+                ", provider=" + provider +
+                ", path='" + path + '\'' +
+                ", pathVariable='" + pathVariable + '\'' +
+                ", requestPathVariableValue='" + requestPathVariableValue + '\'' +
+                ", requestBody='" + requestBody + '\'' +
+                ", expectedStatusCode=" + expectedStatusCode +
+                ", expectedResponseBody='" + expectedResponseBody + '\'' +
+                ", actualStatusCode=" + actualStatusCode +
+                ", actualResponseBody='" + actualResponseBody + '\'' +
+                ", pass=" + pass +
+                '}';
     }
 
 

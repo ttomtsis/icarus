@@ -11,7 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.defaultPageSize;
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.DEFAULT_PAGE_SIZE;
 
 @RestController
 @RequestMapping(value = "api/v0/tests/performance/{testId}/load-profiles", produces = "application/json")
@@ -34,7 +34,7 @@ public class LoadProfileController {
     @GetMapping
     public ResponseEntity<PagedModel<LoadProfileModel>> getAllLoadProfiles(@PathVariable Long testId,
                                                                            @RequestParam(defaultValue = "0") int page,
-                                                                           @RequestParam(defaultValue = defaultPageSize) int size) {
+                                                                           @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 

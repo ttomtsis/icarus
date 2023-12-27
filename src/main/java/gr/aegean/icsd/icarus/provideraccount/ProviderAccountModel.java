@@ -18,6 +18,7 @@ public class ProviderAccountModel extends RepresentationModel<ProviderAccountMod
 
     @JsonProperty("gcpKeyfile")
     private GcpKeyfile gcpKeyfile;
+    private String gcpProjectId;
 
 
 
@@ -90,5 +91,14 @@ public class ProviderAccountModel extends RepresentationModel<ProviderAccountMod
         }
 
     }
+
+    public String getGcpProjectId() {
+        return gcpProjectId;
+    }
+
+    public void setGcpProjectId(String gcpProjectId) {
+        this.gcpProjectId = gcpProjectId;
+    }
+
 
 }

@@ -1,11 +1,13 @@
 package gr.aegean.icsd.icarus.test;
 
-import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.http.HttpMethod;
@@ -27,24 +29,21 @@ public class Test {
     private Long id;
 
     @NotBlank(message = "Test name cannot be blank")
-    @Size(min = minLength, max = maxLength, message = "Test name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH,
+            message = "Test name does not conform to length limitations")
     @Column(unique = true)
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength,
+    @Size(min = MIN_LENGTH, max = MAX_DESCRIPTION_LENGTH,
             message = "Test description does not conform to length limitations")
     private String description;
 
     @NotBlank(message = "Http Method used by the Test cannot be blank")
     private String httpMethod;
 
-    @Pattern(regexp = "^/([a-zA-Z]+/?)*(\\{[a-zA-Z]+\\}/([a-zA-Z]+/?)*)?$",
-            message = "The exposed path is not in a valid format")
+    // TODO: Add validation for path and pathVariable
     private String path;
 
-    @Pattern(regexp = "\\{(?!\\d*\\})[a-zA-Z0-9_]+\\}",
-            message = "Path variable exposed in the test is not in a valid format." +
-                    " Path variable must be in the format {A-Z, a-z, 0-9} e.g. {variable1}")
     private String pathVariable;
 
     @ManyToOne(cascade = CascadeType.REFRESH)
@@ -55,73 +54,28 @@ public class Test {
     @JoinColumn(name = "target_function_id")
     private Function targetFunction;
 
-    @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class)
+    @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class,
+    fetch = FetchType.EAGER)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
+
+    @OneToMany(mappedBy = "parentTest", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
+            targetEntity = ResourceConfiguration.class, orphanRemoval = true,
+    fetch = FetchType.EAGER)
+    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
     // TODO: Merge this field with testAuthor field
     @CreatedBy
     private String authorUsername;
 
-
-
-    public static class TestBuilder {
-
-
-        private final String name;
-        private final IcarusUser testAuthor;
-        private final Function targetFunction;
-        private final String httpMethod;
-
-        private String description;
-        private String path;
-        private String pathVariable;
-
-
-        public TestBuilder(String name, IcarusUser testAuthor, Function targetFunction,
-        HttpMethod httpMethod) {
-            this.name = name;
-            this.testAuthor = testAuthor;
-            this.targetFunction = targetFunction;
-            this.httpMethod = httpMethod.toString();
-        }
-
-
-        public TestBuilder description (String description) {
-            this.description = description;
-            return this;
-        }
-
-        public TestBuilder path (String path) {
-            this.path = path;
-            return this;
-        }
-
-        public TestBuilder pathVariable (String pathVariable) {
-            this.pathVariable = pathVariable;
-            return this;
-        }
-
-        public Test build () {
-            return new Test(this);
-        }
-
-
-    }
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private TestState state;
 
 
 
-    private Test (TestBuilder builder) {
-        this.name = builder.name;
-        this.testAuthor = builder.testAuthor;
-        this.targetFunction = builder.targetFunction;
-        this.httpMethod = builder.httpMethod;
 
-        this.description = builder.description;
-        this.path = builder.path;
-        this.pathVariable = builder.pathVariable;
-    }
+    public Test() {this.state = TestState.CREATED;}
 
-    public Test() {}
 
 
 
@@ -129,6 +83,7 @@ public class Test {
     private void removeForeignKeyConstraints() {
         this.targetFunction = null;
     }
+
 
     public Long getId() {
         return id;
@@ -138,20 +93,16 @@ public class Test {
         this.id = id;
     }
 
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
+    public TestState getState() {
+        return state;
     }
 
-    public void setTestAuthor(IcarusUser testAuthor) {
-        this.testAuthor = testAuthor;
+    public void setState(TestState state) {
+        this.state = state;
     }
 
     public String getAuthorUsername() {
         return authorUsername;
-    }
-
-    public void setAuthorUsername(String authorUsername) {
-        this.authorUsername = authorUsername;
     }
 
     public String getName() {
@@ -194,6 +145,14 @@ public class Test {
 
     public void addProviderAccount(ProviderAccount newAccount) {accountsList.add(newAccount);}
 
+    public void clearAccountsList() {
+        accountsList.clear();
+    }
+
+    public void removeAccount(ProviderAccount providerAccount) {
+        this.accountsList.remove(providerAccount);
+    }
+
     public String getPathVariable() {
         return pathVariable;
     }
@@ -206,12 +165,16 @@ public class Test {
         return targetFunction;
     }
 
-    protected void setAuthor(IcarusUser testAuthor) {
+    public void setAuthor(IcarusUser testAuthor) {
         this.testAuthor = testAuthor;
     }
 
-    protected void setTargetFunction(Function targetFunction) {
+    public void setTargetFunction(Function targetFunction) {
         this.targetFunction = targetFunction;
+    }
+
+    public Set<ResourceConfiguration> getResourceConfigurations() {
+        return resourceConfigurations;
     }
 
 

@@ -1,120 +1,32 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
-import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseModel;
-import gr.aegean.icsd.icarus.util.enums.Platform;
-import org.springframework.hateoas.RepresentationModel;
+import gr.aegean.icsd.icarus.test.TestModel;
 
-import java.util.HashSet;
 import java.util.Set;
 
 
-public class FunctionalTestModel extends RepresentationModel<FunctionalTestModel> {
+public class FunctionalTestModel extends TestModel {
 
 
-    private Long id;
-    private String name;
-    private String description;
-    private String httpMethod;
-    private String path;
-    private String pathVariable;
-    private Long testAuthor;
-    private Long targetFunction;
-
-    private String region;
-    private Integer usedMemory;
     private String functionUrl;
-    private Set<TestCaseModel> testCases = new HashSet<>();
-    private Platform providerPlatform;
+    private Set<Long> testCases;
+    private Set<Long> resourceConfigurations;
 
 
 
-    public Long getId() {
-        return id;
+    public FunctionalTestModel(TestModel parentModel , String functionUrl,
+                               Set<Long> testCases,
+                               Set<Long> resourceConfigurations) {
+
+        super(parentModel);
+        this.functionUrl = functionUrl;
+        this.testCases = testCases;
+        this.resourceConfigurations = resourceConfigurations;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public FunctionalTestModel() {}
 
-    public Platform getProviderPlatform() {
-        return providerPlatform;
-    }
 
-    public void setProviderPlatform(Platform providerPlatform) {
-        this.providerPlatform = providerPlatform;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPathVariable() {
-        return pathVariable;
-    }
-
-    public void setPathVariable(String pathVariable) {
-        this.pathVariable = pathVariable;
-    }
-
-    public Long getTestAuthor() {
-        return testAuthor;
-    }
-
-    public void setTestAuthor(Long testAuthor) {
-        this.testAuthor = testAuthor;
-    }
-
-    public Long getTargetFunction() {
-        return targetFunction;
-    }
-
-    public void setTargetFunction(Long targetFunction) {
-        this.targetFunction = targetFunction;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public Integer getUsedMemory() {
-        return usedMemory;
-    }
-
-    public void setUsedMemory(Integer usedMemory) {
-        this.usedMemory = usedMemory;
-    }
 
     public String getFunctionUrl() {
         return functionUrl;
@@ -124,12 +36,20 @@ public class FunctionalTestModel extends RepresentationModel<FunctionalTestModel
         this.functionUrl = functionUrl;
     }
 
-    public Set<TestCaseModel> getTestCases() {
+    public Set<Long> getTestCases() {
         return testCases;
     }
 
-    public void setTestCases(Set<TestCaseModel> testCases) {
+    public void setTestCases(Set<Long> testCases) {
         this.testCases = testCases;
+    }
+
+    public Set<Long> getResourceConfigurations() {
+        return resourceConfigurations;
+    }
+
+    public void setResourceConfigurations(Set<Long> resourceConfigurations) {
+        this.resourceConfigurations = resourceConfigurations;
     }
 
 

@@ -1,7 +1,6 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 
-import gr.aegean.icsd.icarus.util.PatchDocument;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -60,20 +59,33 @@ public class PerformanceTestController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping(value = "/{testId}", consumes = "application/json")
-    public ResponseEntity<Void> updateTestMetrics(@PathVariable Long testId, @RequestBody PatchDocument patchDoc) {
-
-        service.updateTestMetrics(testId, patchDoc);
-
-        return ResponseEntity.noContent().build();
-    }
-
     @DeleteMapping("/{testId}")
     public ResponseEntity<Void> deleteTest(@PathVariable Long testId) {
 
         service.deleteTest(testId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{testId}/execute")
+    public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
+
+        service.executeTest(testId);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/v0/tests/performance/{testId}/execute")
+                .buildAndExpand(testId)
+                .toUri();
+
+        return ResponseEntity.accepted().header("Location", location.toString()).build();
+    }
+
+    @GetMapping("/{testId}/execute")
+    public ResponseEntity<String> getExecutionStatus(@PathVariable Long testId) {
+
+        String status = service.getTestState(testId);
+
+        return ResponseEntity.ok().body(status);
     }
 
 

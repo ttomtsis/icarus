@@ -16,35 +16,36 @@ public enum LambdaRuntime {
      */
 
     // Node.js Runtimes
-    nodejs20("nodejs20.x"),
-    nodejs18("nodejs18.x"),
-    nodejs16("nodejs16.x"),
-    nodejs14("nodejs14.x"),
+    NODEJS20("nodejs20.x"),
+    NODEJS18("nodejs18.x"),
+    NODEJS16("nodejs16.x"),
+    NODEJS14("nodejs14.x"),
 
     // Python Runtimes
-    python311("python3.11"),
-    python310("python3.10"),
-    python39("python3.9"),
-    python38("python3.8"),
-    python37("python3.7"),
+    PYTHON311("python3.11"),
+    PYTHON310("python3.10"),
+    PYTHON39("python3.9"),
+    PYTHON38("python3.8"),
+    PYTHON37("python3.7"),
 
     // Java Runtimes
-    java21("java21"),
-    java17("java17"),
-    java11("java11"),
-    java8al2("java8al2"),
-    java8("java6"),
+    JAVA21("java21"),
+    JAVA17("java17"),
+    JAVA11("java11"),
+    JAVA8AL2("java8al2"),
+    JAVA8("java6"),
 
     // .NET Runtimes
-    net7("dotnet7"),
-    net6("dotnet6"),
+    NET7("dotnet7"),
+    NET6("dotnet6"),
 
     // Go Runtimes
-    go1("go1.x"),
+    GO1("go1.x"),
 
     // Ruby Runtimes
-    ruby32("ruby3.2"),
-    ruby27("ruby2.7");
+    RUBY32("ruby3.2"),
+    RUBY27("ruby2.7");
+
 
     private final String lambdaRuntimeCode;
 

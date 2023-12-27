@@ -16,7 +16,7 @@ public class TestCaseMember {
 
     private String expectedResponseBody;
 
-    private String requestPathVariable;
+    private String requestPathVariableValue;
 
     private String requestBody;
 
@@ -62,7 +62,7 @@ public class TestCaseMember {
         this.expectedResponseCode = builder.expectedResponseCode;
         this.expectedResponseBody = builder.expectedResponseBody;
 
-        this.requestPathVariable = builder.requestPathVariable;
+        this.requestPathVariableValue = builder.requestPathVariable;
         this.requestBody = builder.requestBody;
     }
 
@@ -73,7 +73,7 @@ public class TestCaseMember {
         return new TestCaseMemberBuilder(model.getExpectedResponseCode(),
                 model.getExpectedResponseBody())
 
-                .requestPathVariable(model.getRequestPathVariable())
+                .requestPathVariable(model.getRequestPathVariableValue())
                 .requestBody(model.getRequestBody())
                 .build();
     }
@@ -104,12 +104,12 @@ public class TestCaseMember {
         this.expectedResponseBody = expectedResponseBody;
     }
 
-    public String getRequestPathVariable() {
-        return requestPathVariable;
+    public String getRequestPathVariableValue() {
+        return requestPathVariableValue;
     }
 
-    public void setRequestPathVariable(String requestPathVariable) {
-        this.requestPathVariable = requestPathVariable;
+    public void setRequestPathVariableValue(String requestPathVariableValue) {
+        this.requestPathVariableValue = requestPathVariableValue;
     }
 
     public String getRequestBody() {

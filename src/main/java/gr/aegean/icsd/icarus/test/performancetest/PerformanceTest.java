@@ -3,7 +3,6 @@ package gr.aegean.icsd.icarus.test.performancetest;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import jakarta.persistence.*;
@@ -32,10 +31,6 @@ public class PerformanceTest extends Test  {
             targetEntity = LoadProfile.class, orphanRemoval = true)
     private final Set<LoadProfile> loadProfiles = new HashSet<>();
 
-    @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
-            targetEntity = LoadProfile.class, orphanRemoval = true)
-    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
-
 
 
     public static class PerformanceTestBuilder {
@@ -43,7 +38,6 @@ public class PerformanceTest extends Test  {
 
         private final String name;
         private final IcarusUser testAuthor;
-        private final Function targetFunction;
         private final HttpMethod httpMethod;
         private final Set<Metric> chosenMetrics = new HashSet<>();
 
@@ -55,16 +49,29 @@ public class PerformanceTest extends Test  {
         private String requestBody;
 
 
-        public PerformanceTestBuilder(String name, IcarusUser author, Function targetFunction,
-                                      HttpMethod httpMethod) {
+        public PerformanceTestBuilder(String name, IcarusUser author, HttpMethod httpMethod) {
 
             this.name = name;
             this.testAuthor = author;
-            this.targetFunction = targetFunction;
             this.httpMethod = httpMethod;
 
         }
 
+
+        public PerformanceTestBuilder description (String description) {
+            this.description = description;
+            return this;
+        }
+
+        public PerformanceTestBuilder path (String path) {
+            this.path = path;
+            return this;
+        }
+
+        public PerformanceTestBuilder pathVariable (String pathVariable) {
+            this.pathVariable = pathVariable;
+            return this;
+        }
 
         public PerformanceTestBuilder pathVariableValue (String pathVariableValue) {
             this.pathVariableValue = pathVariableValue;
@@ -73,11 +80,6 @@ public class PerformanceTest extends Test  {
 
         public PerformanceTestBuilder requestBody (String requestBody) {
             this.requestBody = requestBody;
-            return this;
-        }
-
-        public PerformanceTestBuilder metrics (Metric newMetric) {
-            this.chosenMetrics.add(newMetric);
             return this;
         }
 
@@ -106,9 +108,10 @@ public class PerformanceTest extends Test  {
         targetFunction.setId(model.getTargetFunction());
 
         return new PerformanceTestBuilder(
-                model.getName(), author, targetFunction,
-                HttpMethod.valueOf(model.getHttpMethod())
+                model.getName(), author, HttpMethod.valueOf(model.getHttpMethod())
         )
+                .pathVariable(model.getPathVariable())
+
                 .pathVariableValue(model.getPathVariableValue())
                 .requestBody(model.getRequestBody())
                 .metrics(model.getChosenMetrics())
@@ -119,7 +122,6 @@ public class PerformanceTest extends Test  {
     private PerformanceTest(PerformanceTestBuilder builder) {
         super.setName(builder.name);
         super.setAuthor(builder.testAuthor);
-        super.setTargetFunction(builder.targetFunction);
         super.setHttpMethod(builder.httpMethod);
 
         super.setDescription(builder.description);
@@ -128,19 +130,11 @@ public class PerformanceTest extends Test  {
 
         this.chosenMetrics.addAll(builder.chosenMetrics);
 
-        this.pathVariableValue = builder.pathVariable;
+        this.pathVariableValue = builder.pathVariableValue;
         this.requestBody = builder.requestBody;
     }
 
 
-
-    public String getPathVariable() {
-        return super.getPathVariable();
-    }
-
-    public String getPath () {
-        return super.getPath();
-    }
 
     public String getRequestBody() {
         return requestBody;
@@ -159,12 +153,6 @@ public class PerformanceTest extends Test  {
         this.chosenMetrics.addAll(newMetrics);
     }
 
-    public void addMetric(Metric newMetric) {
-        this.chosenMetrics.add(newMetric);
-    }
-
-    public void removeMetric(Metric metric) {this.chosenMetrics.remove(metric);}
-
     public String getPathVariableValue() {
         return pathVariableValue;
     }
@@ -175,10 +163,6 @@ public class PerformanceTest extends Test  {
 
     public Set<LoadProfile> getLoadProfiles() {
         return loadProfiles;
-    }
-
-    public Set<ResourceConfiguration> getResourceConfigurations() {
-        return resourceConfigurations;
     }
 
 

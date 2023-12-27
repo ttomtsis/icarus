@@ -1,5 +1,8 @@
 package gr.aegean.icsd.icarus.provideraccount;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.DEFAULT_PAGE_SIZE;
 
 @RestController
 @RequestMapping(value = "api/v0/users/{username}/accounts", produces = "application/json")
@@ -25,9 +30,15 @@ public class ProviderAccountController {
 
     @PreAuthorize("#username == authentication.name")
     @GetMapping
-    public PagedModel<ProviderAccountModel> getUsersAccounts(@PathVariable("username") String username) {
-        // TODO: Implement
-        return null;
+    public ResponseEntity<PagedModel<ProviderAccountModel>> getUsersAccounts(@PathVariable("username") String username,
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProviderAccount> accounts = service.getAccounts(username, pageable);
+        PagedModel<ProviderAccountModel> accountsPagedModel = modelAssembler.createPagedModel(accounts, username);
+
+        return ResponseEntity.ok().body(accountsPagedModel);
     }
 
     @PreAuthorize("#username == authentication.name")

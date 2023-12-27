@@ -10,7 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.defaultPageSize;
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.DEFAULT_PAGE_SIZE;
 
 
 @RestController
@@ -36,7 +36,7 @@ public class TestCaseMemberController {
     public ResponseEntity<PagedModel<TestCaseMemberModel>> getAllTestCaseMembers(@PathVariable Long testId,
                                                                      @PathVariable Long testCaseId,
                                                                      @RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = defaultPageSize) int size) {
+                                                                     @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 

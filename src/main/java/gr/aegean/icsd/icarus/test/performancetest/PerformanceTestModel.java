@@ -1,96 +1,36 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
-import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfileModel;
-import gr.aegean.icsd.icarus.test.performancetest.resourceconfiguration.ResourceConfigurationModel;
+import gr.aegean.icsd.icarus.test.TestModel;
 import gr.aegean.icsd.icarus.util.enums.Metric;
-import org.springframework.hateoas.RepresentationModel;
 
-import java.util.HashSet;
 import java.util.Set;
 
-public class PerformanceTestModel extends RepresentationModel<PerformanceTestModel> {
+public class PerformanceTestModel extends TestModel {
 
 
-    private Long id;
-    private String name;
-    private String description;
-    private String httpMethod;
-    private String path;
-    private String pathVariable;
-    private Long testAuthor;
-    private Long targetFunction;
-
-    private Set<Metric> chosenMetrics = new HashSet<>();
+    private Set<Metric> chosenMetrics;
     private String pathVariableValue;
     private String requestBody;
-    private Set<LoadProfileModel> loadProfiles = new HashSet<>();
-    private Set<ResourceConfigurationModel> resourceConfigurations = new HashSet<>();
+    private Set<Long> loadProfiles;
+    private Set<Long> resourceConfigurations;
 
 
 
-    public Long getId() {
-        return id;
+    public PerformanceTestModel (TestModel parentModel, Set<Metric> chosenMetrics, String pathVariableValue,
+                                 String requestBody, Set<Long> loadProfiles,
+                                 Set<Long> resourceConfigurations) {
+
+        super(parentModel);
+        this.chosenMetrics = chosenMetrics;
+        this.pathVariableValue = pathVariableValue;
+        this.requestBody = requestBody;
+        this.loadProfiles = loadProfiles;
+        this.resourceConfigurations = resourceConfigurations;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public PerformanceTestModel() {}
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPathVariable() {
-        return pathVariable;
-    }
-
-    public void setPathVariable(String pathVariable) {
-        this.pathVariable = pathVariable;
-    }
-
-    public Long getTestAuthor() {
-        return testAuthor;
-    }
-
-    public void setTestAuthor(Long testAuthor) {
-        this.testAuthor = testAuthor;
-    }
-
-    public Long getTargetFunction() {
-        return targetFunction;
-    }
-
-    public void setTargetFunction(Long targetFunction) {
-        this.targetFunction = targetFunction;
-    }
 
     public Set<Metric> getChosenMetrics() {
         return chosenMetrics;
@@ -98,14 +38,6 @@ public class PerformanceTestModel extends RepresentationModel<PerformanceTestMod
 
     public void setChosenMetrics(Set<Metric> chosenMetrics) {
         this.chosenMetrics = chosenMetrics;
-    }
-
-    public void setLoadProfiles(Set<LoadProfileModel> loadProfiles) {
-        this.loadProfiles = loadProfiles;
-    }
-
-    public void setResourceConfigurations(Set<ResourceConfigurationModel> resourceConfigurations) {
-        this.resourceConfigurations = resourceConfigurations;
     }
 
     public String getPathVariableValue() {
@@ -124,12 +56,20 @@ public class PerformanceTestModel extends RepresentationModel<PerformanceTestMod
         this.requestBody = requestBody;
     }
 
-    public Set<LoadProfileModel> getLoadProfiles() {
+    public Set<Long> getLoadProfiles() {
         return loadProfiles;
     }
 
-    public Set<ResourceConfigurationModel> getResourceConfigurations() {
+    public void setLoadProfiles(Set<Long> loadProfiles) {
+        this.loadProfiles = loadProfiles;
+    }
+
+    public Set<Long> getResourceConfigurations() {
         return resourceConfigurations;
+    }
+
+    public void setResourceConfigurations(Set<Long> resourceConfigurations) {
+        this.resourceConfigurations = resourceConfigurations;
     }
 
 

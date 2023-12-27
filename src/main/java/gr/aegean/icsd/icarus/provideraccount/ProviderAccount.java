@@ -12,7 +12,7 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@Table(name = "providerAccount")
+@Table(name = "provider_account")
 public class ProviderAccount {
 
     @Id
@@ -21,15 +21,19 @@ public class ProviderAccount {
 
     @NotBlank(message = "Name cannot be blank")
     @Column(unique = true)
-    @Size(min = minLength, max = maxLength, message = "Name does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Name does not conform to length limitations")
     private String name;
 
-    @Size(min = minLength, max = maxDescriptionLength, message = "Description does not conform to length limitations")
+    @Size(min = MIN_LENGTH, max = MAX_DESCRIPTION_LENGTH, message = "Description does not conform to length limitations")
     private String description;
 
-    @ManyToMany(mappedBy = "accountsList", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
+    @Column(name = "dtype", insertable = false, updatable = false)
+    private String accountType;
+
+    @ManyToMany(mappedBy = "accountsList", cascade = CascadeType.REFRESH,
             targetEntity = Test.class)
     private final Set<Test> associatedTests = new HashSet<>();
+
 
 
     public ProviderAccount(String name, String description) {
@@ -42,6 +46,16 @@ public class ProviderAccount {
     }
 
     public ProviderAccount() {}
+
+
+
+    @PreRemove
+    private void removeForeignKeyConstraints() {
+
+        for (Test associatedTest : this.associatedTests) {
+            associatedTest.removeAccount(this);
+        }
+    }
 
 
     // GETTERS - SETTERS
@@ -71,6 +85,10 @@ public class ProviderAccount {
 
     public Set<Test> getAssociatedTests() {
         return associatedTests;
+    }
+
+    public String getAccountType() {
+        return accountType;
     }
 
 

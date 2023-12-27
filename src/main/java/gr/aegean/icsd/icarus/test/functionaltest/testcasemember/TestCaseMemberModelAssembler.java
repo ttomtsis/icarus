@@ -38,7 +38,8 @@ public class TestCaseMemberModelAssembler
         newModel.setParentTestCase(entity.getParentTestCase().getId());
         newModel.setExpectedResponseBody(entity.getExpectedResponseBody());
         newModel.setExpectedResponseCode(entity.getExpectedResponseCode());
-        newModel.setRequestPathVariable(entity.getRequestPathVariable());
+        newModel.setRequestPathVariableValue(entity.getRequestPathVariableValue());
+        newModel.setRequestBody(entity.getRequestBody());
 
         return addLinks(newModel, testId);
     }
