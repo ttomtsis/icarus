@@ -18,7 +18,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashMap;
 import java.util.function.Consumer;
 
 
@@ -66,11 +65,11 @@ public class TestService {
                 new TestNotFoundException
                         (testId));
 
-        setIfNotBlank(requestedTest::setName, testModel.getName());
-        setIfNotBlank(requestedTest::setDescription, testModel.getDescription());
-        setIfNotBlank(value -> requestedTest.setHttpMethod(HttpMethod.valueOf(value)), testModel.getHttpMethod());
-        setIfNotBlank(requestedTest::setPath, testModel.getPath());
-        setIfNotBlank(requestedTest::setPathVariable, testModel.getPathVariable());
+        setIfNotNull(requestedTest::setName, testModel.getName());
+        setIfNotNull(requestedTest::setDescription, testModel.getDescription());
+        setIfNotNull(value -> requestedTest.setHttpMethod(HttpMethod.valueOf(value)), testModel.getHttpMethod());
+        setIfNotNull(requestedTest::setPath, testModel.getPath());
+        setIfNotNull(requestedTest::setPathVariable, testModel.getPathVariable());
 
         if (testModel.getTargetFunction() != null) {
 
@@ -147,11 +146,25 @@ public class TestService {
         return requestedTest;
     }
 
+
+
     public String getTestState(@NotNull @Positive Long testId) {
 
         return repository.findById(testId)
                 .orElseThrow(() -> new TestNotFoundException(testId))
                 .getState().toString();
+    }
+
+    protected void abortTestExecution(Test requestedTest, String deploymentId) {
+
+        setState(requestedTest, TestState.ERROR);
+        deployer.deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+    }
+
+    protected void finalizeTestExecution(Test requestedTest, String deploymentId) {
+
+        deployer.deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+        setState(requestedTest, TestState.FINISHED);
     }
 
 
@@ -186,9 +199,9 @@ public class TestService {
         return true;
     }
 
-    protected void setIfNotBlank(Consumer<String> setter, String value) {
+    protected void setIfNotNull(Consumer<String> setter, String value) {
 
-        if (StringUtils.isNotBlank(value)) {
+        if (value != null) {
             setter.accept(value);
         }
     }
@@ -197,21 +210,6 @@ public class TestService {
 
         test.setState(testState);
         repository.save(test);
-    }
-
-    protected HashMap<String, String> extractUrls(String functionUrls) {
-
-        HashMap<String, String> urlMap = new HashMap<>();
-        String[] lines = functionUrls.split("\\n");
-
-        for (String line : lines) {
-            String[] parts = line.split("=");
-            String key = parts[0].trim();
-            String value = parts[1].trim().replace("\"", "");
-            urlMap.put(key, value);
-        }
-
-        return urlMap;
     }
 
     protected StackDeployer getDeployer() {

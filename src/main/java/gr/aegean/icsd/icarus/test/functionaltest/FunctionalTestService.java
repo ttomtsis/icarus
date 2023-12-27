@@ -59,7 +59,7 @@ public class FunctionalTestService extends TestService {
 
         FunctionalTest requestedTest = (FunctionalTest) super.updateTest(testId, testModel);
 
-        super.setIfNotBlank(requestedTest::setFunctionURL, testModel.getFunctionUrl());
+        super.setIfNotNull(requestedTest::setFunctionURL, testModel.getFunctionUrl());
 
         testRepository.save(requestedTest);
     }
@@ -98,7 +98,8 @@ public class FunctionalTestService extends TestService {
         super.getDeployer().deploy(requestedTest, deploymentId)
 
             .exceptionally(ex -> {
-                super.setState(requestedTest, TestState.ERROR);
+
+                super.abortTestExecution(requestedTest, deploymentId);
                 throw new TestExecutionFailedException(ex);
             })
 
@@ -112,12 +113,11 @@ public class FunctionalTestService extends TestService {
 
                 } catch (RuntimeException ex) {
 
-                    super.setState(requestedTest, TestState.ERROR);
+                    super.abortTestExecution(requestedTest, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
 
-                super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
-                super.setState(requestedTest, TestState.FINISHED);
+                super.finalizeTestExecution(requestedTest, deploymentId);
             });
 
         return null;

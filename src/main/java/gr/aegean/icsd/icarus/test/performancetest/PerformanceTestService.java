@@ -71,8 +71,8 @@ public class PerformanceTestService extends TestService {
 
         PerformanceTest requestedTest = (PerformanceTest) super.updateTest(testId, testModel);
 
-        super.setIfNotBlank(requestedTest::setPathVariableValue, testModel.getPathVariableValue());
-        super.setIfNotBlank(requestedTest::setRequestBody, testModel.getRequestBody());
+        super.setIfNotNull(requestedTest::setPathVariableValue, testModel.getPathVariableValue());
+        super.setIfNotNull(requestedTest::setRequestBody, testModel.getRequestBody());
 
         if (testModel.getChosenMetrics() != null) {
             requestedTest.setChosenMetrics(testModel.getChosenMetrics());
@@ -104,8 +104,7 @@ public class PerformanceTestService extends TestService {
 
             .exceptionally(ex -> {
 
-                super.setState(requestedTest, TestState.ERROR);
-                super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+                super.abortTestExecution(requestedTest, deploymentId);
                 throw new TestExecutionFailedException(ex);
             })
 
@@ -122,14 +121,13 @@ public class PerformanceTestService extends TestService {
 
                 } catch (RuntimeException ex) {
 
-                    super.setState(requestedTest, TestState.ERROR);
+                    super.abortTestExecution(requestedTest, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
                 
                 log.warn("Test Completed, Deleting Stack");
 
-                super.getDeployer().deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
-                super.setState(requestedTest, TestState.FINISHED);
+                super.finalizeTestExecution(requestedTest, deploymentId);
 
                 log.warn("Finished");
             });
