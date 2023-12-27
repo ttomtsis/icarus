@@ -7,6 +7,7 @@ import gr.aegean.icsd.icarus.util.exceptions.function.FunctionConfigurationExcep
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.io.File;
@@ -39,6 +40,8 @@ public class Function {
     @ValidFilePath(message = "Function's source is not a valid filepath")
     private String functionSourceDirectory;
 
+    @Pattern(regexp = "^[^\\\\/:*?\"<>|]*$",
+            message = "Function's source code archive name cannot invalid characters")
     private String functionSourceFileName;
 
     @NotBlank(message = "Function's handler cannot be blank")
