@@ -89,7 +89,7 @@ public class MetricQueryEngine {
 
         Thread loadTestExecutionThread = new Thread(() -> {
 
-            log.error("Executing Load Test for: " + deploymentRecord.deployedFunctionName);
+            log.warn("Executing Load Test for: " + deploymentRecord.deployedFunctionName);
             test.runTest();
 
             Instant testDoneInstant = Instant.now();

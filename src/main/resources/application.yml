@@ -6,6 +6,7 @@ users:
   testUserEmail: ${TEST_USER_EMAIL}
 
 
+
 jmeter:
 
   jmeterHome: ${JMETER_HOME}
@@ -13,9 +14,11 @@ jmeter:
   jmeterLogOutputDirectory: ${JMETER_LOGS_DIR}
 
 
+
 terraform:
 
   stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY}
+
 
 
 spring:
@@ -33,3 +36,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+
+
+
+logging:
+  level:
+    org.apache.jmeter: ERROR
