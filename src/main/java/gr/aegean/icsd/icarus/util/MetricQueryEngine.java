@@ -22,10 +22,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
 
@@ -37,7 +34,7 @@ public class MetricQueryEngine {
     private final Set<LoadProfile> loadProfiles;
     private final Set<Metric> chosenMetrics;
 
-    private final List<MetricResult> resultList = Collections.synchronizedList(new ArrayList<>());
+    private final Set<MetricResult> resultList = Collections.synchronizedSet(new HashSet<>());
 
 
     private static final Logger log = LoggerFactory.getLogger("Metric Query Engine");
@@ -271,7 +268,7 @@ public class MetricQueryEngine {
     }
 
 
-    public List<MetricResult> getResultList() {
+    public Set<MetricResult> getResultList() {
         return resultList;
     }
 
