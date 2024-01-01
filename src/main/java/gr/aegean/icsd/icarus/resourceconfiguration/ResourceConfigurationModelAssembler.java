@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static org.springframework.beans.support.PagedListHolder.DEFAULT_PAGE_SIZE;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -78,7 +79,7 @@ public class ResourceConfigurationModelAssembler
                         new ResourceConfigurationModel())).withRel("Update"));
 
         model.add(linkTo(methodOn(ResourceConfigurationController.class)
-                .getAllResourceConfigurations(model.getParentTest(), 0, 10))
+                .getAllResourceConfigurations(model.getParentTest(), 0, DEFAULT_PAGE_SIZE))
                 .withRel("Get all Resource configurations for this test"));
 
         return model;
