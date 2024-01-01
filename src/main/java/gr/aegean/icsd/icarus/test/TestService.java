@@ -7,6 +7,7 @@ import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestStateException;
+import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
@@ -158,7 +159,13 @@ public class TestService {
     protected void abortTestExecution(Test requestedTest, String deploymentId) {
 
         setState(requestedTest, TestState.ERROR);
-        deployer.deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+
+        try {
+            deployer.deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
+        }
+        catch (RuntimeException ex) {
+            throw new TestExecutionFailedException(ex);
+        }
     }
 
     protected void finalizeTestExecution(Test requestedTest, String deploymentId) {
