@@ -3,6 +3,7 @@ package gr.aegean.icsd.icarus.test;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
@@ -70,6 +71,10 @@ public class Test {
     @NotNull
     @Enumerated(EnumType.STRING)
     private TestState state;
+
+    @OneToMany(targetEntity = TestExecution.class, mappedBy = "parentTest", cascade = {CascadeType.REFRESH,
+            CascadeType.REMOVE}, orphanRemoval = true)
+    private final Set<TestExecution> testExecutions = new HashSet<>();
 
 
 
@@ -175,6 +180,10 @@ public class Test {
 
     public Set<ResourceConfiguration> getResourceConfigurations() {
         return resourceConfigurations;
+    }
+
+    public Set<TestExecution> getTestExecutions() {
+        return testExecutions;
     }
 
 
