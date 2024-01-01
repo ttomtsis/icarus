@@ -30,6 +30,7 @@ import software.constructs.Construct;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Class used to model AWS Lambda Functions in the Terraform CDK as Constructs <br>
@@ -40,9 +41,11 @@ public class AwsConstruct extends Construct {
     /**
      * Unique 8-digit ID that identifies all resources deployed as
      * part of an AWS Construct. <br>
-     * Every AWS Construct uses a different guid
+     * Every AWS Construct uses a different deploymentId
      */
-    private final String guid;
+    private final String deploymentId;
+    private final String guid = UUID.randomUUID().toString().substring(0, 5);
+
 
     private final Set<String> locations = new HashSet<>();
 
@@ -102,7 +105,7 @@ public class AwsConstruct extends Construct {
 
         super(scope, id);
 
-        this.guid = deploymentId;
+        this.deploymentId = deploymentId;
 
         this.accessKey = awsAccessKey;
         this.secretKey = awsSecretKey;
@@ -134,10 +137,10 @@ public class AwsConstruct extends Construct {
             // Create a function and api gateway for every requested memory configuration
             for (Integer memory: memoryConfigurations) {
 
-                String targetFunctionID = awsFunctionName + "-" + memory + "mb-" + provider.getRegion()  + "-" + guid;
+                String targetFunctionID = awsFunctionName + "-" + memory + "mb-" + provider.getRegion()  + "-" + this.deploymentId;
 
                 DeploymentRecord newRecord = new DeploymentRecord(targetFunctionID, provider.getRegion(),
-                        memory, guid, Platform.AWS);
+                        memory, this.deploymentId, Platform.AWS);
 
                 deploymentRecords.add(newRecord);
 
@@ -179,11 +182,12 @@ public class AwsConstruct extends Construct {
 
         for (String location : locations) {
             providers.add(
-                    AwsProvider.Builder.create(this, "awsProvider-" + location + "-" + guid)
+                    AwsProvider.Builder.create(this, "awsProvider-" + location + "-" + deploymentId +
+                                    "-" + guid)
                             .region(location)
                             .accessKey(accessKey)
                             .secretKey(secretKey)
-                            .alias("aws-" + location + "-" + guid)
+                            .alias("aws-" + location + "-" + deploymentId + "-" + guid)
                             .build()
             );
         }
@@ -200,12 +204,14 @@ public class AwsConstruct extends Construct {
     private IamRole createIamRole() {
 
         DataAwsIamPolicyDocument policyDocument = createDocument();
-        IamRole functionRole = IamRole.Builder.create(this, "lambda_exec-" + guid)
-                .name("serverless_lambda-" + guid)
+        IamRole functionRole = IamRole.Builder.create(this, "lambda_exec-" + deploymentId +
+                        "-" + guid)
+                .name("serverless_lambda-" + deploymentId + "-" + guid)
                 .assumeRolePolicy(policyDocument.getJson())
                 .build();
 
-        IamRolePolicyAttachment.Builder.create(this, "lambda_policy-" + guid)
+        IamRolePolicyAttachment.Builder.create(this, "lambda_policy-" + deploymentId +
+                        "-" + guid)
             .role(functionRole.getName())
             .policyArn("arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole")
             .build();
@@ -248,7 +254,8 @@ public class AwsConstruct extends Construct {
         );
 
         // Document
-        return DataAwsIamPolicyDocument.Builder.create(this, "policy_document-" + guid)
+        return DataAwsIamPolicyDocument.Builder.create(this, "policy_document-" + deploymentId +
+                        "-" + guid)
                 .version("2012-10-17")
                 .statement(statements)
                 .build();
@@ -265,14 +272,16 @@ public class AwsConstruct extends Construct {
      */
     private S3Bucket createBucket(AwsProvider provider, String location) {
 
-        S3Bucket myBucket = S3Bucket.Builder.create(this, "lambda_bucket-" + location + guid)
-                .bucket("lambda-bucket-" + location + "-" + guid)
+        S3Bucket myBucket = S3Bucket.Builder.create(this, "lambda_bucket-" + location + deploymentId + "-"
+                + guid)
+                .bucket("lambda-bucket-" + location + "-" + deploymentId)
                 .provider(provider)
                 .build();
 
 
         S3BucketOwnershipControls bucketControls = S3BucketOwnershipControls.Builder.create(
-                this, "lambda_bucket_controls-" + location + "-" + guid)
+                this, "lambda_bucket_controls-" + location + "-" + deploymentId +
+                        "-" + guid)
                 .bucket(myBucket.getId())
                 .rule(
                         S3BucketOwnershipControlsRule.builder()
@@ -287,7 +296,8 @@ public class AwsConstruct extends Construct {
         dependencies.add(bucketControls);
 
         S3BucketAcl.Builder.create(
-            this, "lambda_bucket_acl-" + location + "-" + guid)
+            this, "lambda_bucket_acl-" + location + "-" + deploymentId + "-"
+                + guid)
             .bucket(myBucket.getId())
             .acl("private")
             .dependsOn(dependencies)
@@ -310,7 +320,8 @@ public class AwsConstruct extends Construct {
      */
     private S3Object createBucketObject(AwsProvider provider, S3Bucket bucket, String location){
 
-        return S3Object.Builder.create(this, "lambda_object-" + location + "-" + guid)
+        return S3Object.Builder.create(this, "lambda_object-" + location + "-" + deploymentId +
+                        "-" + guid)
                 .bucket(bucket.getId())
                 .key(functionArchiveName)
                 .source(functionSource)
@@ -348,7 +359,7 @@ public class AwsConstruct extends Construct {
                 .build();
 
         CloudwatchLogGroup.Builder.create(
-                    this, "log_group-" + targetFunctionID + "-" + guid)
+                    this, "log_group-" + targetFunctionID + "-" + deploymentId)
             .name("/aws/lambda/"+lambdaFunction.getFunctionName())
             .retentionInDays(30)
             .build();
@@ -370,10 +381,10 @@ public class AwsConstruct extends Construct {
     private Apigatewayv2Stage createAPIGateway(AwsProvider provider, LambdaFunction lambdaFunction,
                                                String targetFunctionID) {
 
-        String apiName = "lambda_api-" + targetFunctionID + "-" + guid;
+        String apiName = "lambda_api-" + targetFunctionID + "-" + deploymentId;
 
         Apigatewayv2Api api = Apigatewayv2Api.Builder.create(this, apiName)
-                .name("serverless_lambda_gw-" + guid + "-" + lambdaFunction.getFunctionName())
+                .name("serverless_lambda_gw-" + deploymentId + "-" + lambdaFunction.getFunctionName())
                 .protocolType("HTTP")
                 .provider(provider)
                 .build();
@@ -423,7 +434,7 @@ public class AwsConstruct extends Construct {
                 .build();
 
         LambdaPermission.Builder.create(this,
-                    "permission-" + targetFunctionID + "-" + guid)
+                    "permission-" + targetFunctionID + "-" + deploymentId)
             .statementId("AllowExecutionFromAPIGateway")
             .action("lambda:InvokeFunction")
             .functionName(lambdaFunction.getFunctionName())
