@@ -1,9 +1,12 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
+import gr.aegean.icsd.icarus.report.Report;
+import gr.aegean.icsd.icarus.report.ReportService;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
-import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
+import gr.aegean.icsd.icarus.testexecution.TestExecution;
+import gr.aegean.icsd.icarus.testexecution.TestExecutionRepository;
 import gr.aegean.icsd.icarus.util.MetricQueryEngine;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -28,18 +32,22 @@ public class PerformanceTestService extends TestService {
 
 
     private final TestRepository repository;
-    private final MetricResultRepository metricResultRepository;
-    
+    private final TestExecutionRepository testExecutionRepository;
+    private final ReportService reportService;
+
+
     private static final Logger log = LoggerFactory.getLogger("Performance Test Service");
 
 
 
     public PerformanceTestService(TestRepository repository, StackDeployer deployer,
-                                  MetricResultRepository metricResultRepository) {
+                                  TestExecutionRepository testExecutionRepository,
+                                  ReportService reportService) {
 
         super(repository, deployer);
         this.repository = repository;
-        this.metricResultRepository = metricResultRepository;
+        this.testExecutionRepository = testExecutionRepository;
+        this.reportService = reportService;
     }
 
 
@@ -115,12 +123,20 @@ public class PerformanceTestService extends TestService {
                 try {
                     
                     log.warn("Creating Load Tests");
+                    Instant startDate = Instant.now();
                     MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result, deploymentId);
+                    Instant endDate = Instant.now();
 
-                    metricResultRepository.saveAll(queryEngine.getResultList());
+                    Report testResultsReport = reportService.createReport();
+
+                    TestExecution testExecution = new TestExecution(requestedTest, testResultsReport,
+                            startDate, endDate);
+                    testExecution.addMetricResults(queryEngine.getResultList());
+
+                    testExecutionRepository.save(testExecution);
 
                 } catch (RuntimeException ex) {
-
+                    log.error("Failed to execute tests");
                     super.abortTestExecution(requestedTest, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }

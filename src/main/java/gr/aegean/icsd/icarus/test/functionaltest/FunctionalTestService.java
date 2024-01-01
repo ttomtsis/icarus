@@ -1,10 +1,14 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
+import gr.aegean.icsd.icarus.report.Report;
+import gr.aegean.icsd.icarus.report.ReportService;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
+import gr.aegean.icsd.icarus.testexecution.TestExecution;
+import gr.aegean.icsd.icarus.testexecution.TestExecutionRepository;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
 import gr.aegean.icsd.icarus.util.enums.TestState;
@@ -20,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,15 +37,19 @@ public class FunctionalTestService extends TestService {
 
 
     private final TestRepository testRepository;
-    private final TestCaseResultRepository testCaseResultRepository;
+    private final TestExecutionRepository testExecutionRepository;
+    private final ReportService reportService;
 
 
 
     public FunctionalTestService(TestRepository repository, StackDeployer deployer,
-                                 TestCaseResultRepository testCaseResultRepository) {
+                                 TestExecutionRepository testExecutionRepository,
+                                 ReportService reportService) {
+
         super(repository, deployer);
         this.testRepository = repository;
-        this.testCaseResultRepository = testCaseResultRepository;
+        this.testExecutionRepository = testExecutionRepository;
+        this.reportService = reportService;
     }
 
 
@@ -109,7 +119,17 @@ public class FunctionalTestService extends TestService {
 
                 try {
 
-                    createRestAssuredTests(requestedTest, result);
+                    Instant startDate = Instant.now();
+                    Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result);
+                    Instant endDate = Instant.now();
+
+                    Report testResultsReport = reportService.createReport();
+
+                    TestExecution testExecution = new TestExecution(requestedTest, testResultsReport,
+                            startDate, endDate);
+                    testExecution.addTestCaseResults(results);
+
+                    testExecutionRepository.save(testExecution);
 
                 } catch (RuntimeException ex) {
 
@@ -124,7 +144,9 @@ public class FunctionalTestService extends TestService {
     }
 
 
-    private void createRestAssuredTests(FunctionalTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+    private Set<TestCaseResult> createRestAssuredTests(FunctionalTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+
+        Set<TestCaseResult> testCaseResults = new HashSet<>();
 
         for (DeploymentRecord deploymentRecord : deploymentRecords) {
             for (TestCase testCase : requestedTest.getTestCases()) {
@@ -147,11 +169,12 @@ public class FunctionalTestService extends TestService {
                             deploymentRecord.configurationUsed,
                             test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
 
-                    testCaseResultRepository.save(testResult);
+                    testCaseResults.add(testResult);
                 }
             }
         }
 
+    return testCaseResults;
     }
 
 
