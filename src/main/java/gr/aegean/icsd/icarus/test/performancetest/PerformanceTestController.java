@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "api/v0/tests/performance", produces = "application/json")
@@ -70,22 +71,15 @@ public class PerformanceTestController {
     @PostMapping("/{testId}/execute")
     public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
 
-        service.executeTest(testId);
+        String deploymentId = UUID.randomUUID().toString().substring(0, 5);
+        service.executeTest(testId, deploymentId);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v0/tests/performance/{testId}/execute")
+                .path("/api/v0/tests/{testId}/executions/" + deploymentId + "/status")
                 .buildAndExpand(testId)
                 .toUri();
 
         return ResponseEntity.accepted().header("Location", location.toString()).build();
-    }
-
-    @GetMapping("/{testId}/execute")
-    public ResponseEntity<String> getExecutionStatus(@PathVariable Long testId) {
-
-        String status = service.getTestState(testId);
-
-        return ResponseEntity.ok().body(status);
     }
 
 

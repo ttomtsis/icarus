@@ -26,10 +26,9 @@ import java.util.*;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
 
+
 public class MetricQueryEngine {
 
-
-    private final String deploymentId;
 
     private final Set<LoadProfile> loadProfiles;
     private final Set<Metric> chosenMetrics;
@@ -41,10 +40,8 @@ public class MetricQueryEngine {
 
 
 
-    public MetricQueryEngine(PerformanceTest requestedTest, Set<DeploymentRecord> deploymentRecords,
-                             String deploymentId) {
+    public MetricQueryEngine(PerformanceTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
 
-        this.deploymentId = deploymentId;
         this.loadProfiles = requestedTest.getLoadProfiles();
         this.chosenMetrics = requestedTest.getChosenMetrics();
 
@@ -155,7 +152,8 @@ public class MetricQueryEngine {
         boolean foundMetrics = compareTimestamps(metricRequest.getInstants(), testDone);
         while (!foundMetrics && minutes < METRIC_QUERY_MAX_TIMEOUT) {
 
-            log.warn("Metrics are not logged, will sleep and retry");
+            log.warn("Metric " + metric + " has not been logged yet for deployment id: " + deploymentRecord.deploymentGuid
+                    + ", will sleep and retry");
 
             minutes++;
 
@@ -172,7 +170,7 @@ public class MetricQueryEngine {
 
         if (foundMetrics) {
             resultList.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
-                    metricRequest.getMetricResults(), metric.toString(), deploymentId));
+                    metricRequest.getMetricResults(), metric.toString()));
         }
         else {
             throw new MetricsTimeoutException(minutes);
@@ -208,7 +206,7 @@ public class MetricQueryEngine {
 
             if (foundMetrics) {
                 resultList.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
-                        request.getMetricResults(), metric.toString(), deploymentId));
+                        request.getMetricResults(), metric.toString()));
             }
             else {
                 throw new MetricsTimeoutException(minutes);

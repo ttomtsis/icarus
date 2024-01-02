@@ -1,5 +1,6 @@
 package gr.aegean.icsd.icarus.testexecution;
 
+import gr.aegean.icsd.icarus.util.enums.TestState;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
@@ -14,6 +15,7 @@ public class TestExecutionModel extends RepresentationModel<TestExecutionModel> 
     private Long parentTest;
     private Set<Long> testCaseResults;
     private Set<Long> metricResults;
+    private TestState testState;
 
 
 
@@ -71,6 +73,14 @@ public class TestExecutionModel extends RepresentationModel<TestExecutionModel> 
 
     public void setMetricResults(Set<Long> metricResults) {
         this.metricResults = metricResults;
+    }
+
+    public TestState getTestState() {
+        return testState;
+    }
+
+    public void setTestState(TestState testState) {
+        this.testState = testState;
     }
 
 

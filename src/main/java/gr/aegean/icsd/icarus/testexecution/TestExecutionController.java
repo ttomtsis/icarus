@@ -11,7 +11,7 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.DEFAULT_PAGE_
 
 
 @RestController
-@RequestMapping(value = "api/v0/tests/{testId}/results", produces = "application/json")
+@RequestMapping(value = "api/v0/tests/{testId}/executions", produces = "application/json")
 public class TestExecutionController {
 
 
@@ -51,6 +51,14 @@ public class TestExecutionController {
                 .toModel(execution);
 
         return ResponseEntity.ok().body(executionModel);
+    }
+
+    @GetMapping("/{deploymentId}/status")
+    public ResponseEntity<String> getExecutionStatus(@PathVariable Long testId, @PathVariable String deploymentId) {
+
+        String status = testExecutionService.getExecutionState(testId, deploymentId);
+
+        return ResponseEntity.ok().body(status);
     }
 
 

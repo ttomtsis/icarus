@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 
 @RestController
@@ -14,6 +15,7 @@ public class FunctionalTestController {
 
     private final FunctionalTestService service;
     private final FunctionalTestModelAssembler assembler;
+
 
 
     public FunctionalTestController(FunctionalTestService service, FunctionalTestModelAssembler assembler) {
@@ -69,22 +71,15 @@ public class FunctionalTestController {
     @PostMapping("/{testId}/execute")
     public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
 
-        service.executeTest(testId);
+        String deploymentId = UUID.randomUUID().toString().substring(0, 5);
+        service.executeTest(testId, deploymentId);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v0/tests/functional/{testId}/execute")
+                .path("/api/v0/tests/{testId}/executions/" + deploymentId + "/status")
                 .buildAndExpand(testId)
                 .toUri();
 
         return ResponseEntity.accepted().header("Location", location.toString()).build();
-    }
-
-    @GetMapping("/{testId}/execute")
-    public ResponseEntity<String> getExecutionStatus(@PathVariable Long testId) {
-
-        String status = service.getTestState(testId);
-
-        return ResponseEntity.ok().body(status);
     }
 
 

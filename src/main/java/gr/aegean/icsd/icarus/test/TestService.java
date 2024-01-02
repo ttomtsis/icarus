@@ -4,14 +4,10 @@ import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
-import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestStateException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +29,9 @@ public class TestService {
     private final StackDeployer deployer;
 
 
-    public TestService(TestRepository repository, StackDeployer deployer) {
+    public TestService(TestRepository repository,
+                       StackDeployer deployer) {
+
         this.repository = repository;
         this.deployer = deployer;
     }
@@ -116,16 +114,6 @@ public class TestService {
                 .orElseThrow(() -> new TestNotFoundException
                         (testId));
 
-        // Test is in correct state
-        if (!(requestedTest.getState().equals(TestState.CREATED) ||
-                requestedTest.getState().equals(TestState.FINISHED) ||
-                        requestedTest.getState().equals(TestState.ERROR))
-        ) {
-            String[] expectedStates = {TestState.CREATED.toString(), TestState.FINISHED.toString(),
-                    TestState.ERROR.toString()};
-            throw new InvalidTestStateException(testId, requestedTest.getState(), expectedStates);
-        }
-
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
             throw new InvalidTestConfigurationException(testId, "does not have a Function" +
@@ -145,33 +133,6 @@ public class TestService {
         }
 
         return requestedTest;
-    }
-
-
-
-    public String getTestState(@NotNull @Positive Long testId) {
-
-        return repository.findById(testId)
-                .orElseThrow(() -> new TestNotFoundException(testId))
-                .getState().toString();
-    }
-
-    protected void abortTestExecution(Test requestedTest, String deploymentId) {
-
-        setState(requestedTest, TestState.ERROR);
-
-        try {
-            deployer.deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
-        }
-        catch (RuntimeException ex) {
-            throw new TestExecutionFailedException(ex);
-        }
-    }
-
-    protected void finalizeTestExecution(Test requestedTest, String deploymentId) {
-
-        deployer.deleteStack(requestedTest.getTargetFunction().getName(), deploymentId);
-        setState(requestedTest, TestState.FINISHED);
     }
 
 
@@ -206,17 +167,12 @@ public class TestService {
         return true;
     }
 
+
     protected void setIfNotNull(Consumer<String> setter, String value) {
 
         if (value != null) {
             setter.accept(value);
         }
-    }
-
-    public void setState(@NotNull Test test, @NotBlank TestState testState) {
-
-        test.setState(testState);
-        repository.save(test);
     }
 
     protected StackDeployer getDeployer() {

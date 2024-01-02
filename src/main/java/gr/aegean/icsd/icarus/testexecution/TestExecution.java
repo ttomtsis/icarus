@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.report.Report;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
+import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -28,34 +29,40 @@ public class TestExecution {
     @NotNull(message = "Test result's start date cannot be null")
     private Instant startDate;
 
-    @NotNull(message = "Test result's end date cannot be null")
     private Instant endDate;
 
+    @NotNull(message = "Test result's deployment id cannot be null")
+    private String deploymentId;
 
     @ManyToOne(targetEntity = Test.class, optional = false)
     private Test parentTest;
 
     @OneToMany(targetEntity = TestCaseResult.class, orphanRemoval = true,
             cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
-    @JoinColumn(name = "test_case_results")
+    @JoinColumn
     private final Set<TestCaseResult> testCaseResults = new HashSet<>();
 
     @OneToMany(targetEntity = MetricResult.class, orphanRemoval = true,
             cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
-    @JoinColumn(name = "metric_results")
+    @JoinColumn
     private final Set<MetricResult> metricResults = new HashSet<>();
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private TestState state;
 
 
-    public TestExecution(Test parentTest, Report report, Instant startDate, Instant endDate) {
+
+    public TestExecution(Test parentTest, Instant startDate, String deploymentId) {
 
         this.parentTest = parentTest;
-        this.report = report;
         this.startDate = startDate;
-        this.endDate = endDate;
+        this.deploymentId = deploymentId;
+
+        this.state = TestState.CREATED;
     }
 
-    public TestExecution() {}
+    public TestExecution() {this.state = TestState.CREATED;}
 
 
 
@@ -117,4 +124,22 @@ public class TestExecution {
     public Set<MetricResult> getMetricResults() {
         return metricResults;
     }
+
+    public TestState getState() {
+        return state;
+    }
+
+    public void setState(TestState state) {
+        this.state = state;
+    }
+
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+
+
 }

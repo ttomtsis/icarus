@@ -5,10 +5,8 @@ import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.http.HttpMethod;
@@ -68,9 +66,6 @@ public class Test {
     @CreatedBy
     private String authorUsername;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private TestState state;
 
     @OneToMany(targetEntity = TestExecution.class, mappedBy = "parentTest", cascade = {CascadeType.REFRESH,
             CascadeType.REMOVE}, orphanRemoval = true)
@@ -78,9 +73,7 @@ public class Test {
 
 
 
-
-    public Test() {this.state = TestState.CREATED;}
-
+    public Test() {}
 
 
 
@@ -96,14 +89,6 @@ public class Test {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public TestState getState() {
-        return state;
-    }
-
-    public void setState(TestState state) {
-        this.state = state;
     }
 
     public String getAuthorUsername() {
