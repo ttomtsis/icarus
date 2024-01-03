@@ -1,5 +1,8 @@
 package gr.aegean.icsd.icarus.util.terraform;
 
+import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.LOCAL_PROVIDERS_DIRECTORY;
+import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.USE_LOCAL_PROVIDERS;
+
 public enum TerraformCommand {
 
 
@@ -19,6 +22,11 @@ public enum TerraformCommand {
 
 
     public String[] get() {
+
+        if (this == INIT && USE_LOCAL_PROVIDERS) {
+            return new String[]{"terraform", "init", "-plugin-dir=" + LOCAL_PROVIDERS_DIRECTORY};
+        }
+
         return command;
     }
 

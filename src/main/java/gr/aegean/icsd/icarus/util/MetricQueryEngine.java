@@ -4,7 +4,7 @@ import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
 import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.testexecution.MetricResult;
+import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.util.aws.AwsMetricRequest;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import gr.aegean.icsd.icarus.util.enums.Platform;
@@ -22,32 +22,26 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
+
 
 public class MetricQueryEngine {
 
 
-    private final String deploymentId;
-
     private final Set<LoadProfile> loadProfiles;
     private final Set<Metric> chosenMetrics;
 
-    private final List<MetricResult> resultList = Collections.synchronizedList(new ArrayList<>());
+    private final Set<MetricResult> resultList = Collections.synchronizedSet(new HashSet<>());
 
 
     private static final Logger log = LoggerFactory.getLogger("Metric Query Engine");
 
 
 
-    public MetricQueryEngine(PerformanceTest requestedTest, Set<DeploymentRecord> deploymentRecords,
-                             String deploymentId) {
+    public MetricQueryEngine(PerformanceTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
 
-        this.deploymentId = deploymentId;
         this.loadProfiles = requestedTest.getLoadProfiles();
         this.chosenMetrics = requestedTest.getChosenMetrics();
 
@@ -158,7 +152,8 @@ public class MetricQueryEngine {
         boolean foundMetrics = compareTimestamps(metricRequest.getInstants(), testDone);
         while (!foundMetrics && minutes < METRIC_QUERY_MAX_TIMEOUT) {
 
-            log.warn("Metrics are not logged, will sleep and retry");
+            log.warn("Metric " + metric + " has not been logged yet for deployment id: " + deploymentRecord.deploymentGuid
+                    + ", will sleep and retry");
 
             minutes++;
 
@@ -175,7 +170,7 @@ public class MetricQueryEngine {
 
         if (foundMetrics) {
             resultList.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
-                    metricRequest.getMetricResults(), metric.toString(), deploymentId));
+                    metricRequest.getMetricResults(), metric.toString()));
         }
         else {
             throw new MetricsTimeoutException(minutes);
@@ -211,7 +206,7 @@ public class MetricQueryEngine {
 
             if (foundMetrics) {
                 resultList.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
-                        request.getMetricResults(), metric.toString(), deploymentId));
+                        request.getMetricResults(), metric.toString()));
             }
             else {
                 throw new MetricsTimeoutException(minutes);
@@ -271,7 +266,7 @@ public class MetricQueryEngine {
     }
 
 
-    public List<MetricResult> getResultList() {
+    public Set<MetricResult> getResultList() {
         return resultList;
     }
 

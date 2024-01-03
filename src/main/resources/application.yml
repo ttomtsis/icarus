@@ -18,6 +18,8 @@ jmeter:
 terraform:
 
   stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY}
+  useLocalProviders: ${USE_LOCAL_PROVIDERS}
+  localProvidersDirectory: ${LOCAL_PROVIDERS_DIRECTORY}
 
 
 

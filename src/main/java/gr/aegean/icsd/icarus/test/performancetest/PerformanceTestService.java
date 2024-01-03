@@ -1,15 +1,16 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
-import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
-import gr.aegean.icsd.icarus.testexecution.MetricResultRepository;
+import gr.aegean.icsd.icarus.testexecution.TestExecution;
+import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.util.MetricQueryEngine;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
@@ -17,8 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.UUID;
 
 
 @Service
@@ -28,18 +27,19 @@ public class PerformanceTestService extends TestService {
 
 
     private final TestRepository repository;
-    private final MetricResultRepository metricResultRepository;
-    
+    private final TestExecutionService testExecutionService;
+
+
     private static final Logger log = LoggerFactory.getLogger("Performance Test Service");
 
 
 
     public PerformanceTestService(TestRepository repository, StackDeployer deployer,
-                                  MetricResultRepository metricResultRepository) {
+                                  TestExecutionService testExecutionService) {
 
         super(repository, deployer);
         this.repository = repository;
-        this.metricResultRepository = metricResultRepository;
+        this.testExecutionService = testExecutionService;
     }
 
 
@@ -81,8 +81,10 @@ public class PerformanceTestService extends TestService {
         repository.save(requestedTest);
     }
 
-    @Override
-    public Test executeTest(@NotNull @Positive Long testId) {
+
+    public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
+
+        log.warn("Executing request: " + deploymentId);
 
         PerformanceTest requestedTest = (PerformanceTest) super.executeTest(testId);
 
@@ -96,43 +98,46 @@ public class PerformanceTestService extends TestService {
                     " associated with it");
         }
 
-        super.setState(requestedTest, TestState.DEPLOYING);
+        log.warn("All checks passed for: " + deploymentId);
 
-        String deploymentId = UUID.randomUUID().toString().substring(0, 5);
+        TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
+        testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
+
+        log.warn("Starting deployment of: " + deploymentId);
 
         super.getDeployer().deploy(requestedTest, deploymentId)
 
             .exceptionally(ex -> {
 
-                super.abortTestExecution(requestedTest, deploymentId);
+                testExecutionService.abortTestExecution(testExecution, deploymentId);
                 throw new TestExecutionFailedException(ex);
             })
 
             .thenAccept(result -> {
 
-                super.setState(requestedTest, TestState.RUNNING);
+                testExecutionService.setExecutionState(testExecution, TestState.RUNNING);
 
                 try {
                     
-                    log.warn("Creating Load Tests");
-                    MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result, deploymentId);
+                    log.warn("Creating Load Tests: " + deploymentId);
+                    MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result);
 
-                    metricResultRepository.saveAll(queryEngine.getResultList());
-
+                    log.warn("Saving execution results: " + deploymentId);
+                    testExecutionService.addMetricResultsToExecution(testExecution, queryEngine.getResultList());
                 } catch (RuntimeException ex) {
 
-                    super.abortTestExecution(requestedTest, deploymentId);
+                    log.error("Failed to execute tests: " + deploymentId);
+
+                    testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
                 
-                log.warn("Test Completed, Deleting Stack");
+                log.warn("Test Completed, Deleting Stack: " + deploymentId);
+                testExecutionService.finalizeTestExecution(testExecution, deploymentId);
 
-                super.finalizeTestExecution(requestedTest, deploymentId);
-
-                log.warn("Finished");
+                log.warn("Finished: " + deploymentId);
             });
 
-        return null;
     }
 
 

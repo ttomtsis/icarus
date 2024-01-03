@@ -1,12 +1,12 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
-import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
-import gr.aegean.icsd.icarus.testexecution.TestCaseResult;
-import gr.aegean.icsd.icarus.testexecution.TestCaseResultRepository;
+import gr.aegean.icsd.icarus.testexecution.TestExecution;
+import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
+import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
@@ -14,14 +14,16 @@ import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 
 @Service
@@ -31,15 +33,16 @@ public class FunctionalTestService extends TestService {
 
 
     private final TestRepository testRepository;
-    private final TestCaseResultRepository testCaseResultRepository;
+    private final TestExecutionService testExecutionService;
 
-
+    private static final Logger log = LoggerFactory.getLogger("Functional Test Service");
 
     public FunctionalTestService(TestRepository repository, StackDeployer deployer,
-                                 TestCaseResultRepository testCaseResultRepository) {
+                                 TestExecutionService testExecutionService) {
+
         super(repository, deployer);
         this.testRepository = repository;
-        this.testCaseResultRepository = testCaseResultRepository;
+        this.testExecutionService = testExecutionService;
     }
 
 
@@ -64,8 +67,10 @@ public class FunctionalTestService extends TestService {
         testRepository.save(requestedTest);
     }
 
-    @Override
-    public Test executeTest(@NotNull @Positive Long testId) {
+
+    public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
+
+        log.warn("Executing request: " + deploymentId);
 
         FunctionalTest requestedTest = (FunctionalTest) super.executeTest(testId);
 
@@ -91,67 +96,98 @@ public class FunctionalTestService extends TestService {
                     "associated with it");
         }
 
-        super.setState(requestedTest, TestState.DEPLOYING);
+        log.warn("All checks passed for: " + deploymentId);
 
-        String deploymentId = UUID.randomUUID().toString().substring(0, 5);
+        TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
+        testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
+
+        log.warn("Starting deployment of: " + deploymentId);
 
         super.getDeployer().deploy(requestedTest, deploymentId)
 
             .exceptionally(ex -> {
 
-                super.abortTestExecution(requestedTest, deploymentId);
+                testExecutionService.abortTestExecution(testExecution, deploymentId);
                 throw new TestExecutionFailedException(ex);
             })
 
             .thenAccept(result -> {
 
-                super.setState(requestedTest, TestState.RUNNING);
+                testExecutionService.setExecutionState(testExecution, TestState.RUNNING);
 
                 try {
 
-                    createRestAssuredTests(requestedTest, result);
+                    log.warn("Creating Rest Assured Tests of: " + deploymentId);
+                    Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result);
+
+                    log.warn("Saving execution results of: " + deploymentId);
+                    testExecutionService.addTestCaseResultsToExecution(testExecution, results);
+
 
                 } catch (RuntimeException ex) {
 
-                    super.abortTestExecution(requestedTest, deploymentId);
+                    log.error("Failed to execute tests: " + deploymentId);
+
+                    testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
 
-                super.finalizeTestExecution(requestedTest, deploymentId);
+                log.warn("Test completed, Deleting stack: " + deploymentId);
+                testExecutionService.finalizeTestExecution(testExecution, deploymentId);
+
+                log.warn("Finished: " + deploymentId);
             });
 
-        return null;
     }
 
 
-    private void createRestAssuredTests(FunctionalTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+    private Set<TestCaseResult> createRestAssuredTests(FunctionalTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+
+        Set<TestCaseResult> testCaseResults = new HashSet<>();
+        Set<Thread> threadSet = new HashSet<>();
 
         for (DeploymentRecord deploymentRecord : deploymentRecords) {
             for (TestCase testCase : requestedTest.getTestCases()) {
                 for (TestCaseMember testCaseMember : testCase.getTestCaseMembers()) {
 
-                    LoggerFactory.getLogger("Functional Test Service").warn("Running test");
+                    Thread thread = new Thread(() -> {
 
-                    // Create rest assured test
-                    RestAssuredTest test = new RestAssuredTest(deploymentRecord.deployedUrl, requestedTest.getPath(),
-                            requestedTest.getPathVariable(), testCaseMember.getRequestPathVariableValue(),
-                            testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
-                            testCaseMember.getExpectedResponseBody(),
-                            deploymentRecord.deployedPlatform
-                    );
+                        log.warn("Running test " + testCaseMember.getId() + " for function: "
+                                + deploymentRecord.deployedFunctionName);
 
-                    LoggerFactory.getLogger("Functional Test Service").warn("Saving results");
+                        // Create rest assured test
+                        RestAssuredTest test = new RestAssuredTest(deploymentRecord.deployedUrl, requestedTest.getPath(),
+                                requestedTest.getPathVariable(), testCaseMember.getRequestPathVariableValue(),
+                                testCaseMember.getRequestBody(), testCaseMember.getExpectedResponseCode(),
+                                testCaseMember.getExpectedResponseBody(),
+                                deploymentRecord.deployedPlatform
+                        );
 
-                    // Save results
-                    TestCaseResult testResult = new TestCaseResult(testCaseMember,
-                            deploymentRecord.configurationUsed,
-                            test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+                        log.warn("Saving results");
 
-                    testCaseResultRepository.save(testResult);
+                        // Save results
+                        TestCaseResult testResult = new TestCaseResult(testCaseMember,
+                                deploymentRecord.configurationUsed,
+                                test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+
+                        testCaseResults.add(testResult);
+                    });
+
+                    threadSet.add(thread);
+                    thread.start();
                 }
             }
         }
 
+        for (Thread test : threadSet) {
+            try {
+                test.join();
+            } catch (InterruptedException e) {
+                throw new TestExecutionFailedException(e);
+            }
+        }
+
+    return testCaseResults;
     }
 
 

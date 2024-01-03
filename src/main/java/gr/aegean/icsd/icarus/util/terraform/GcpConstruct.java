@@ -15,6 +15,7 @@ import software.constructs.Construct;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Class used to model GCF Functions in the Terraform CDK as Constructs <br>
@@ -25,9 +26,11 @@ public class GcpConstruct extends Construct
     /**
      * Unique 8-digit ID that identifies all resources deployed as
      * part of a GCP Construct. <br>
-     * Every GCP Construct uses a different guid
+     * Every GCP Construct uses a different deploymentId
      */
-    private final String guid;
+    private final String deploymentId;
+    private final String guid = UUID.randomUUID().toString().substring(0, 8);
+
 
     private final String functionDescription;
     private final GcfRuntime functionRuntime;
@@ -73,7 +76,7 @@ public class GcpConstruct extends Construct
 
         super(scope, id);
 
-        this.guid = deploymentId;
+        this.deploymentId = deploymentId;
 
         String functionSource = gcfFunctionSource + "/" + gcfFunctionSourceFileName;
         this.functionRuntime = gcfRuntime;
@@ -88,7 +91,7 @@ public class GcpConstruct extends Construct
         }
 
 
-        GoogleProvider.Builder.create(this, "google-" + guid)
+        GoogleProvider.Builder.create(this, "google-" + this.deploymentId + "-" + guid)
                 .project(gcpProject)
                 .credentials(gcpCredentials)
                 .build();
@@ -100,18 +103,18 @@ public class GcpConstruct extends Construct
 
         for (String location: locations) {
 
-            String bucketName = "bucket-" + location + "-" + guid;
-            String objectName = "function_source-" + location + "-" + guid;
+            String bucketName = "bucket-" + location + "-" + this.deploymentId+ "-" + guid;
+            String objectName = "function_source-" + location + "-" + this.deploymentId+ "-" + guid;
             StorageBucketObject object = createBucket(bucketName, objectName, functionSource, location);
 
             for (int memory: memoryConfigs) {
 
                 for (int cpu: cpuConfigurations) {
 
-                    String name = gcfFunctionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + guid;
+                    String name = gcfFunctionName + "-" + memory + "mb-" + location + "-" + cpu + "vcpu" + "-" + this.deploymentId;
                     name = name.toLowerCase();
 
-                    DeploymentRecord newRecord = new DeploymentRecord(name, location, memory, guid, Platform.GCP);
+                    DeploymentRecord newRecord = new DeploymentRecord(name, location, memory, this.deploymentId, Platform.GCP);
                     newRecord.deployedCpu = cpu;
 
                     deploymentRecords.add(newRecord);
@@ -151,7 +154,7 @@ public class GcpConstruct extends Construct
     private StorageBucketObject createBucket(String bucketName, String objectName,
                                              String objectLocation, String location) {
 
-        StorageBucket bucket = StorageBucket.Builder.create(this, "bucket-" + location + "-" + guid)
+        StorageBucket bucket = StorageBucket.Builder.create(this, "bucket-" + location + "-" + deploymentId)
                 .name(bucketName)
                 .location(location)
                 .uniformBucketLevelAccess(true)
@@ -160,7 +163,7 @@ public class GcpConstruct extends Construct
         dependencies.clear();
         dependencies.add(bucket);
 
-        return StorageBucketObject.Builder.create(this, "object-" + location + "-" + guid)
+        return StorageBucketObject.Builder.create(this, "object-" + location + "-" + deploymentId)
                 .name(objectName)
                 .bucket(bucketName)
                 .source(objectLocation)

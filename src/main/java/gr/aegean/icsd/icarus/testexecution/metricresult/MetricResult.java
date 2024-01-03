@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.testexecution;
+package gr.aegean.icsd.icarus.testexecution.metricresult;
 
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
@@ -18,11 +18,8 @@ public class MetricResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Metric result's metric name cannot be blank")
     private String metricName;
-
-    @NotBlank
-    private String deploymentId;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "metric_result_metric_values", joinColumns = @JoinColumn(name = "id"))
@@ -38,13 +35,12 @@ public class MetricResult {
 
 
     public MetricResult(Set<LoadProfile> profiles, ResourceConfiguration resourceConfiguration,
-                        Map<String, String> values, String metricName, String deploymentId) {
+                        Map<String, String> values, String metricName) {
 
         this.loadProfiles.addAll(profiles);
         this.resourceConfiguration = resourceConfiguration;
         this.metricValues.putAll(values);
         this.metricName = metricName;
-        this.deploymentId = deploymentId;
     }
 
     public MetricResult() {}
@@ -65,14 +61,6 @@ public class MetricResult {
 
     public void setMetricName(String metricName) {
         this.metricName = metricName;
-    }
-
-    public String getDeploymentId() {
-        return deploymentId;
-    }
-
-    public void setDeploymentId(String deploymentId) {
-        this.deploymentId = deploymentId;
     }
 
     public Map<String, String> getMetricValues() {
