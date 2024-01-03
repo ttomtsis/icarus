@@ -84,6 +84,8 @@ public class PerformanceTestService extends TestService {
 
     public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
 
+        log.warn("Executing request: " + deploymentId);
+
         PerformanceTest requestedTest = (PerformanceTest) super.executeTest(testId);
 
         if (requestedTest.getLoadProfiles().isEmpty()) {
@@ -96,9 +98,12 @@ public class PerformanceTestService extends TestService {
                     " associated with it");
         }
 
+        log.warn("All checks passed for: " + deploymentId);
 
         TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
         testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
+
+        log.warn("Starting deployment of: " + deploymentId);
 
         super.getDeployer().deploy(requestedTest, deploymentId)
 
@@ -114,23 +119,23 @@ public class PerformanceTestService extends TestService {
 
                 try {
                     
-                    log.warn("Creating Load Tests");
+                    log.warn("Creating Load Tests: " + deploymentId);
                     MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result);
 
-                    log.warn("Saving execution results");
+                    log.warn("Saving execution results: " + deploymentId);
                     testExecutionService.addMetricResultsToExecution(testExecution, queryEngine.getResultList());
                 } catch (RuntimeException ex) {
 
-                    log.error("Failed to execute tests");
+                    log.error("Failed to execute tests: " + deploymentId);
 
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
                 
-                log.warn("Test Completed, Deleting Stack");
+                log.warn("Test Completed, Deleting Stack: " + deploymentId);
                 testExecutionService.finalizeTestExecution(testExecution, deploymentId);
 
-                log.warn("Finished");
+                log.warn("Finished: " + deploymentId);
             });
 
     }

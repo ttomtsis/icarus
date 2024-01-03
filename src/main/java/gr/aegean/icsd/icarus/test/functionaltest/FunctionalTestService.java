@@ -70,6 +70,8 @@ public class FunctionalTestService extends TestService {
 
     public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
 
+        log.warn("Executing request: " + deploymentId);
+
         FunctionalTest requestedTest = (FunctionalTest) super.executeTest(testId);
 
         // Has at least 1 TestCase
@@ -94,8 +96,12 @@ public class FunctionalTestService extends TestService {
                     "associated with it");
         }
 
+        log.warn("All checks passed for: " + deploymentId);
+
         TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
         testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
+
+        log.warn("Starting deployment of: " + deploymentId);
 
         super.getDeployer().deploy(requestedTest, deploymentId)
 
@@ -111,25 +117,25 @@ public class FunctionalTestService extends TestService {
 
                 try {
 
-                    log.warn("Creating Rest Assured Tests");
+                    log.warn("Creating Rest Assured Tests of: " + deploymentId);
                     Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result);
 
-                    log.warn("Saving execution results");
+                    log.warn("Saving execution results of: " + deploymentId);
                     testExecutionService.addTestCaseResultsToExecution(testExecution, results);
 
 
                 } catch (RuntimeException ex) {
 
-                    log.error("Failed to execute tests");
+                    log.error("Failed to execute tests: " + deploymentId);
 
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
 
-                log.warn("Test completed, Deleting stack");
+                log.warn("Test completed, Deleting stack: " + deploymentId);
                 testExecutionService.finalizeTestExecution(testExecution, deploymentId);
 
-                log.warn("Finished");
+                log.warn("Finished: " + deploymentId);
             });
 
     }

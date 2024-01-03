@@ -28,7 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -55,41 +57,65 @@ public class StackDeployer {
         String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
         String stackDir = outputDir + "\\stacks\\" + name;
 
-        App app = App.Builder.create()
-                .outdir(outputDir)
-                .build();
+        Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformConfiguration(outputDir, name,
+                associatedTest, id);
 
-        // Create stack
-        log.warn("Creating stack");
-        Set<DeploymentRecord> incompleteDeploymentRecords = createStack(name, app, associatedTest, id);
-
-        log.warn("Finished creating");
-
-        // Synthesize it
-        log.warn("Synthesizing stack");
-        app.synth();
-
-        log.warn("Finished synthesizing");
+        log.warn("Finished synthesizing: " + id);
 
         // Deploy
-        log.warn("Deploying stack");
+        log.warn("Deploying stack: " + id);
         deployStack(stackDir);
 
-        log.warn("Finished deploying");
+        log.warn("Finished deploying: " + id);
 
         // Get functionUrls
-        log.warn("Getting function URLs");
+        log.warn("Getting function URLs for: " + id);
         Set<DeploymentRecord> completeDeploymentRecords = getFunctionUrls(stackDir, incompleteDeploymentRecords);
 
         return CompletableFuture.completedFuture(completeDeploymentRecords);
     }
 
+    private synchronized Set<DeploymentRecord> createTerraformConfiguration(String outputDir, String stackName,
+                                                                            Test associatedTest, String id) {
 
+        App app = App.Builder.create()
+                .outdir(outputDir)
+                .build();
 
-    private Set<DeploymentRecord> createStack(@NotBlank String name, @NotNull App app,
+        // Create stack
+        log.warn("Creating stack: " + id);
+        Set<DeploymentRecord> incompleteDeploymentRecords = createStack(stackName, app, outputDir, associatedTest, id);
+
+        log.warn("Finished creating: " + id);
+
+        // Synthesize it
+        log.warn("Synthesizing stack: " + id);
+        app.synth();
+
+        return incompleteDeploymentRecords;
+    }
+
+    private Set<DeploymentRecord> createStack(@NotBlank String name, @NotNull App app, @NotBlank String outputDir,
                                               @NotNull Test associatedTest, @NotBlank String id) {
 
         MainStack mainStack = new MainStack(app, name);
+
+        mainStack.addOverride("terraform.backend", Map.of(
+                "local", Map.of(
+                        "path", outputDir + "/" + name + ".tfstate"
+                )
+        ));
+
+        mainStack.addOverride("terraform.required_providers", Map.of(
+                "aws", Map.of(
+                        "source", "hashicorp/aws",
+                        "version", ">= 5.0"
+                ),
+                "google", Map.of(
+                        "source", "hashicorp/google",
+                        "version", ">= 5.0"
+                )
+        ));
 
         Set<DeploymentRecord> deploymentRecordSet = new HashSet<>();
 
@@ -167,7 +193,7 @@ public class StackDeployer {
             createProcess(stackDirectory, TerraformCommand.APPLY.get());
         }
         catch (RuntimeException ex) {
-
+            log.error("Error when deploying stack at: " + stackDir);
             throw new StackDeploymentException(ex.getMessage());
         }
 
@@ -284,8 +310,9 @@ public class StackDeployer {
         processBuilder.directory(stackDirectory);
         processBuilder.command(commands);
 
-        String commandString = "\\" + String.join(" ", commands);
-        commandString = commandString.replace(" ", "_").replace("-", "_");
+        String commandString = "_" + commands[1];
+
+        log.warn("executing command: " + Arrays.toString(commands));
 
         File outputFile = new File(processBuilder.directory().getPath() + commandString + "_output.txt");
         processBuilder.redirectOutput(outputFile);
@@ -318,6 +345,5 @@ public class StackDeployer {
             deploymentRecord.configurationUsed = configuration;
         }
     }
-
 
 }
