@@ -29,7 +29,7 @@ public class GcpConstruct extends Construct
      * Every GCP Construct uses a different deploymentId
      */
     private final String deploymentId;
-    private final String guid = UUID.randomUUID().toString().substring(0, 5);
+    private final String guid = UUID.randomUUID().toString().substring(0, 8);
 
 
     private final String functionDescription;

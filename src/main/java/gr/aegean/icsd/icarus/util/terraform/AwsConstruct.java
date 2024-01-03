@@ -44,7 +44,7 @@ public class AwsConstruct extends Construct {
      * Every AWS Construct uses a different deploymentId
      */
     private final String deploymentId;
-    private final String guid = UUID.randomUUID().toString().substring(0, 5);
+    private final String guid = UUID.randomUUID().toString().substring(0, 8);
 
 
     private final Set<String> locations = new HashSet<>();
@@ -274,7 +274,7 @@ public class AwsConstruct extends Construct {
 
         S3Bucket myBucket = S3Bucket.Builder.create(this, "lambda_bucket-" + location + deploymentId + "-"
                 + guid)
-                .bucket("lambda-bucket-" + location + "-" + deploymentId)
+                .bucket("lambda-bucket-" + location + "-" + deploymentId + "-" + guid)
                 .provider(provider)
                 .build();
 
