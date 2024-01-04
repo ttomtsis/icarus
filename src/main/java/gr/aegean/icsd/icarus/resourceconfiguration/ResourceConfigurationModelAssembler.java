@@ -34,6 +34,8 @@ public class ResourceConfigurationModelAssembler
                 entity.getParentTest().getId()
         );
 
+        newModel.setCreator(entity.getCreator().getUsername());
+
         return addLinks(newModel);
     }
 

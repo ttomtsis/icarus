@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
@@ -10,6 +11,8 @@ import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,12 +22,18 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
 @Entity
 @Table(name = "resource_configuration")
+@EntityListeners(AuditingEntityListener.class)
 public class ResourceConfiguration {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "resource_configuration_regions", joinColumns = @JoinColumn(name = "id"))
@@ -249,6 +258,14 @@ public class ResourceConfiguration {
 
     public void setParentTest(Test parentTest) {
         this.parentTest = parentTest;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

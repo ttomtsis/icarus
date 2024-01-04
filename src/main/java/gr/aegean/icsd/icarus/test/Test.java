@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.http.HttpMethod;
 
 import java.util.HashSet;
@@ -20,12 +21,18 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Table(name = "test")
+@EntityListeners(AuditingEntityListener.class)
 public class Test {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne(cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "test_author_id", updatable = false)
+    private IcarusUser creator;
 
     @NotBlank(message = "Test name cannot be blank")
     @Size(min = MIN_LENGTH, max = MAX_LENGTH,
@@ -45,10 +52,6 @@ public class Test {
 
     private String pathVariable;
 
-    @ManyToOne(cascade = CascadeType.REFRESH)
-    @JoinColumn(name = "test_author_id")
-    private IcarusUser testAuthor;
-
     @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "target_function_id")
     private Function targetFunction;
@@ -61,11 +64,6 @@ public class Test {
             targetEntity = ResourceConfiguration.class, orphanRemoval = true,
     fetch = FetchType.EAGER)
     private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
-
-    // TODO: Merge this field with testAuthor field
-    @CreatedBy
-    private String authorUsername;
-
 
     @OneToMany(targetEntity = TestExecution.class, mappedBy = "parentTest", cascade = {CascadeType.REFRESH,
             CascadeType.REMOVE}, orphanRemoval = true)
@@ -89,10 +87,6 @@ public class Test {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getAuthorUsername() {
-        return authorUsername;
     }
 
     public String getName() {
@@ -127,7 +121,7 @@ public class Test {
         this.path = path;
     }
 
-    public IcarusUser getTestAuthor() {return this.testAuthor;}
+    public IcarusUser getCreator() {return this.creator;}
 
     public Set<ProviderAccount> getAccountsList() {
         return accountsList;
@@ -156,7 +150,7 @@ public class Test {
     }
 
     public void setAuthor(IcarusUser testAuthor) {
-        this.testAuthor = testAuthor;
+        this.creator = testAuthor;
     }
 
     public void setTargetFunction(Function targetFunction) {

@@ -9,6 +9,7 @@ public class TestExecutionModel extends RepresentationModel<TestExecutionModel> 
 
 
     private Long id;
+    private String creator;
     private Long report;
     private String startDate;
     private String endDate;
@@ -81,6 +82,14 @@ public class TestExecutionModel extends RepresentationModel<TestExecutionModel> 
 
     public void setTestState(TestState testState) {
         this.testState = testState;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 

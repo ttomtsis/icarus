@@ -35,6 +35,7 @@ public class TestCaseMemberModelAssembler
         TestCaseMemberModel newModel = new TestCaseMemberModel();
 
         newModel.setId(entity.getId());
+        newModel.setCreator(entity.getCreator().getUsername());
         newModel.setParentTestCase(entity.getParentTestCase().getId());
         newModel.setExpectedResponseBody(entity.getExpectedResponseBody());
         newModel.setExpectedResponseCode(entity.getExpectedResponseCode());

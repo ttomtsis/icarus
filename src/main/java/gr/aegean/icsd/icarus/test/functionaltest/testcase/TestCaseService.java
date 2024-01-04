@@ -2,8 +2,10 @@ package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -36,7 +38,8 @@ public class TestCaseService {
 
         FunctionalTest parentTest = checkIfTestExists(testId);
 
-        return testCaseRepository.findAllByParentTest(parentTest, pageable);
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testCaseRepository.findAllByParentTestAndCreator(parentTest, loggedInUser, pageable);
     }
 
     public TestCase createTestCase(@NotNull TestCase newTestCase, @NotNull @Positive Long testId) {
@@ -77,13 +80,15 @@ public class TestCaseService {
 
     private FunctionalTest checkIfTestExists(@NotNull @Positive Long parentTestId) {
 
-        return (FunctionalTest) testRepository.findById(parentTestId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return (FunctionalTest) testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
                 .orElseThrow( () -> new TestNotFoundException(parentTestId));
     }
 
     private TestCase checkIfTestCaseExists(@NotNull @Positive Long testCaseId) {
 
-        return testCaseRepository.findById(testCaseId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testCaseRepository.findByIdAndCreator(testCaseId, loggedInUser)
                 .orElseThrow( () -> new TestCaseNotFoundException(testCaseId));
     }
 

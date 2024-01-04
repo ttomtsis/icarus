@@ -2,18 +2,27 @@ package gr.aegean.icsd.icarus.testexecution.testcaseresult;
 
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class TestCaseResult {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     @NotNull(message = "Test case result's actual response code cannot be null")
     @Positive(message = "Test case result's actual response code cannot be negative")
@@ -85,6 +94,14 @@ public class TestCaseResult {
 
     public void setParentTestCaseMember(TestCaseMember parentTestCaseMember) {
         this.parentTestCaseMember = parentTestCaseMember;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

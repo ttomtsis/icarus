@@ -8,10 +8,12 @@ import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.TestExecutionNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
@@ -99,7 +101,9 @@ public class TestExecutionService {
     public Page<TestExecution> getExecutions(@NotNull @Positive Long testId, @NotNull Pageable pageable) {
 
         Test parentTest = checkIfTestExists(testId);
-        return testExecutionRepository.findAllByParentTest(parentTest, pageable);
+
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testExecutionRepository.findAllByParentTestAndCreator(parentTest, loggedInUser, pageable);
     }
 
     public TestExecution getExecution(@NotNull @Positive Long testId, @NotNull @Positive Long executionId) {
@@ -176,7 +180,8 @@ public class TestExecutionService {
 
     private Test checkIfTestExists(@NotNull @Positive Long parentTestId) {
 
-        return testRepository.findById(parentTestId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
                 .orElseThrow( () -> new TestNotFoundException(parentTestId));
     }
 

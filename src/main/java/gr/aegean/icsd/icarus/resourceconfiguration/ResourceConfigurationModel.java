@@ -10,6 +10,7 @@ public class ResourceConfigurationModel extends RepresentationModel<ResourceConf
 
 
     private Long id;
+    private String creator;
     private Set<String> regions;
     private Set<Integer> memoryConfigurations;
     private Set<Integer> cpuConfigurations;
@@ -90,6 +91,14 @@ public class ResourceConfigurationModel extends RepresentationModel<ResourceConf
 
     public void setParentTest(Long parentTest) {
         this.parentTest = parentTest;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 

@@ -47,7 +47,7 @@ public class IcarusUser implements UserDetails {
     @JoinColumn(name = "user_id")
     private final Set<ProviderAccount> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "testAuthor", targetEntity = Test.class, orphanRemoval = true,
+    @OneToMany(mappedBy = "creator", targetEntity = Test.class, orphanRemoval = true,
             cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     private final Set<Test> createdTests = new HashSet<>();
 

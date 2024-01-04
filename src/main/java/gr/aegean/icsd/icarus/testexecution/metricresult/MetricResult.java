@@ -2,8 +2,11 @@ package gr.aegean.icsd.icarus.testexecution.metricresult;
 
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,12 +14,18 @@ import java.util.Map;
 import java.util.Set;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class MetricResult {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     @NotBlank(message = "Metric result's metric name cannot be blank")
     private String metricName;
@@ -77,6 +86,14 @@ public class MetricResult {
 
     public void setResourceConfiguration(ResourceConfiguration resourceConfiguration) {
         this.resourceConfiguration = resourceConfiguration;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

@@ -30,6 +30,7 @@ public class LoadProfileModelAssembler
         LoadProfileModel newModel = new LoadProfileModel();
 
         newModel.setId(entity.getId());
+        newModel.setCreator(entity.getCreator().getUsername());
         newModel.setParentTest(entity.getParentTest().getId());
         newModel.setLoadTime(entity.getLoadTime());
         newModel.setRampUp(entity.getRampUp());

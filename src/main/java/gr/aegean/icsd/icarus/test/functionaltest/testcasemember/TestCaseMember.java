@@ -1,16 +1,25 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcasemember;
 
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class TestCaseMember {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne(cascade = CascadeType.REFRESH)
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     private int expectedResponseCode;
 
@@ -126,6 +135,14 @@ public class TestCaseMember {
 
     public void setParentTestCase(TestCase parentTestCase) {
         this.parentTestCase = parentTestCase;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

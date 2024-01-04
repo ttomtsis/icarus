@@ -6,6 +6,7 @@ public class TestCaseMemberModel extends RepresentationModel<TestCaseMemberModel
 
 
     private Long id;
+    private String creator;
     private Integer expectedResponseCode;
     private String expectedResponseBody;
     private String requestPathVariableValue;
@@ -60,6 +61,14 @@ public class TestCaseMemberModel extends RepresentationModel<TestCaseMemberModel
 
     public void setParentTestCase(Long parentTestCase) {
         this.parentTestCase = parentTestCase;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 
