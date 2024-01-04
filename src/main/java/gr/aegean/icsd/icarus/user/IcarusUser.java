@@ -164,4 +164,21 @@ public class IcarusUser implements UserDetails {
 
     public Set<Test> getCreatedTests() {return this.createdTests;}
 
+
+    @Override
+    public String toString() {
+        return "IcarusUser{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", accountEnabled=" + accountEnabled +
+                ", accountNonExpired=" + accountNonExpired +
+                ", accountNonLocked=" + accountNonLocked +
+                ", credentialsNonExpired=" + credentialsNonExpired +
+                ", authorities=" + authorities +
+                '}';
+    }
+
+
 }

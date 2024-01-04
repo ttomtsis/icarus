@@ -2,8 +2,10 @@ package gr.aegean.icsd.icarus.function;
 
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.function.FunctionNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -81,8 +83,7 @@ public class FunctionService {
 
         checkIfTestExists(testId);
 
-        return functionRepository.findById(functionId)
-                .orElseThrow(() -> new FunctionNotFoundException(functionId));
+        return checkIfFunctionExists(functionId);
     }
 
 
@@ -94,7 +95,9 @@ public class FunctionService {
 
     private Function checkIfFunctionExists(Long functionId) {
 
-        return functionRepository.findById(functionId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+
+        return functionRepository.findFunctionByIdAndAuthor(functionId, loggedInUser)
                 .orElseThrow( () -> new FunctionNotFoundException(functionId));
     }
 

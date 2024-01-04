@@ -5,6 +5,7 @@ import gr.aegean.icsd.icarus.util.security.httpbasic.MySqlAuthenticationManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,6 +30,7 @@ import static jakarta.servlet.DispatcherType.*;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableJpaAuditing
 public class SecurityConfiguration {
 
 
@@ -59,7 +61,7 @@ public class SecurityConfiguration {
 
         http
 
-                .authorizeHttpRequests((authorize) -> authorize
+                .authorizeHttpRequests(authorize -> authorize
 
                         .dispatcherTypeMatchers(FORWARD, ERROR, INCLUDE).permitAll()
 
@@ -94,7 +96,7 @@ public class SecurityConfiguration {
                         )
                 )
 
-                .sessionManagement((session) -> session
+                .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
