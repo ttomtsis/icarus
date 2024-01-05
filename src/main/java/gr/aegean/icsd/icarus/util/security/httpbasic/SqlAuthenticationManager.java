@@ -2,7 +2,9 @@ package gr.aegean.icsd.icarus.util.security.httpbasic;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
+import gr.aegean.icsd.icarus.util.exceptions.InvalidPasswordException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
+import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,13 +13,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static gr.aegean.icsd.icarus.util.security.SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD;
+import static gr.aegean.icsd.icarus.util.security.SecurityConfiguration.*;
 
 
 /**
@@ -25,6 +29,8 @@ import static gr.aegean.icsd.icarus.util.security.SecurityConfiguration.CREDENTI
  * user details from a MySQL database
  */
 @Service
+@Transactional
+@Validated
 public class SqlAuthenticationManager implements UserDetailsService, UserDetailsManager {
 
 
@@ -47,9 +53,7 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
         if (user instanceof IcarusUser newUser) {
 
-            String encodedPassword = passwordEncoder.encode(newUser.getPassword());
-            newUser.setPassword(encodedPassword);
-
+            setPassword(newUser, newUser.getPassword());
             userRepository.save(newUser);
         }
         else {
@@ -61,9 +65,7 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
     public IcarusUser createIcarusUser(IcarusUser newUser) {
 
-        String encodedPassword = passwordEncoder.encode(newUser.getPassword());
-        newUser.setPassword(encodedPassword);
-
+        setPassword(newUser, newUser.getPassword());
         return userRepository.save(newUser);
     }
 
@@ -79,8 +81,7 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
             if (updatedUserDetails.getPassword() != null) {
 
-                loggedInUser.setPassword(passwordEncoder.encode(updatedUserDetails.getPassword()));
-                loggedInUser.setCredentialsLastChanged(Instant.now());
+                setPassword(loggedInUser, updatedUserDetails.getPassword());
             }
 
             userRepository.save(loggedInUser);
@@ -126,6 +127,21 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
     }
 
+
+    private void setPassword(IcarusUser user, String password) {
+
+        if(passwordIsValid(password)){
+
+            user.setPassword(passwordEncoder.encode(password));
+            user.setCredentialsLastChanged(Instant.now());
+        }
+        else {
+            throw new InvalidPasswordException("Password does not conform to limitations");
+        }
+
+
+    }
+
     private void credentialsNotExpired(IcarusUser user) {
 
         Instant credentialsLastChanged = user.getCredentialsLastChanged().truncatedTo(ChronoUnit.DAYS);
@@ -142,12 +158,33 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
     }
 
-
     private void setIfNotNull(Consumer<String> setter, String value) {
 
         if (value != null) {
             setter.accept(value);
         }
+    }
+
+    public boolean passwordIsValid(String password) {
+
+        if (password.length() < MINIMUM_PASSWORD_LENGTH || password.length() > MAXIMUM_PASSWORD_LENGTH) {
+            return false;
+        }
+
+        boolean hasSpecialChar = Arrays.stream(password.split(""))
+                .anyMatch(c -> !Character.isLetterOrDigit(c.charAt(0)));
+        if (!hasSpecialChar) {
+            return false;
+        }
+
+        boolean hasDigit = password.chars().anyMatch(Character::isDigit);
+        if (!hasDigit) {
+            return false;
+        }
+
+        boolean hasUpper = password.chars().anyMatch(Character::isUpperCase);
+        boolean hasLower = password.chars().anyMatch(Character::isLowerCase);
+        return hasUpper && hasLower;
     }
 
 

@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static jakarta.servlet.DispatcherType.*;
 
@@ -36,6 +37,8 @@ public class SecurityConfiguration {
 
 
     public static int CREDENTIALS_EXPIRATION_PERIOD;
+    public static final int MINIMUM_PASSWORD_LENGTH = 8;
+    public static final int MAXIMUM_PASSWORD_LENGTH = 150;
 
     @Value("${security.users.enableTestUser}")
     private boolean enableTestAccounts;
@@ -135,6 +138,12 @@ public class SecurityConfiguration {
         passwordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
 
         return passwordEncoder;
+    }
+
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
     }
 
 

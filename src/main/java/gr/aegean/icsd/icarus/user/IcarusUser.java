@@ -34,7 +34,6 @@ public class IcarusUser implements UserDetails {
     @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Username does not conform to length limitations")
     private String username;
 
-    //TODO: Create password validation annotation
     @NotBlank(message = "Password cannot be blank")
     @Column(nullable = false, name = "password")
     private String password;
