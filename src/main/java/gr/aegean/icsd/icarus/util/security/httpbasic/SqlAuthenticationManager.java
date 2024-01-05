@@ -112,7 +112,9 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
         Optional<IcarusUser> requestedUser = userRepository.findUserByUsername(username);
 
-        if (requestedUser.isPresent() && credentialsNotExpired(requestedUser.get())) {
+        if (requestedUser.isPresent()) {
+
+            credentialsNotExpired(requestedUser.get());
 
             return requestedUser.get();
         }
@@ -124,7 +126,7 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
 
     }
 
-    private boolean credentialsNotExpired(IcarusUser user) {
+    private void credentialsNotExpired(IcarusUser user) {
 
         Instant credentialsLastChanged = user.getCredentialsLastChanged().truncatedTo(ChronoUnit.DAYS);
 
@@ -136,8 +138,6 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
         if (currentDate.isAfter(expirationDate)){
             LoggerFactory.getLogger("SQL Authentication Manager").error("User's credentials have expired");
             throw new CredentialsExpiredException("User's credentials have expired");
-        } else {
-            return true;
         }
 
     }
