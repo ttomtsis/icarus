@@ -25,17 +25,17 @@ public class HttpBasicConfiguration {
 
     /**
      * Creates a DaoAuthenticationProvider that utilizes the
-     * {@link MySqlAuthenticationManager} and {@link BCryptPasswordEncoder}
+     * {@link SqlAuthenticationManager} and {@link BCryptPasswordEncoder}
      *
      * @return DaoAuthenticationProvider
      */
     @Bean
     DaoAuthenticationProvider createAuthenticationProvider() {
 
-        MySqlAuthenticationManager users = new MySqlAuthenticationManager(userRepository);
-
         DelegatingPasswordEncoder passwordEncoder = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
         passwordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
+
+        SqlAuthenticationManager users = new SqlAuthenticationManager(userRepository, passwordEncoder);
 
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
 
@@ -43,7 +43,6 @@ public class HttpBasicConfiguration {
         authenticationProvider.setPasswordEncoder(passwordEncoder);
 
         return authenticationProvider;
-
     }
 
 
