@@ -1,5 +1,6 @@
 package gr.aegean.icsd.icarus.util.security;
 
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 
@@ -9,10 +10,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public final class UserUtils {
 
 
+    private UserUtils() {}
+
+
+
     public static String getUsername() {
 
         return SecurityContextHolder.getContext().getAuthentication().getName();
 
+    }
+
+
+    public static IcarusUser getLoggedInUser() {
+
+        return (IcarusUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 

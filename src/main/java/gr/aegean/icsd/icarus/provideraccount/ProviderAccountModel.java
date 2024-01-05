@@ -10,6 +10,7 @@ import org.springframework.hateoas.RepresentationModel;
 public class ProviderAccountModel extends RepresentationModel<ProviderAccountModel> {
 
     private Long id;
+    private String creator;
     private String name;
     private String description;
 
@@ -98,6 +99,14 @@ public class ProviderAccountModel extends RepresentationModel<ProviderAccountMod
 
     public void setGcpProjectId(String gcpProjectId) {
         this.gcpProjectId = gcpProjectId;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 

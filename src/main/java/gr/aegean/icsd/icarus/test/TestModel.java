@@ -10,6 +10,7 @@ public class TestModel extends RepresentationModel<TestModel> {
 
 
     private Long id;
+    private String creator;
     private String name;
     private String description;
     private String httpMethod;
@@ -38,6 +39,7 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.resourceConfigurations = model.getResourceConfigurations();
         this.authorUsername = model.getAuthorUsername();
         this.state = model.getState();
+        this.creator = model.getCreator();
     }
 
     public TestModel() {}
@@ -138,6 +140,14 @@ public class TestModel extends RepresentationModel<TestModel> {
 
     public void setResourceConfigurations(Set<Long> resourceConfigurations) {
         this.resourceConfigurations = resourceConfigurations;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 

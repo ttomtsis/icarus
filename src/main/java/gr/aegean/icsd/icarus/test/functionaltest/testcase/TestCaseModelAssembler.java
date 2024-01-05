@@ -39,6 +39,7 @@ public class TestCaseModelAssembler extends RepresentationModelAssemblerSupport<
         TestCaseModel newModel = new TestCaseModel();
         
         newModel.setId(entity.getId());
+        newModel.setCreator(entity.getCreator().getUsername());
         newModel.setName(entity.getName());
         newModel.setDescription(entity.getDescription());
         newModel.setParentTest(entity.getParentTest().getId());

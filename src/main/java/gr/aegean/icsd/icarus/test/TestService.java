@@ -3,9 +3,11 @@ package gr.aegean.icsd.icarus.test;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -52,17 +54,12 @@ public class TestService {
 
     public Test searchTest(@NotNull @Positive Long testId) {
 
-        return repository.findById(testId)
-                .orElseThrow(() -> new TestNotFoundException
-                        (testId));
-
+        return checkIfTestExists(testId);
     }
 
     public Test updateTest(@NotNull @Positive Long testId, @NotNull TestModel testModel) {
 
-        Test requestedTest = repository.findById(testId).orElseThrow( () ->
-                new TestNotFoundException
-                        (testId));
+        Test requestedTest = checkIfTestExists(testId);
 
         setIfNotNull(requestedTest::setName, testModel.getName());
         setIfNotNull(requestedTest::setDescription, testModel.getDescription());
@@ -95,24 +92,14 @@ public class TestService {
 
     public void deleteTest(@NotNull @Positive Long testId) {
 
-        if (repository.existsById(testId)) {
-
-            repository.deleteById(testId);
-
-        } else {
-
-            throw new TestNotFoundException(testId);
-
-        }
-
+        Test requestedTest = checkIfTestExists(testId);
+        repository.delete(requestedTest);
     }
 
     public Test executeTest(@NotNull @Positive Long testId) {
 
         // Test exists
-        Test requestedTest = repository.findById(testId)
-                .orElseThrow(() -> new TestNotFoundException
-                        (testId));
+        Test requestedTest = checkIfTestExists(testId);
 
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
@@ -179,5 +166,13 @@ public class TestService {
         return this.deployer;
     }
 
+    private Test checkIfTestExists(Long testId) {
+
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+
+        return repository.findTestByIdAndCreator(testId, loggedInUser)
+                .orElseThrow(() -> new TestNotFoundException
+                        (testId));
+    }
 
 }

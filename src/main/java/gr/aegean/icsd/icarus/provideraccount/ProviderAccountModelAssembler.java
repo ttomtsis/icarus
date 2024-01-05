@@ -36,6 +36,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
         ProviderAccountModel awsAccountModel = new ProviderAccountModel();
 
         awsAccountModel.setId(id);
+        awsAccountModel.setCreator(entity.getCreator().getUsername());
         awsAccountModel.setName(accountName);
         awsAccountModel.setDescription(accountDescription);
         awsAccountModel.setAwsAccessKey(awsAccessKey);
@@ -73,6 +74,7 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
         ProviderAccountModel gcpAccountModel = new ProviderAccountModel();
 
         gcpAccountModel.setId(id);
+        gcpAccountModel.setCreator(entity.getCreator().getUsername());
         gcpAccountModel.setName(accountName);
         gcpAccountModel.setDescription(accountDescription);
         gcpAccountModel.setKeyfile(gcpCredentials);

@@ -11,6 +11,7 @@ import jdk.jfr.BooleanFlag;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class IcarusUser implements UserDetails {
     private Long id;
 
     @NotBlank(message = "Username cannot be blank")
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Username does not conform to length limitations")
     private String username;
 
@@ -37,8 +38,9 @@ public class IcarusUser implements UserDetails {
     @Column(nullable = false, name = "password")
     private String password;
 
-    @NotBlank(message = "Email cannot be blank")
     @Email
+    @NotBlank(message = "Email cannot be blank")
+    @Column(nullable = false, unique = true)
     private String email;
 
 
@@ -47,7 +49,7 @@ public class IcarusUser implements UserDetails {
     @JoinColumn(name = "user_id")
     private final Set<ProviderAccount> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "testAuthor", targetEntity = Test.class, orphanRemoval = true,
+    @OneToMany(mappedBy = "creator", targetEntity = Test.class, orphanRemoval = true,
             cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     private final Set<Test> createdTests = new HashSet<>();
 
@@ -66,6 +68,9 @@ public class IcarusUser implements UserDetails {
     @Column(name = "account_non_locked", columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean accountNonLocked;
 
+    @NotNull
+    private Instant credentialsLastChanged;
+
     @BooleanFlag
     @NotNull
     @Column(name = "credentials_non_expired", columnDefinition = "BOOLEAN DEFAULT TRUE")
@@ -79,6 +84,7 @@ public class IcarusUser implements UserDetails {
 
 
     public IcarusUser(String username, String password, String email) {
+
         this.username = username;
         this.password = password;
         this.email = email;
@@ -87,9 +93,16 @@ public class IcarusUser implements UserDetails {
         this.accountNonLocked = true;
         this.accountNonExpired = true;
         this.credentialsNonExpired = true;
+
+        this.credentialsLastChanged = Instant.now();
     }
 
     public IcarusUser() {}
+
+    public static IcarusUser createUserFromModel(IcarusUserModel model) {
+
+        return new IcarusUser(model.getUsername(), model.getPassword(), model.getEmail());
+    }
 
 
 
@@ -163,5 +176,30 @@ public class IcarusUser implements UserDetails {
     }
 
     public Set<Test> getCreatedTests() {return this.createdTests;}
+
+    public Instant getCredentialsLastChanged() {
+        return credentialsLastChanged;
+    }
+
+    public void setCredentialsLastChanged(Instant credentialsLastChanged) {
+        this.credentialsLastChanged = credentialsLastChanged;
+    }
+
+
+    @Override
+    public String toString() {
+        return "IcarusUser{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", accountEnabled=" + accountEnabled +
+                ", accountNonExpired=" + accountNonExpired +
+                ", accountNonLocked=" + accountNonLocked +
+                ", credentialsNonExpired=" + credentialsNonExpired +
+                ", authorities=" + authorities +
+                '}';
+    }
+
 
 }

@@ -36,6 +36,7 @@ public class TestExecutionModelAssembler extends RepresentationModelAssemblerSup
         TestExecutionModel newModel = new TestExecutionModel();
 
         newModel.setId(entity.getId());
+        newModel.setCreator(entity.getCreator().getUsername());
 
         if(entity.getReport() != null) {
             newModel.setReport(entity.getReport().getId());

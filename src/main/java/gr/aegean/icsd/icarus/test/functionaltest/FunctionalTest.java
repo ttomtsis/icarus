@@ -1,10 +1,9 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
-import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import jakarta.persistence.*;
@@ -33,7 +32,6 @@ public class FunctionalTest extends Test {
 
 
         private final String name;
-        private final IcarusUser testAuthor;
         private final HttpMethod httpMethod;
 
         private String description;
@@ -44,9 +42,8 @@ public class FunctionalTest extends Test {
 
 
 
-        public FunctionalTestBuilder(String name, IcarusUser author, HttpMethod httpMethod) {
+        public FunctionalTestBuilder(String name, HttpMethod httpMethod) {
             this.name = name;
-            this.testAuthor = author;
             this.httpMethod = httpMethod;
         }
 
@@ -81,7 +78,6 @@ public class FunctionalTest extends Test {
     private FunctionalTest(FunctionalTestBuilder builder) {
 
         super.setName(builder.name);
-        super.setAuthor(builder.testAuthor);
         super.setHttpMethod(builder.httpMethod);
 
         super.setDescription(builder.description);
@@ -95,15 +91,12 @@ public class FunctionalTest extends Test {
 
     public static FunctionalTest createFunctionalTestFromModel(FunctionalTestModel model) {
 
-        IcarusUser author = new IcarusUser();
-        author.setId(model.getTestAuthor());
-
         Function targetFunction = new Function();
         targetFunction.setId(model.getTargetFunction());
 
 
         return new FunctionalTestBuilder(
-                model.getName(), author,
+                model.getName(),
                 HttpMethod.valueOf(model.getHttpMethod()))
 
                 .pathVariable(model.getPathVariable())

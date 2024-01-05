@@ -1,19 +1,28 @@
 package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class LoadProfile {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne(cascade = CascadeType.REFRESH)
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     @NotNull(message = "Load Profile's load time cannot be null")
     @Positive(message = "Load time cannot be less than or equal to zero")
@@ -118,6 +127,14 @@ public class LoadProfile {
 
     public PerformanceTest getParentTest() {
         return parentTest;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

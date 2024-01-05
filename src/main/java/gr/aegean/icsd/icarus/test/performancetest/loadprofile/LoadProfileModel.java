@@ -6,6 +6,7 @@ public class LoadProfileModel extends RepresentationModel<LoadProfileModel> {
 
 
     private Long id;
+    private String creator;
     private Integer loadTime;
     private Integer rampUp;
     private Integer concurrentUsers;
@@ -69,6 +70,14 @@ public class LoadProfileModel extends RepresentationModel<LoadProfileModel> {
 
     public void setParentTest(Long parentTest) {
         this.parentTest = parentTest;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 

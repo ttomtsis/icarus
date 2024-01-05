@@ -1,9 +1,12 @@
 package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,11 +16,17 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "provider_account")
+@EntityListeners(AuditingEntityListener.class)
 public class ProviderAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     @NotBlank(message = "Name cannot be blank")
     @Column(unique = true)
@@ -89,6 +98,14 @@ public class ProviderAccount {
 
     public String getAccountType() {
         return accountType;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

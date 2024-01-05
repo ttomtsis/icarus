@@ -26,11 +26,12 @@ public class TestModelAssembler extends RepresentationModelAssemblerSupport<Test
         TestModel newModel = new TestModel();
 
         newModel.setId(entity.getId());
+        newModel.setCreator(entity.getCreator().getUsername());
         newModel.setName(entity.getName());
         newModel.setDescription(entity.getDescription());
         newModel.setHttpMethod(entity.getHttpMethod());
 
-        newModel.setTestAuthor(entity.getTestAuthor().getId());
+        newModel.setTestAuthor(entity.getCreator().getId());
 
         if (entity.getTargetFunction() != null) {
             newModel.setTargetFunction(entity.getTargetFunction().getId());

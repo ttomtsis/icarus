@@ -11,6 +11,7 @@ public class FunctionModel  extends RepresentationModel<FunctionModel> {
 
     private Long id;
     private String name;
+    private String author;
     private String description;
     private String githubURL;
     private String functionHandler;
@@ -82,6 +83,14 @@ public class FunctionModel  extends RepresentationModel<FunctionModel> {
 
     public void setFunctionSourceFileName(String functionSourceFileName) {
         this.functionSourceFileName = functionSourceFileName;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
 

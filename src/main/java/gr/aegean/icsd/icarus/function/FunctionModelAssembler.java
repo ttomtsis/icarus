@@ -38,6 +38,7 @@ public class FunctionModelAssembler
 
         newModel.setId(entity.getId());
         newModel.setName(entity.getName());
+        newModel.setAuthor(entity.getAuthor().getUsername());
         newModel.setDescription(entity.getDescription());
         newModel.setFunctionHandler(entity.getFunctionHandler());
         newModel.setFunctionSourceDirectory(entity.getFunctionSourceDirectory());

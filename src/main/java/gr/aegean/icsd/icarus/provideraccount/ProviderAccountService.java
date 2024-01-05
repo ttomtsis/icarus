@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
 import gr.aegean.icsd.icarus.util.exceptions.UserNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.provideraccount.ProviderAccountNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
@@ -65,7 +66,9 @@ public class ProviderAccountService {
 
     public void updateProviderAccount(@NotBlank String awsAccountName, @NotNull AwsAccount updatedAwsAccount) {
 
-        Optional<ProviderAccount> existingProviderAccount = accountRepository.findByName(awsAccountName);
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        Optional<ProviderAccount> existingProviderAccount = accountRepository.findByNameAndCreator
+                (awsAccountName, loggedInUser);
 
         if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException(awsAccountName);}
 
@@ -88,7 +91,9 @@ public class ProviderAccountService {
 
     public void updateProviderAccount(@NotBlank String gcpAccountName, @NotNull GcpAccount updatedGcpAccount) {
 
-        Optional<ProviderAccount> existingProviderAccount = accountRepository.findByName(gcpAccountName);
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        Optional<ProviderAccount> existingProviderAccount = accountRepository.findByNameAndCreator
+                (gcpAccountName, loggedInUser);
 
         if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException(gcpAccountName);}
 
@@ -115,7 +120,9 @@ public class ProviderAccountService {
     }
 
     public void detachProviderAccount(@NotBlank String accountName) {
-        accountRepository.deleteByName(accountName);
+
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        accountRepository.deleteByNameAndCreator(accountName, loggedInUser);
     }
 
     private IcarusUser checkIfUserExists(String username) {

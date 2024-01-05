@@ -2,8 +2,10 @@ package gr.aegean.icsd.icarus.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.resourceconfiguration.ResourceConfigurationNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -35,9 +37,10 @@ public class ResourceConfigurationService {
     public Page<ResourceConfiguration> getResourceConfigurations(@NotNull @Positive Long testId,
                                                                       @NotNull Pageable pageable) {
 
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         Test parentTest = checkIfTestExists(testId);
 
-        return resourceConfigurationRepository.findAllByParentTest(parentTest, pageable);
+        return resourceConfigurationRepository.findAllByParentTestAndCreator(parentTest, loggedInUser, pageable);
     }
 
     public ResourceConfiguration createConfiguration(@NotNull ResourceConfiguration newConfiguration,
@@ -97,7 +100,9 @@ public class ResourceConfigurationService {
 
     private ResourceConfiguration checkIfConfigurationExists(Long configurationId) {
 
-        return resourceConfigurationRepository.findById(configurationId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+
+        return resourceConfigurationRepository.findResourceConfigurationByIdAndCreator(configurationId, loggedInUser)
                 .orElseThrow( () -> new ResourceConfigurationNotFoundException(configurationId));
     }
 

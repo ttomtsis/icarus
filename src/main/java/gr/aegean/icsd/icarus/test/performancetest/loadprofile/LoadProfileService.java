@@ -2,8 +2,10 @@ package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.LoadProfileNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -79,19 +81,22 @@ public class LoadProfileService {
 
         PerformanceTest parentTest = checkIfTestExists(testId);
 
-        return loadProfileRepository.findAllByParentTest(parentTest, pageable);
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return loadProfileRepository.findAllByParentTestAndCreator(parentTest, loggedInUser, pageable);
     }
 
 
     private PerformanceTest checkIfTestExists(Long parentTestId) {
 
-        return (PerformanceTest) testRepository.findById(parentTestId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return (PerformanceTest) testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
                 .orElseThrow( () -> new TestNotFoundException(parentTestId));
     }
 
     private LoadProfile checkIfProfileExists(Long loadProfileId) {
 
-        return loadProfileRepository.findById(loadProfileId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return loadProfileRepository.findByIdAndAndCreator(loadProfileId, loggedInUser)
                 .orElseThrow( () -> new LoadProfileNotFoundException(loadProfileId));
     }
 

@@ -1,10 +1,12 @@
 package gr.aegean.icsd.icarus.util.security;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.security.httpbasic.MySqlAuthenticationManager;
+import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static jakarta.servlet.DispatcherType.*;
 
@@ -29,20 +32,38 @@ import static jakarta.servlet.DispatcherType.*;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableJpaAuditing
 public class SecurityConfiguration {
 
 
-    @Value("${users.enableTestUser}")
+    public static int CREDENTIALS_EXPIRATION_PERIOD;
+    public static final int MINIMUM_PASSWORD_LENGTH = 8;
+    public static final int MAXIMUM_PASSWORD_LENGTH = 150;
+
+    @Value("${security.users.enableTestUser}")
     private boolean enableTestAccounts;
 
-    @Value("${users.testUserUsername}")
+    @Value("${security.users.testUserUsername}")
     private String testAccountUsername;
 
-    @Value("${users.testUserPassword}")
+    @Value("${security.users.testUserPassword}")
     private String testAccountPassword;
 
-    @Value("${users.testUserEmail}")
+    @Value("${security.users.testUserEmail}")
     private String testAccountEmail;
+
+
+
+    @Value("${security.credentialsExpirationPeriod}")
+    public void setCredentialsExpirationPeriod(Integer credentialsExpirationPeriod) {
+
+        if (credentialsExpirationPeriod != null && credentialsExpirationPeriod > 0) {
+            SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD = credentialsExpirationPeriod;
+        }
+        else {
+            SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD = 354;
+        }
+    }
 
 
     /**
@@ -59,7 +80,7 @@ public class SecurityConfiguration {
 
         http
 
-                .authorizeHttpRequests((authorize) -> authorize
+                .authorizeHttpRequests(authorize -> authorize
 
                         .dispatcherTypeMatchers(FORWARD, ERROR, INCLUDE).permitAll()
 
@@ -67,9 +88,12 @@ public class SecurityConfiguration {
                         .requestMatchers("/oauth/**").permitAll()
                         .requestMatchers("/").authenticated()
 
+                        .requestMatchers(HttpMethod.POST, "/api/v0/users/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v0/users/reset**").permitAll()
+
                         .requestMatchers("/api/v0/users/{username}/accounts/**").authenticated()
                         .requestMatchers("/api/v0/tests/**").authenticated()
-
+                        .requestMatchers("/api/v0/users/**").authenticated()
                 )
 
                 .headers(headers -> headers
@@ -94,7 +118,7 @@ public class SecurityConfiguration {
                         )
                 )
 
-                .sessionManagement((session) -> session
+                .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
@@ -107,6 +131,22 @@ public class SecurityConfiguration {
     }
 
 
+    @Bean
+    DelegatingPasswordEncoder createEncoder() {
+
+        DelegatingPasswordEncoder passwordEncoder = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        passwordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
+
+        return passwordEncoder;
+    }
+
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
+    }
+
+
     /**
      * If test accounts are enabled, this method creates them
      * ( provided that they do not already exist in the database )
@@ -116,23 +156,17 @@ public class SecurityConfiguration {
      * @return true if the accounts were created
      */
     @Bean
-    boolean createTestUsers(MySqlAuthenticationManager userManager) {
+    boolean createTestUsers(SqlAuthenticationManager userManager) {
 
         if (enableTestAccounts && !userManager.userExists(testAccountUsername)) {
 
-            DelegatingPasswordEncoder passwordEncoder = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
-            passwordEncoder.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
-
-            String password = passwordEncoder.encode(testAccountPassword);
-
-            UserDetails testJournalist = new IcarusUser(testAccountUsername, password, testAccountEmail);
+            UserDetails testJournalist = new IcarusUser(testAccountUsername, testAccountPassword, testAccountEmail);
             userManager.createUser(testJournalist);
 
             return true;
         }
 
         return false;
-
     }
 
 

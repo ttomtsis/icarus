@@ -10,4 +10,5 @@ public interface IcarusUserRepository extends JpaRepository<IcarusUser, Long> {
 
     Optional<IcarusUser> findUserByUsername(String username);
 
+    void deleteIcarusUserByUsername(String username);
 }

@@ -4,9 +4,12 @@ import gr.aegean.icsd.icarus.report.Report;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -15,12 +18,18 @@ import java.util.Set;
 
 @Entity
 @Table(name = "test_execution")
+@EntityListeners(AuditingEntityListener.class)
 public class TestExecution {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private IcarusUser creator;
 
     @OneToOne(targetEntity = Report.class, cascade = {CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "test_report")
@@ -139,6 +148,14 @@ public class TestExecution {
 
     public void setDeploymentId(String deploymentId) {
         this.deploymentId = deploymentId;
+    }
+
+    public IcarusUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(IcarusUser creator) {
+        this.creator = creator;
     }
 
 

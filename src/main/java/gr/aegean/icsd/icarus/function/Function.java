@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.function;
 
 import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
 import gr.aegean.icsd.icarus.util.exceptions.function.FunctionConfigurationException;
@@ -9,6 +10,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.File;
 import java.util.HashSet;
@@ -18,12 +21,18 @@ import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Function {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private IcarusUser author;
 
     @NotBlank(message = "Function's name cannot be blank")
     @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Function name does not conform to length limitations")
@@ -37,7 +46,7 @@ public class Function {
     @GithubUrl(message = "Function's GitHub URL is not valid ")
     private String githubURL;
 
-    @ValidFilePath(message = "Function's source is not a valid filepath")
+    @ValidFilePath(message = "Function's source directory is not a valid filepath")
     private String functionSourceDirectory;
 
     @Pattern(regexp = "^[^\\\\/:*?\"<>|]*$",
@@ -166,5 +175,11 @@ public class Function {
         this.functionHandler = functionHandler;
     }
 
+    public IcarusUser getAuthor() {
+        return author;
+    }
 
+    public void setAuthor(IcarusUser author) {
+        this.author = author;
+    }
 }

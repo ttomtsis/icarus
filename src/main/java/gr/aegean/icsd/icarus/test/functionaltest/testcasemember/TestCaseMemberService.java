@@ -4,10 +4,12 @@ import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.testcasemember.InvalidTestCaseMemberConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.testcasemember.TestCaseMemberNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -50,7 +52,8 @@ public class TestCaseMemberService {
 
         TestCase parentTestCase = checkIfTestCaseExists(testCaseId);
 
-        return testCaseMemberRepository.findAllByParentTestCase(parentTestCase, pageable);
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testCaseMemberRepository.findAllByParentTestCaseAndCreator(parentTestCase, loggedInUser, pageable);
     }
 
     public TestCaseMember createTestCaseMember(@NotNull TestCaseMember newTestCaseMember,
@@ -98,6 +101,7 @@ public class TestCaseMemberService {
         testCaseMemberRepository.save(existingTestCaseMember);
     }
 
+    //TODO: Check for possible bug
     private void setIfNotBlank(Consumer<String> setter, String value) {
 
         if (StringUtils.isNotBlank(value)) {
@@ -121,19 +125,22 @@ public class TestCaseMemberService {
 
     private Test checkIfTestExists(Long parentTestId) {
 
-        return testRepository.findById(parentTestId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
                 .orElseThrow(() -> new TestNotFoundException(parentTestId));
     }
 
     private TestCase checkIfTestCaseExists(Long parentTestCaseId) {
 
-        return testCaseRepository.findById(parentTestCaseId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testCaseRepository.findByIdAndCreator(parentTestCaseId, loggedInUser)
                 .orElseThrow( () -> new TestCaseNotFoundException(parentTestCaseId));
     }
 
     private TestCaseMember checkIfTestCaseMemberExists(Long testCaseMemberId) {
 
-        return testCaseMemberRepository.findById(testCaseMemberId)
+        IcarusUser loggedInUser = UserUtils.getLoggedInUser();
+        return testCaseMemberRepository.findByIdAndCreator(testCaseMemberId, loggedInUser)
                 .orElseThrow( () -> new TestCaseMemberNotFoundException(testCaseMemberId));
     }
 

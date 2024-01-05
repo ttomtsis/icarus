@@ -3,7 +3,6 @@ package gr.aegean.icsd.icarus.test.performancetest;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import jakarta.persistence.*;
 import org.springframework.http.HttpMethod;
@@ -37,7 +36,6 @@ public class PerformanceTest extends Test  {
 
 
         private final String name;
-        private final IcarusUser testAuthor;
         private final HttpMethod httpMethod;
         private final Set<Metric> chosenMetrics = new HashSet<>();
 
@@ -49,12 +47,10 @@ public class PerformanceTest extends Test  {
         private String requestBody;
 
 
-        public PerformanceTestBuilder(String name, IcarusUser author, HttpMethod httpMethod) {
+        public PerformanceTestBuilder(String name, HttpMethod httpMethod) {
 
             this.name = name;
-            this.testAuthor = author;
             this.httpMethod = httpMethod;
-
         }
 
 
@@ -101,14 +97,11 @@ public class PerformanceTest extends Test  {
 
     public static PerformanceTest createPerformanceTestFromModel(PerformanceTestModel model) {
 
-        IcarusUser author = new IcarusUser();
-        author.setId(model.getTestAuthor());
-
         Function targetFunction = new Function();
         targetFunction.setId(model.getTargetFunction());
 
         return new PerformanceTestBuilder(
-                model.getName(), author, HttpMethod.valueOf(model.getHttpMethod())
+                model.getName(), HttpMethod.valueOf(model.getHttpMethod())
         )
                 .pathVariable(model.getPathVariable())
 
@@ -120,8 +113,8 @@ public class PerformanceTest extends Test  {
     }
 
     private PerformanceTest(PerformanceTestBuilder builder) {
+
         super.setName(builder.name);
-        super.setAuthor(builder.testAuthor);
         super.setHttpMethod(builder.httpMethod);
 
         super.setDescription(builder.description);

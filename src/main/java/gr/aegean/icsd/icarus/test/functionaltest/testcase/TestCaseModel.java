@@ -11,6 +11,7 @@ public class TestCaseModel extends RepresentationModel<TestCaseModel> {
 
 
     private Long id;
+    private String creator;
     private String name;
     private String description;
     private Long parentTest;
@@ -57,6 +58,14 @@ public class TestCaseModel extends RepresentationModel<TestCaseModel> {
 
     public void setTestCaseMembers(Set<TestCaseMemberModel> testCaseMembers) {
         this.testCaseMembers = testCaseMembers;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 
 
