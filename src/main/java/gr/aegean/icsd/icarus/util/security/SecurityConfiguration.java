@@ -35,17 +35,32 @@ import static jakarta.servlet.DispatcherType.*;
 public class SecurityConfiguration {
 
 
-    @Value("${users.enableTestUser}")
+    public static int CREDENTIALS_EXPIRATION_PERIOD;
+
+    @Value("${security.users.enableTestUser}")
     private boolean enableTestAccounts;
 
-    @Value("${users.testUserUsername}")
+    @Value("${security.users.testUserUsername}")
     private String testAccountUsername;
 
-    @Value("${users.testUserPassword}")
+    @Value("${security.users.testUserPassword}")
     private String testAccountPassword;
 
-    @Value("${users.testUserEmail}")
+    @Value("${security.users.testUserEmail}")
     private String testAccountEmail;
+
+
+
+    @Value("${security.credentialsExpirationPeriod}")
+    public void setCredentialsExpirationPeriod(Integer credentialsExpirationPeriod) {
+
+        if (credentialsExpirationPeriod != null && credentialsExpirationPeriod > 0) {
+            SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD = credentialsExpirationPeriod;
+        }
+        else {
+            SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD = 354;
+        }
+    }
 
 
     /**

@@ -17,7 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.CREDENTIALS_EXPIRATION_PERIOD;
+import static gr.aegean.icsd.icarus.util.security.SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD;
 
 
 /**

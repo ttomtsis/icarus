@@ -1,9 +1,13 @@
-users:
+security:
 
-  enableTestUser: ${ENABLE_TEST_USER}
-  testUserUsername: ${TEST_USER_USERNAME}
-  testUserPassword: ${TEST_USER_PASSWORD}
-  testUserEmail: ${TEST_USER_EMAIL}
+  credentialsExpirationPeriod:
+
+  users:
+
+    enableTestUser: ${ENABLE_TEST_USER}
+    testUserUsername: ${TEST_USER_USERNAME}
+    testUserPassword: ${TEST_USER_PASSWORD}
+    testUserEmail: ${TEST_USER_EMAIL}
 
 
 

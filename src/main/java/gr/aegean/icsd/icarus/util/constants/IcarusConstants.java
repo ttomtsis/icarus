@@ -20,8 +20,6 @@ public class IcarusConstants {
     public static final int METRIC_QUERY_MAX_TIMEOUT = 10;
 
 
-    public static final int CREDENTIALS_EXPIRATION_PERIOD = 365;
-
 
     private IcarusConstants() {}
 
