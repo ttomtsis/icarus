@@ -1,6 +1,8 @@
 security:
 
-  credentialsExpirationPeriod:
+  credentialsExpirationPeriod: ${CREDENTIALS_EXPIRATION_PERIOD:355}
+
+
 
   users:
 
@@ -8,6 +10,8 @@ security:
     testUserUsername: ${TEST_USER_USERNAME}
     testUserPassword: ${TEST_USER_PASSWORD}
     testUserEmail: ${TEST_USER_EMAIL}
+
+    functionSourcesDirectory: ${FUNCTION_SOURCES_DIRECTORY:classpath/resources}
 
 
 
@@ -32,6 +36,13 @@ spring:
   groovy:
     template:
       check-template-location: false
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
 
   datasource:
     url: ${DATASOURCE_URL}

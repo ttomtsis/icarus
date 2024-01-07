@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.util.security;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.util.exceptions.IcarusConfigurationException;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ public class SecurityConfiguration {
     public static final int MINIMUM_PASSWORD_LENGTH = 8;
     public static final int MAXIMUM_PASSWORD_LENGTH = 150;
 
+
     @Value("${security.users.enableTestUser}")
     private boolean enableTestAccounts;
 
@@ -61,7 +63,8 @@ public class SecurityConfiguration {
             SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD = credentialsExpirationPeriod;
         }
         else {
-            SecurityConfiguration.CREDENTIALS_EXPIRATION_PERIOD = 354;
+            throw new IcarusConfigurationException("Credentials expiration period cannot be: "
+                    + credentialsExpirationPeriod);
         }
     }
 
