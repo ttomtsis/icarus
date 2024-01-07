@@ -41,8 +41,6 @@ public class FunctionModelAssembler
         newModel.setAuthor(entity.getAuthor().getUsername());
         newModel.setDescription(entity.getDescription());
         newModel.setFunctionHandler(entity.getFunctionHandler());
-        newModel.setFunctionSourceDirectory(entity.getFunctionSourceDirectory());
-        newModel.setFunctionSourceFileName(entity.getFunctionSourceFileName());
         newModel.setGithubURL(entity.getGithubURL());
 
         Set<Long> tests = entity.getCreatedTests().stream()
@@ -60,7 +58,7 @@ public class FunctionModelAssembler
                 .deleteFunction(testId, model.getId())).withRel("Delete"));
 
         model.add(linkTo(methodOn(FunctionController.class)
-                .updateFunction(testId, model.getId(), new FunctionModel())).withRel("Update"));
+                .updateFunction(testId, model.getId(), null, null)).withRel("Update"));
 
         model.add(linkTo(methodOn(FunctionController.class)
                 .getFunction(testId, model.getId()))

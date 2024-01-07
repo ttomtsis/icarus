@@ -15,8 +15,6 @@ public class FunctionModel  extends RepresentationModel<FunctionModel> {
     private String description;
     private String githubURL;
     private String functionHandler;
-    private String functionSourceDirectory;
-    private String functionSourceFileName;
     private Set<Long> createdTests = new HashSet<>();
 
 
@@ -53,14 +51,6 @@ public class FunctionModel  extends RepresentationModel<FunctionModel> {
         this.githubURL = githubURL;
     }
 
-    public String getFunctionSourceDirectory() {
-        return functionSourceDirectory;
-    }
-
-    public void setFunctionSourceDirectory(String functionSourceDirectory) {
-        this.functionSourceDirectory = functionSourceDirectory;
-    }
-
     public Set<Long> getCreatedTests() {
         return createdTests;
     }
@@ -75,14 +65,6 @@ public class FunctionModel  extends RepresentationModel<FunctionModel> {
 
     public void setFunctionHandler(String functionHandler) {
         this.functionHandler = functionHandler;
-    }
-
-    public String getFunctionSourceFileName() {
-        return functionSourceFileName;
-    }
-
-    public void setFunctionSourceFileName(String functionSourceFileName) {
-        this.functionSourceFileName = functionSourceFileName;
     }
 
     public String getAuthor() {
