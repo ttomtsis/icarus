@@ -4,7 +4,6 @@ import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
-import gr.aegean.icsd.icarus.util.MetricQueryEngine;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;

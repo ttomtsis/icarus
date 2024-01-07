@@ -1,8 +1,7 @@
-package gr.aegean.icsd.icarus.util;
+package gr.aegean.icsd.icarus.test.performancetest;
 
 import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
 import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.util.aws.AwsMetricRequest;
@@ -26,7 +25,7 @@ import java.util.*;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
 
-
+//TODO: Relocate to performance test package
 public class MetricQueryEngine {
 
 
