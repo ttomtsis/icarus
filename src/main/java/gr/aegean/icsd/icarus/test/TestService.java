@@ -5,8 +5,8 @@ import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
+import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
@@ -171,8 +171,8 @@ public class TestService {
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
 
         return repository.findTestByIdAndCreator(testId, loggedInUser)
-                .orElseThrow(() -> new TestNotFoundException
-                        (testId));
+                .orElseThrow(() -> new EntityNotFoundException
+                        (Test.class, testId));
     }
 
 }

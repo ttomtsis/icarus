@@ -1,10 +1,10 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -82,14 +82,14 @@ public class TestCaseService {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return (FunctionalTest) testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
-                .orElseThrow( () -> new TestNotFoundException(parentTestId));
+                .orElseThrow( () -> new EntityNotFoundException(Test.class, parentTestId));
     }
 
     private TestCase checkIfTestCaseExists(@NotNull @Positive Long testCaseId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return testCaseRepository.findByIdAndCreator(testCaseId, loggedInUser)
-                .orElseThrow( () -> new TestCaseNotFoundException(testCaseId));
+                .orElseThrow( () -> new EntityNotFoundException(TestCase.class, testCaseId));
     }
 
 

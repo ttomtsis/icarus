@@ -2,8 +2,7 @@ package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
-import gr.aegean.icsd.icarus.util.exceptions.UserNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.provideraccount.ProviderAccountNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -41,7 +40,7 @@ public class ProviderAccountService {
     public Page<ProviderAccount> getAccounts(String username, Pageable pageable) {
 
         IcarusUser user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
+                .orElseThrow(() -> new EntityNotFoundException(IcarusUser.class, username));
 
         // Convert the Set to a List
         List<ProviderAccount> accounts = new ArrayList<>(user.getAccounts());
@@ -70,7 +69,7 @@ public class ProviderAccountService {
         Optional<ProviderAccount> existingProviderAccount = accountRepository.findByNameAndCreator
                 (awsAccountName, loggedInUser);
 
-        if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException(awsAccountName);}
+        if (existingProviderAccount.isEmpty()) {throw new EntityNotFoundException(AwsAccount.class, awsAccountName);}
 
         AwsAccount existingAwsAccount = (AwsAccount) existingProviderAccount.get();
 
@@ -95,7 +94,7 @@ public class ProviderAccountService {
         Optional<ProviderAccount> existingProviderAccount = accountRepository.findByNameAndCreator
                 (gcpAccountName, loggedInUser);
 
-        if (existingProviderAccount.isEmpty()) {throw new ProviderAccountNotFoundException(gcpAccountName);}
+        if (existingProviderAccount.isEmpty()) {throw new EntityNotFoundException(GcpAccount.class, gcpAccountName);}
 
         GcpAccount existingGcpAccount = (GcpAccount) existingProviderAccount.get();
 
@@ -128,7 +127,7 @@ public class ProviderAccountService {
     private IcarusUser checkIfUserExists(String username) {
 
         return userRepository.findUserByUsername(username).orElseThrow(
-                () -> new UserNotFoundException(username)
+                () -> new EntityNotFoundException(IcarusUser.class, username)
         );
     }
 }

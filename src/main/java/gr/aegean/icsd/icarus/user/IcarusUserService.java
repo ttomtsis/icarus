@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.user;
 
-import gr.aegean.icsd.icarus.util.exceptions.UserNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
 import jakarta.transaction.Transactional;
@@ -49,7 +49,7 @@ public class IcarusUserService {
     public IcarusUser viewUserAccount() {
 
         return repository.findById(UserUtils.getLoggedInUser().getId())
-                .orElseThrow(() -> new UserNotFoundException(UserUtils.getUsername()));
+                .orElseThrow(() -> new EntityNotFoundException(IcarusUser.class, UserUtils.getUsername()));
     }
 
     public void resetAccountPassword(@NotBlank String icarusUserEmail) {
