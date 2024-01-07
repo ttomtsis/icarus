@@ -25,6 +25,7 @@ import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import io.micrometer.common.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
 import software.constructs.Construct;
 
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public class AwsConstruct extends Construct {
                         String objectSource, String objectFileName,
                         Set<AwsRegion> awsRegions, Set<Integer> memoryConfigurations,
                         String awsFunctionName, LambdaRuntime awsFunctionRuntime, String awsFunctionHandler,
-                        String awsFunctionRoute, String awsFunctionMethod) {
+                        String awsFunctionRoute, RequestMethod awsFunctionMethod) {
 
         super(scope, id);
 
@@ -120,7 +121,7 @@ public class AwsConstruct extends Construct {
         this.functionRuntime = awsFunctionRuntime.get();
         this.functionHandler = awsFunctionHandler;
         this.functionRoute = awsFunctionRoute;
-        this.functionMethod = awsFunctionMethod;
+        this.functionMethod = String.valueOf(awsFunctionMethod);
 
 
         Set<AwsProvider> providers = createProviders();

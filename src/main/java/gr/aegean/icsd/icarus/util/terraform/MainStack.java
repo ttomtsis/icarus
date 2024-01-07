@@ -6,6 +6,7 @@ import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
+import org.springframework.web.bind.annotation.RequestMethod;
 import software.constructs.Construct;
 
 import java.util.Set;
@@ -52,7 +53,7 @@ public class MainStack extends TerraformStack {
                                    String objectSource, String objectFileName,
                                    Set<AwsRegion> awsRegions, Set<Integer> memoryConfigurations,
                                    String awsFunctionName, LambdaRuntime awsFunctionRuntime,
-                                   String awsFunctionHandler, String awsFunctionRoute, String awsFunctionMethod) {
+                                   String awsFunctionHandler, String awsFunctionRoute, RequestMethod awsFunctionMethod) {
 
         AwsConstruct newAwsConstruct = new AwsConstruct(this,
                 "awsConstruct-" + UUID.randomUUID().toString().substring(0, 5), deploymentId,

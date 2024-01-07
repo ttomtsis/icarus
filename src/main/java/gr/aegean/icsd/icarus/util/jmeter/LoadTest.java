@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.jmeter;
 
-import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import io.micrometer.common.util.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
@@ -17,7 +17,7 @@ import org.apache.jmeter.timers.UniformRandomTimer;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.HashTree;
 import org.apache.jorphan.collections.ListedHashTree;
-import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.File;
 import java.util.UUID;
@@ -40,7 +40,7 @@ public class LoadTest {
     private final String testName;
 
     private final String functionURL;
-    private final String functionMethod;
+    private final RequestMethod functionMethod;
 
     private final StandardJMeterEngine jmeter;
 
@@ -66,7 +66,7 @@ public class LoadTest {
      * @param invokeHTTPMethod HTTP Method that invokes the function
      */
     public LoadTest(String name, String url, String path, String pathVariable, String pathVariableValue,
-                    HttpMethod invokeHTTPMethod) {
+                    RequestMethod invokeHTTPMethod) {
 
         this.testName = name;
 
@@ -78,7 +78,7 @@ public class LoadTest {
             this.functionURL = url + path;
         }
 
-        this.functionMethod = invokeHTTPMethod.toString();
+        this.functionMethod = RequestMethod.valueOf(invokeHTTPMethod.toString());
 
         this.jmeterHome = new File(JMETER_HOME_DIRECTORY);
         this.jmeterProperties = new File(JMETER_PROPERTIES_FILE);
@@ -192,7 +192,7 @@ public class LoadTest {
 
         request.setName(testName + "-Function Request-" + guid);
         request.setEnabled(true);
-        request.setMethod(functionMethod);
+        request.setMethod(String.valueOf(functionMethod));
         request.setPath(functionURL);
         request.setUseKeepAlive(true);
         request.setFollowRedirects(true);

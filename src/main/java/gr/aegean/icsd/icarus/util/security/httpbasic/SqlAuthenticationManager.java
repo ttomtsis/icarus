@@ -136,7 +136,7 @@ public class SqlAuthenticationManager implements UserDetailsService, UserDetails
             user.setCredentialsLastChanged(Instant.now());
         }
         else {
-            throw new InvalidPasswordException("Password does not conform to limitations");
+            throw new InvalidPasswordException(password);
         }
 
 
