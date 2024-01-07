@@ -4,8 +4,6 @@ import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
-import gr.aegean.icsd.icarus.util.exceptions.function.FunctionConfigurationException;
-import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -13,7 +11,6 @@ import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,12 +65,10 @@ public class Function {
         this.githubURL = githubURL;
     }
 
-    public Function (String name, String description, String functionHandler, String functionSourceFileName, File functionSource) {
+    public Function (String name, String description, String functionHandler) {
         this.name = name;
         this.description = description;
         this.functionHandler = functionHandler;
-        this.functionSourceFileName = functionSourceFileName;
-        this.functionSourceDirectory = functionSource.getAbsolutePath();
     }
 
     public Function() {}
@@ -81,24 +76,8 @@ public class Function {
 
     public static Function createFunctionFromModel(FunctionModel model) {
 
-        if (StringUtils.isBlank(model.getGithubURL()) && StringUtils.isBlank(model.getFunctionSourceDirectory())) {
-
-            throw new FunctionConfigurationException("Function requires either a GitHub URL or a Filepath to the local" +
-                    "source directory");
-        }
-
-        if ((StringUtils.isNotBlank(model.getFunctionSourceDirectory()) ||
-                StringUtils.isNotBlank(model.getFunctionSourceFileName())) &&
-        (StringUtils.isBlank(model.getFunctionSourceDirectory()) ||
-                StringUtils.isBlank(model.getFunctionSourceFileName()))) {
-
-            throw new FunctionConfigurationException("Function requires both a specified source code directory" +
-                    " and a specified source archive filename");
-        }
-
         if (model.getGithubURL() == null) {
-            return new Function(model.getName(), model.getDescription(), model.getFunctionHandler(),
-                    model.getFunctionSourceFileName(), new File(model.getFunctionSourceDirectory()));
+            return new Function(model.getName(), model.getDescription(), model.getFunctionHandler());
         }
 
         return new Function(model.getName(), model.getDescription(), model.getFunctionHandler(), model.getGithubURL());
