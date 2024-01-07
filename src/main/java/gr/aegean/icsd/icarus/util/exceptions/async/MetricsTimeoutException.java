@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.exceptions.test;
+package gr.aegean.icsd.icarus.util.exceptions.async;
 
 public class MetricsTimeoutException extends RuntimeException{
 

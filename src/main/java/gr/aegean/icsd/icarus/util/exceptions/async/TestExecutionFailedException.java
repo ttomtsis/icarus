@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.exceptions.test;
+package gr.aegean.icsd.icarus.util.exceptions.async;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -7,10 +7,11 @@ import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -44,8 +45,9 @@ public class Test {
             message = "Test description does not conform to length limitations")
     private String description;
 
-    @NotBlank(message = "Http Method used by the Test cannot be blank")
-    private String httpMethod;
+    @NotNull(message = "Http Method used by the Test cannot be blank")
+    @Enumerated(EnumType.STRING)
+    private RequestMethod httpMethod;
 
     // TODO: Add validation for path and pathVariable
     private String path;
@@ -97,12 +99,12 @@ public class Test {
         this.name = name;
     }
 
-    public String getHttpMethod() {
+    public RequestMethod getHttpMethod() {
         return httpMethod;
     }
 
-    public void setHttpMethod(HttpMethod httpMethod) {
-        this.httpMethod = httpMethod.toString();
+    public void setHttpMethod(RequestMethod httpMethod) {
+        this.httpMethod = httpMethod;
     }
 
     public String getDescription() {

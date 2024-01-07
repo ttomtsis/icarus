@@ -10,9 +10,8 @@ import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
-import gr.aegean.icsd.icarus.util.exceptions.TestExecutionNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
@@ -116,7 +115,7 @@ public class TestExecutionService {
             }
         }
 
-        throw new TestExecutionNotFoundException(executionId);
+        throw new EntityNotFoundException(TestExecution.class, executionId);
     }
 
     public void deleteExecution(@NotNull @Positive Long testId, @NotNull @Positive Long executionId) {
@@ -130,7 +129,7 @@ public class TestExecutionService {
             }
         }
 
-        throw new TestExecutionNotFoundException(executionId);
+        throw new EntityNotFoundException(TestExecution.class, executionId);
     }
 
     public String getExecutionState(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
@@ -144,8 +143,7 @@ public class TestExecutionService {
             }
         }
 
-        throw new TestExecutionNotFoundException("Test execution with deploymentId: " + deploymentId
-                + " for Test: " + testId + " was not found");
+        throw new EntityNotFoundException(TestExecution.class, deploymentId);
     }
 
 
@@ -182,7 +180,7 @@ public class TestExecutionService {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
-                .orElseThrow( () -> new TestNotFoundException(parentTestId));
+                .orElseThrow( () -> new EntityNotFoundException(Test.class, parentTestId));
     }
 
 

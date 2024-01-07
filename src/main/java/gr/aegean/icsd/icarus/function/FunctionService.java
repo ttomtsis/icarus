@@ -3,8 +3,7 @@ package gr.aegean.icsd.icarus.function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.exceptions.function.FunctionNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +33,7 @@ public class FunctionService {
 
     @Value("${security.users.functionSourcesDirectory}")
     private String functionSourcesDirectory;
+
 
 
     public FunctionService(TestRepository testRepository, FunctionRepository repository) {
@@ -117,7 +117,7 @@ public class FunctionService {
     private Test checkIfTestExists(Long associatedTestId) {
 
         return testRepository.findTestByIdAndCreator(associatedTestId, UserUtils.getLoggedInUser())
-                .orElseThrow( () -> new TestNotFoundException(associatedTestId));
+                .orElseThrow( () -> new EntityNotFoundException(Test.class, associatedTestId));
     }
 
 
@@ -126,7 +126,7 @@ public class FunctionService {
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
 
         return functionRepository.findFunctionByIdAndAuthor(functionId, loggedInUser)
-                .orElseThrow( () -> new FunctionNotFoundException(functionId));
+                .orElseThrow( () -> new EntityNotFoundException(Function.class, functionId));
     }
 
 

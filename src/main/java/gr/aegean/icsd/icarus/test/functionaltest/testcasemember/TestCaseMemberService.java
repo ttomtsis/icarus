@@ -5,10 +5,8 @@ import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.exceptions.testcasemember.InvalidTestCaseMemberConfigurationException;
-import gr.aegean.icsd.icarus.util.exceptions.testcasemember.TestCaseMemberNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.TestCaseNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestCaseMemberConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -127,21 +125,21 @@ public class TestCaseMemberService {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
-                .orElseThrow(() -> new TestNotFoundException(parentTestId));
+                .orElseThrow(() -> new EntityNotFoundException(Test.class, parentTestId));
     }
 
     private TestCase checkIfTestCaseExists(Long parentTestCaseId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return testCaseRepository.findByIdAndCreator(parentTestCaseId, loggedInUser)
-                .orElseThrow( () -> new TestCaseNotFoundException(parentTestCaseId));
+                .orElseThrow( () -> new EntityNotFoundException(TestCase.class, parentTestCaseId));
     }
 
     private TestCaseMember checkIfTestCaseMemberExists(Long testCaseMemberId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return testCaseMemberRepository.findByIdAndCreator(testCaseMemberId, loggedInUser)
-                .orElseThrow( () -> new TestCaseMemberNotFoundException(testCaseMemberId));
+                .orElseThrow( () -> new EntityNotFoundException(TestCaseMember.class, testCaseMemberId));
     }
 
 

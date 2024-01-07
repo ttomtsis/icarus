@@ -2,6 +2,7 @@ package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Set;
 
@@ -13,7 +14,7 @@ public class TestModel extends RepresentationModel<TestModel> {
     private String creator;
     private String name;
     private String description;
-    private String httpMethod;
+    private RequestMethod httpMethod;
     private String path;
     private String pathVariable;
     private Long testAuthor;
@@ -70,11 +71,11 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.description = description;
     }
 
-    public String getHttpMethod() {
+    public RequestMethod getHttpMethod() {
         return httpMethod;
     }
 
-    public void setHttpMethod(String httpMethod) {
+    public void setHttpMethod(RequestMethod httpMethod) {
         this.httpMethod = httpMethod;
     }
 
