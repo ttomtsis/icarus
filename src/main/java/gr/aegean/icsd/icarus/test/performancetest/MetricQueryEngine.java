@@ -25,7 +25,7 @@ import java.util.*;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
 
-//TODO: Relocate to performance test package
+
 public class MetricQueryEngine {
 
 
