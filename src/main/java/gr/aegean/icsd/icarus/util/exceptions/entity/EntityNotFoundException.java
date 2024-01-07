@@ -1,4 +1,5 @@
-package gr.aegean.icsd.icarus.util.exceptions;
+package gr.aegean.icsd.icarus.util.exceptions.entity;
+
 
 public class EntityNotFoundException extends RuntimeException {
 

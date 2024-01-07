@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.exceptions.testcasemember;
+package gr.aegean.icsd.icarus.util.exceptions.entity;
 
 public class InvalidTestCaseMemberConfigurationException extends RuntimeException {
 

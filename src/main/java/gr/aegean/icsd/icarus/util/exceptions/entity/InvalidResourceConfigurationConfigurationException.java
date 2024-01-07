@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util.exceptions.resourceconfiguration;
+package gr.aegean.icsd.icarus.util.exceptions.entity;
 
 public class InvalidResourceConfigurationConfigurationException extends RuntimeException {
 
