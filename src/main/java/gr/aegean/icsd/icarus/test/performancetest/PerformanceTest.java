@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import jakarta.persistence.*;
-import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +36,7 @@ public class PerformanceTest extends Test  {
 
 
         private final String name;
-        private final HttpMethod httpMethod;
+        private final RequestMethod httpMethod;
         private final Set<Metric> chosenMetrics = new HashSet<>();
 
         private String description;
@@ -47,7 +47,7 @@ public class PerformanceTest extends Test  {
         private String requestBody;
 
 
-        public PerformanceTestBuilder(String name, HttpMethod httpMethod) {
+        public PerformanceTestBuilder(String name, RequestMethod httpMethod) {
 
             this.name = name;
             this.httpMethod = httpMethod;
@@ -101,7 +101,7 @@ public class PerformanceTest extends Test  {
         targetFunction.setId(model.getTargetFunction());
 
         return new PerformanceTestBuilder(
-                model.getName(), HttpMethod.valueOf(model.getHttpMethod())
+                model.getName(), model.getHttpMethod()
         )
                 .pathVariable(model.getPathVariable())
 

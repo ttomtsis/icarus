@@ -5,10 +5,10 @@ import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.URL;
-import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +32,7 @@ public class FunctionalTest extends Test {
 
 
         private final String name;
-        private final HttpMethod httpMethod;
+        private final RequestMethod httpMethod;
 
         private String description;
         private String path;
@@ -42,7 +42,7 @@ public class FunctionalTest extends Test {
 
 
 
-        public FunctionalTestBuilder(String name, HttpMethod httpMethod) {
+        public FunctionalTestBuilder(String name, RequestMethod httpMethod) {
             this.name = name;
             this.httpMethod = httpMethod;
         }
@@ -97,7 +97,7 @@ public class FunctionalTest extends Test {
 
         return new FunctionalTestBuilder(
                 model.getName(),
-                HttpMethod.valueOf(model.getHttpMethod()))
+                model.getHttpMethod())
 
                 .pathVariable(model.getPathVariable())
 

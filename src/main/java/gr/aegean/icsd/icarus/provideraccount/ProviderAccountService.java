@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.user.IcarusUserRepository;
-import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;

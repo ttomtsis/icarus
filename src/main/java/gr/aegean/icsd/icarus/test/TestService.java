@@ -5,15 +5,14 @@ import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.test.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -63,7 +62,11 @@ public class TestService {
 
         setIfNotNull(requestedTest::setName, testModel.getName());
         setIfNotNull(requestedTest::setDescription, testModel.getDescription());
-        setIfNotNull(value -> requestedTest.setHttpMethod(HttpMethod.valueOf(value)), testModel.getHttpMethod());
+
+        if (testModel.getHttpMethod() != null) {
+            requestedTest.setHttpMethod(testModel.getHttpMethod());
+        }
+
         setIfNotNull(requestedTest::setPath, testModel.getPath());
         setIfNotNull(requestedTest::setPathVariable, testModel.getPathVariable());
 

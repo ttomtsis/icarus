@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.user;
 
-import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
 import jakarta.transaction.Transactional;

@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.resourceconfiguration.InvalidResourceConfigurationConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidResourceConfigurationConfigurationException;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.persistence.*;

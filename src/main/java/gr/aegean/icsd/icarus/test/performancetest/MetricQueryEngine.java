@@ -7,14 +7,13 @@ import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.util.aws.AwsMetricRequest;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.test.MetricsTimeoutException;
-import gr.aegean.icsd.icarus.util.exceptions.test.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.MetricsTimeoutException;
+import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.gcp.GcpMetricRequest;
 import gr.aegean.icsd.icarus.util.jmeter.LoadTest;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpMethod;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -65,7 +64,7 @@ public class MetricQueryEngine {
 
         LoadTest test = new LoadTest(deploymentRecord.deployedFunctionName, deploymentRecord.deployedUrl,
                 requestedTest.getPath(), requestedTest.getPathVariable(),
-                requestedTest.getPathVariableValue(), HttpMethod.valueOf(requestedTest.getHttpMethod()));
+                requestedTest.getPathVariableValue(), requestedTest.getHttpMethod());
 
         for (LoadProfile loadProfile : requestedTest.getLoadProfiles()) {
 

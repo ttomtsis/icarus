@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.function;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.exceptions.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
