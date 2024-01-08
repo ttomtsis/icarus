@@ -1,5 +1,6 @@
 package gr.aegean.icsd.icarus.util.exceptions.controlleradvice;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +35,13 @@ public class SqlExceptionHandler {
 
         } else if (errorMessage.contains("could not execute statement")) {
             responseMessage += "There was a problem executing a statement.";
+            LoggerFactory.getLogger(SqlExceptionHandler.class).error(ex.getMessage());
+            return new ResponseEntity<>(responseMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 
         } else {
             responseMessage += errorMessage;
+            LoggerFactory.getLogger(SqlExceptionHandler.class).error("SQL Error occurred: {}", responseMessage);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(responseMessage, HttpStatus.BAD_REQUEST);
