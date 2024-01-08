@@ -31,7 +31,7 @@ public class FunctionService {
     private final TestRepository testRepository;
     private final FunctionRepository functionRepository;
 
-    @Value("${security.users.functionSourcesDirectory}")
+    @Value("${icarus.functionSourcesDirectory}")
     private String functionSourcesDirectory;
 
 
