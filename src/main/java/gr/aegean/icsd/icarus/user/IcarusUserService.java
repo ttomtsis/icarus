@@ -7,7 +7,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -19,6 +18,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 
+import static gr.aegean.icsd.icarus.IcarusConfiguration.FUNCTION_SOURCES_DIRECTORY;
+
 
 @Service
 @Transactional
@@ -28,9 +29,6 @@ public class IcarusUserService {
 
     private final IcarusUserRepository repository;
     private final SqlAuthenticationManager authenticationManager;
-
-    @Value("${security.users.functionSourcesDirectory}")
-    private String functionSourcesDirectory;
 
 
 
@@ -49,7 +47,7 @@ public class IcarusUserService {
 
         authenticationManager.deleteUser(loggedInUserUsername);
 
-        String usersFunctionDirectory = functionSourcesDirectory + "\\Functions\\" + loggedInUserUsername;
+        String usersFunctionDirectory = FUNCTION_SOURCES_DIRECTORY + "\\Functions\\" + loggedInUserUsername;
         deleteDirectory(usersFunctionDirectory);
     }
 
@@ -79,7 +77,7 @@ public class IcarusUserService {
 
         try {
 
-            Files.walkFileTree(Path.of(dir), new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(Path.of(dir), new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
