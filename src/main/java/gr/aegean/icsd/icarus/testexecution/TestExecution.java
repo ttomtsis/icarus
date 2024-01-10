@@ -31,7 +31,8 @@ public class TestExecution {
     @JoinColumn(updatable = false)
     private IcarusUser creator;
 
-    @OneToOne(targetEntity = Report.class, cascade = {CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToOne(targetEntity = Report.class, mappedBy = "associatedExecution",
+            cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     private Report report;
 
     @NotNull(message = "Test result's start date cannot be null")
