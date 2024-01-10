@@ -32,7 +32,6 @@ public class TestExecution {
     private IcarusUser creator;
 
     @OneToOne(targetEntity = Report.class, cascade = {CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "test_report")
     private Report report;
 
     @NotNull(message = "Test result's start date cannot be null")
@@ -104,10 +103,6 @@ public class TestExecution {
 
     public Instant getStartDate() {
         return startDate;
-    }
-
-    public void setStartDate(Instant startDate) {
-        this.startDate = startDate;
     }
 
     public Instant getEndDate() {
