@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.testexecution;
 
 import gr.aegean.icsd.icarus.report.Report;
+import gr.aegean.icsd.icarus.report.ReportRepository;
 import gr.aegean.icsd.icarus.report.ReportService;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
@@ -18,6 +19,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,17 +38,22 @@ public class TestExecutionService {
 
     private final TestExecutionRepository testExecutionRepository;
     private final TestRepository testRepository;
+
     private final MetricResultRepository metricResultRepository;
     private final TestCaseResultRepository testCaseResultRepository;
+
     private final StackDeployer deployer;
+
     private final ReportService reportService;
+    private final ReportRepository reportRepository;
 
 
 
     public TestExecutionService(TestExecutionRepository repository, TestRepository testRepository,
                                 MetricResultRepository metricResultRepository,
                                 TestCaseResultRepository testCaseResultRepository,
-                                StackDeployer deployer, ReportService reportService) {
+                                StackDeployer deployer, ReportService reportService,
+                                ReportRepository reportRepository) {
 
         this.testExecutionRepository = repository;
         this.testRepository = testRepository;
@@ -54,6 +61,7 @@ public class TestExecutionService {
         this.testCaseResultRepository = testCaseResultRepository;
         this.deployer = deployer;
         this.reportService = reportService;
+        this.reportRepository = reportRepository;
     }
 
 
@@ -69,32 +77,37 @@ public class TestExecutionService {
                                             @NotNull Set<MetricResult> metricResults) {
 
         Instant endDate = Instant.now();
-        @NotNull Report testResultsReport = reportService.createReport();
-
         testExecution.setEndDate(endDate);
-        testExecution.setReport(testResultsReport);
 
         Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAll(metricResults));
         testExecution.addMetricResults(resultSet);
 
-        testExecutionRepository.save(testExecution);
+        testExecutionRepository.saveAndFlush(testExecution);
+
+        LoggerFactory.getLogger(TestExecutionService.class).warn
+                ("Producing report document for deployment: {}", testExecution.getDeploymentId());
+
+        @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
+        reportRepository.saveAndFlush(metricResultsReport);
     }
 
     public void addTestCaseResultsToExecution(@NotNull TestExecution testExecution,
                                               @NotNull Set<TestCaseResult> testCaseResults) {
 
         Instant endDate = Instant.now();
-        @NotNull Report testResultsReport = reportService.createReport();
-
         testExecution.setEndDate(endDate);
-        testExecution.setReport(testResultsReport);
 
         Set<TestCaseResult> resultSet = new HashSet<>(testCaseResultRepository.saveAll(testCaseResults));
         testExecution.addTestCaseResults(resultSet);
 
         testExecutionRepository.save(testExecution);
-    }
 
+        LoggerFactory.getLogger(TestExecutionService.class).warn
+                ("Producing report document for deployment: {}", testExecution.getDeploymentId());
+
+        @NotNull Report testResultsReport = reportService.createFunctionalTestReport(testExecution);
+        reportRepository.save(testResultsReport);
+    }
 
 
     public Page<TestExecution> getExecutions(@NotNull @Positive Long testId, @NotNull Pageable pageable) {
@@ -105,45 +118,34 @@ public class TestExecutionService {
         return testExecutionRepository.findAllByParentTestAndCreator(parentTest, loggedInUser, pageable);
     }
 
+
     public TestExecution getExecution(@NotNull @Positive Long testId, @NotNull @Positive Long executionId) {
 
         Test parentTest = checkIfTestExists(testId);
 
-        for (TestExecution execution : parentTest.getTestExecutions()) {
-            if (execution.getId().equals(executionId)) {
-                return execution;
-            }
-        }
-
-        throw new EntityNotFoundException(TestExecution.class, executionId);
+        return checkIfTestExecutionExists(parentTest, executionId);
     }
+
 
     public void deleteExecution(@NotNull @Positive Long testId, @NotNull @Positive Long executionId) {
 
         Test parentTest = checkIfTestExists(testId);
 
-        for (TestExecution execution : parentTest.getTestExecutions()) {
-            if (execution.getId().equals(executionId)) {
-                testExecutionRepository.delete(execution);
-                return;
-            }
-        }
+        TestExecution execution = checkIfTestExecutionExists(parentTest, executionId);
 
-        throw new EntityNotFoundException(TestExecution.class, executionId);
+        testExecutionRepository.delete(execution);
     }
+
 
     public String getExecutionState(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
 
         Test parentTest = checkIfTestExists(testId);
 
-        for (TestExecution execution : parentTest.getTestExecutions()) {
+        TestExecution execution = testExecutionRepository.findTestExecutionByDeploymentIdAndParentTestAndCreator
+                        (deploymentId, parentTest, UserUtils.getLoggedInUser())
+                .orElseThrow( () -> new EntityNotFoundException(TestExecution.class, deploymentId));
 
-            if (execution.getDeploymentId().equals(deploymentId)) {
-                return execution.getState().toString();
-            }
-        }
-
-        throw new EntityNotFoundException(TestExecution.class, deploymentId);
+       return execution.getState().toString();
     }
 
 
@@ -181,6 +183,13 @@ public class TestExecutionService {
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
         return testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
                 .orElseThrow( () -> new EntityNotFoundException(Test.class, parentTestId));
+    }
+
+    private TestExecution checkIfTestExecutionExists(@NotNull Test parentTest, @NotNull @Positive Long executionId) {
+
+        return testExecutionRepository.findTestExecutionByIdAndParentTestAndCreator
+                        (executionId, parentTest, UserUtils.getLoggedInUser())
+                .orElseThrow( () -> new EntityNotFoundException(TestExecution.class, executionId));
     }
 
 
