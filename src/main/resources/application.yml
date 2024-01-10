@@ -5,7 +5,6 @@ icarus:
   reports:
     testCaseResultReportTemplateLocation: ${TEST_CASE_RESULT_REPORT_DIRECTORY:classpath/resources/testCaseResultReportTemplate.rptdesign}
     metricResultReportTemplateLocation: ${METRIC_RESULT_REPORT_DIRECTORY:classpath/resources/metricResultReportTemplate.rptdesign}
-    outputReportDirectory: ${OUTPUT_REPORT_DIRECTORY:classpath/resources/user_resources}
 
 
 

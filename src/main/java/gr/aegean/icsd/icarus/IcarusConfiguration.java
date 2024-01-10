@@ -20,14 +20,10 @@ public class IcarusConfiguration {
 
     public static String TEST_CASE_RESULT_REPORT_TEMPLATE_LOCATION;
     public static String METRIC_RESULT_REPORT_TEMPLATE_LOCATION;
-    public static String OUTPUT_REPORT_DIRECTORY;
 
 
 
-    public IcarusConfiguration(@Value("${icarus.reports.outputReportDirectory}")
-                               String outputReportDirectory,
-
-                               @Value("${icarus.reports.metricResultReportTemplateLocation}")
+    public IcarusConfiguration(@Value("${icarus.reports.metricResultReportTemplateLocation}")
                                String metricResultReportTemplateLocation,
 
                                @Value("${icarus.reports.testCaseResultReportTemplateLocation}")
@@ -39,7 +35,6 @@ public class IcarusConfiguration {
         IcarusConfiguration.FUNCTION_SOURCES_DIRECTORY = functionSourcesDirectory;
         IcarusConfiguration.TEST_CASE_RESULT_REPORT_TEMPLATE_LOCATION = testCaseResultReportTemplateLocation;
         IcarusConfiguration.METRIC_RESULT_REPORT_TEMPLATE_LOCATION = metricResultReportTemplateLocation;
-        IcarusConfiguration.OUTPUT_REPORT_DIRECTORY = outputReportDirectory;
     }
 
 
