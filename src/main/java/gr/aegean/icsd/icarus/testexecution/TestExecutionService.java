@@ -88,7 +88,7 @@ public class TestExecutionService {
                 ("Producing report document for deployment: {}", testExecution.getDeploymentId());
 
         @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
-        reportRepository.saveAndFlush(metricResultsReport);
+        reportRepository.save(metricResultsReport);
     }
 
     public void addTestCaseResultsToExecution(@NotNull TestExecution testExecution,
