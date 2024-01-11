@@ -82,7 +82,7 @@ public class TestExecutionService {
         Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAll(metricResults));
         testExecution.addMetricResults(resultSet);
 
-        testExecutionRepository.saveAndFlush(testExecution);
+        testExecutionRepository.save(testExecution);
 
         LoggerFactory.getLogger(TestExecutionService.class).warn
                 ("Producing report document for deployment: {}", testExecution.getDeploymentId());
