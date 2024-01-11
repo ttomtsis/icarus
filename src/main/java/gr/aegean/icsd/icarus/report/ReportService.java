@@ -1,6 +1,5 @@
 package gr.aegean.icsd.icarus.report;
 
-import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
@@ -72,19 +71,34 @@ public class ReportService {
         String documentName = execution.getParentTest().getName() + "-"
                 + execution.getDeploymentId() + "-Report.pdf";
 
+        Map<String, Object> parameters = addParameters(execution);
+
+        byte[] documentReport = generateReport(parameters, TEST_CASE_RESULT_REPORT_TEMPLATE_LOCATION);
+
+        return new Report(execution, documentReport, documentName);
+    }
+
+
+    public Report createPerformanceTestReport(@NotNull TestExecution execution) {
+
+        String documentName = execution.getParentTest().getName() + "-"
+                + execution.getDeploymentId() + "-Report.pdf";
+
+        Map<String, Object> parameters = addParameters(execution);
+
+        byte[] documentReport = generateReport(parameters, METRIC_RESULT_REPORT_TEMPLATE_LOCATION);
+
+        return new Report(execution, documentReport, documentName);
+    }
+
+
+
+    private Map<String, Object> addParameters(TestExecution execution) {
+
         Map<String, Object> parameters = new HashMap<>();
 
         parameters.put("ExecutionID", "" + execution.getId());
         parameters.put("authorUsername", execution.getCreator().getUsername());
-
-        // TODO: This will likely be cause for future issues.
-        //  The root of this issue is the implementation of Functional Test
-        ResourceConfiguration configuration = null;
-        for (ResourceConfiguration resourceConfiguration : execution.getParentTest().getResourceConfigurations()) {
-            configuration = resourceConfiguration;
-        }
-        parameters.put("ConfigurationID", "" + configuration.getId());
-
         parameters.put("TestID", "" + execution.getParentTest().getId());
         parameters.put("FunctionID", "" + execution.getParentTest().getTargetFunction().getId());
 
@@ -93,24 +107,11 @@ public class ReportService {
                 .format(Instant.now());
         parameters.put("creationDate", formattedTimestamp);
 
-
-        byte[] documentReport = generateReport(parameters, TEST_CASE_RESULT_REPORT_TEMPLATE_LOCATION);
-
-        return new Report(execution, documentReport, documentName);
+        return parameters;
     }
 
 
-    public Report createPerformanceTestReport(@NotNull TestExecution testExecution) {
-
-        Map<String, Object> parameters = new HashMap<>();
-
-        generateReport(parameters, METRIC_RESULT_REPORT_TEMPLATE_LOCATION);
-
-        return new Report();
-    }
-
-
-    public byte[] generateReport(@NotNull Map<String, Object> parameters,
+    private byte[] generateReport(@NotNull Map<String, Object> parameters,
                                  @NotBlank @ValidFilePath String reportDesignFilePath) {
 
         try {
