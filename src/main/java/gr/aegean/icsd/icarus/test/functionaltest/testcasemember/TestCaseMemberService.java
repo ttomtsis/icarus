@@ -1,7 +1,8 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcasemember;
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.TestRepository;
+import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
+import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
 import gr.aegean.icsd.icarus.user.IcarusUser;
@@ -28,12 +29,13 @@ public class TestCaseMemberService {
     
     private final TestCaseMemberRepository testCaseMemberRepository;
     private final TestCaseRepository testCaseRepository;
-    private final TestRepository testRepository;
+    private final FunctionalTestRepository testRepository;
 
 
 
     public TestCaseMemberService(TestCaseMemberRepository testCaseMemberRepository,
-                                 TestCaseRepository testCaseRepository, TestRepository testRepository) {
+                                 TestCaseRepository testCaseRepository,
+                                 FunctionalTestRepository testRepository) {
         
         this.testCaseMemberRepository = testCaseMemberRepository;
         this.testCaseRepository = testCaseRepository;
@@ -54,6 +56,7 @@ public class TestCaseMemberService {
         return testCaseMemberRepository.findAllByParentTestCaseAndCreator(parentTestCase, loggedInUser, pageable);
     }
 
+
     public TestCaseMember createTestCaseMember(@NotNull TestCaseMember newTestCaseMember,
                                    @NotNull @Positive Long testId, @NotNull @Positive Long testCaseId) {
 
@@ -71,6 +74,7 @@ public class TestCaseMemberService {
         newTestCaseMember.setParentTestCase(parentTestCase);
         return testCaseMemberRepository.save(newTestCaseMember);
     }
+
 
     public void updateTestCaseMember(@NotNull @Positive Long testId, @NotNull @Positive Long testCaseId,
                                      @NotNull @Positive Long testCaseMemberId,
@@ -99,6 +103,7 @@ public class TestCaseMemberService {
         testCaseMemberRepository.save(existingTestCaseMember);
     }
 
+
     //TODO: Check for possible bug
     private void setIfNotBlank(Consumer<String> setter, String value) {
 
@@ -106,6 +111,7 @@ public class TestCaseMemberService {
             setter.accept(value);
         }
     }
+
 
     public void deleteTestCaseMember(@NotNull @Positive Long testId,
                                      @NotNull @Positive Long testCaseId,
@@ -121,11 +127,12 @@ public class TestCaseMemberService {
     }
 
 
+
     private Test checkIfTestExists(Long parentTestId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
-        return testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
-                .orElseThrow(() -> new EntityNotFoundException(Test.class, parentTestId));
+        return testRepository.findFunctionalTestByIdAndCreator(parentTestId, loggedInUser)
+                .orElseThrow(() -> new EntityNotFoundException(FunctionalTest.class, parentTestId));
     }
 
     private TestCase checkIfTestCaseExists(Long parentTestCaseId) {

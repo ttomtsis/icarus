@@ -51,14 +51,7 @@ public class TestService {
         return repository.save(newTest);
     }
 
-    public Test searchTest(@NotNull @Positive Long testId) {
-
-        return checkIfTestExists(testId);
-    }
-
-    public Test updateTest(@NotNull @Positive Long testId, @NotNull TestModel testModel) {
-
-        Test requestedTest = checkIfTestExists(testId);
+    public void updateTest(@NotNull Test requestedTest, @NotNull TestModel testModel) {
 
         setIfNotNull(requestedTest::setName, testModel.getName());
         setIfNotNull(requestedTest::setDescription, testModel.getDescription());
@@ -90,7 +83,6 @@ public class TestService {
             }
         }
 
-        return requestedTest;
     }
 
     public void deleteTest(@NotNull @Positive Long testId) {
@@ -99,30 +91,26 @@ public class TestService {
         repository.delete(requestedTest);
     }
 
-    public Test executeTest(@NotNull @Positive Long testId) {
-
-        // Test exists
-        Test requestedTest = checkIfTestExists(testId);
+    public void executeTest(@NotNull Test requestedTest) {
 
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
-            throw new InvalidTestConfigurationException(testId, "does not have a Function" +
+            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a Function" +
                     " associated with it");
         }
 
         // Test has at least 1 provider account
         if (requestedTest.getAccountsList().isEmpty()) {
-            throw new InvalidTestConfigurationException(testId, "does not have " +
+            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have " +
                     "any provider accounts associated with it");
         }
 
         // Test has one configuration per provider account
         if (!oneConfigurationPerProviderAccount(requestedTest)) {
-            throw new InvalidTestConfigurationException(testId, "does not have a resource" +
+            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a resource" +
                     " configuration for every provider account");
         }
 
-        return requestedTest;
     }
 
 

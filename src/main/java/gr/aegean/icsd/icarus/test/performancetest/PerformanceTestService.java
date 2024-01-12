@@ -6,7 +6,9 @@ import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +27,7 @@ import org.springframework.validation.annotation.Validated;
 public class PerformanceTestService extends TestService {
 
 
-    private final TestRepository repository;
+    private final PerformanceTestRepository repository;
     private final TestExecutionService testExecutionService;
 
 
@@ -33,21 +35,21 @@ public class PerformanceTestService extends TestService {
 
 
 
-    public PerformanceTestService(TestRepository repository, StackDeployer deployer,
-                                  TestExecutionService testExecutionService) {
+    public PerformanceTestService(TestRepository testRepository, PerformanceTestRepository repository,
+                                  StackDeployer deployer, TestExecutionService testExecutionService) {
 
-        super(repository, deployer);
+        super(testRepository, deployer);
         this.repository = repository;
         this.testExecutionService = testExecutionService;
     }
 
 
 
-    @Override
     public PerformanceTest searchTest(@NotNull @Positive Long testId) {
 
-        return (PerformanceTest) super.searchTest(testId);
+        return checkIfPerformanceTestExists(testId);
     }
+
 
     public PerformanceTest createTest(@NotNull PerformanceTest newTest) {
 
@@ -66,9 +68,11 @@ public class PerformanceTestService extends TestService {
         return (PerformanceTest) super.createTest(newTest);
     }
 
+
     public void updateTest(@NotNull @Positive Long testId, @NotNull PerformanceTestModel testModel) {
 
-        PerformanceTest requestedTest = (PerformanceTest) super.updateTest(testId, testModel);
+        PerformanceTest requestedTest = checkIfPerformanceTestExists(testId);
+        super.updateTest(requestedTest, testModel);
 
         super.setIfNotNull(requestedTest::setPathVariableValue, testModel.getPathVariableValue());
         super.setIfNotNull(requestedTest::setRequestBody, testModel.getRequestBody());
@@ -85,7 +89,8 @@ public class PerformanceTestService extends TestService {
 
         log.warn("Executing request: {}", deploymentId);
 
-        PerformanceTest requestedTest = (PerformanceTest) super.executeTest(testId);
+        PerformanceTest requestedTest = checkIfPerformanceTestExists(testId);
+        super.executeTest(requestedTest);
 
         if (requestedTest.getLoadProfiles().isEmpty()) {
             throw new InvalidTestConfigurationException(testId, " does not have any Load Profiles" +
@@ -141,6 +146,14 @@ public class PerformanceTestService extends TestService {
                 log.warn("Finished: {}", deploymentId);
             });
 
+    }
+
+
+
+    private PerformanceTest checkIfPerformanceTestExists(Long testId) {
+
+        return repository.findPerformanceTestByIdAndCreator(testId, UserUtils.getLoggedInUser())
+                .orElseThrow(() -> new EntityNotFoundException(PerformanceTest.class, testId));
     }
 
 

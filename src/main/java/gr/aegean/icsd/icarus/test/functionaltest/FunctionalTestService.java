@@ -4,13 +4,16 @@ import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
+import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
+import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
@@ -32,16 +35,18 @@ import java.util.Set;
 public class FunctionalTestService extends TestService {
 
 
-    private final TestRepository testRepository;
+    private final FunctionalTestRepository repository;
     private final TestExecutionService testExecutionService;
 
     private static final Logger log = LoggerFactory.getLogger("Functional Test Service");
 
-    public FunctionalTestService(TestRepository repository, StackDeployer deployer,
-                                 TestExecutionService testExecutionService) {
 
-        super(repository, deployer);
-        this.testRepository = repository;
+
+    public FunctionalTestService(FunctionalTestRepository repository, TestRepository testRepository,
+                                 StackDeployer deployer, TestExecutionService testExecutionService) {
+
+        super(testRepository, deployer);
+        this.repository = repository;
         this.testExecutionService = testExecutionService;
     }
 
@@ -52,19 +57,21 @@ public class FunctionalTestService extends TestService {
         return (FunctionalTest) super.createTest(newTest);
     }
 
-    @Override
+
     public FunctionalTest searchTest(@NotNull @Positive Long testId) {
 
-        return (FunctionalTest) super.searchTest(testId);
+        return checkIfFunctionalTestExists(testId);
     }
+
 
     public void updateTest(@NotNull @Positive Long testId, @NotNull FunctionalTestModel testModel) {
 
-        FunctionalTest requestedTest = (FunctionalTest) super.updateTest(testId, testModel);
+        FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
+        super.updateTest(requestedTest, testModel);
 
         super.setIfNotNull(requestedTest::setFunctionURL, testModel.getFunctionUrl());
 
-        testRepository.save(requestedTest);
+        repository.save(requestedTest);
     }
 
 
@@ -72,7 +79,8 @@ public class FunctionalTestService extends TestService {
 
         log.warn("Executing request: {}", deploymentId);
 
-        FunctionalTest requestedTest = (FunctionalTest) super.executeTest(testId);
+        FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
+        super.executeTest(requestedTest);
 
         // Has at least 1 TestCase
         if (requestedTest.getTestCases().isEmpty()) {
@@ -191,6 +199,14 @@ public class FunctionalTestService extends TestService {
         }
 
     return testCaseResults;
+    }
+
+
+
+    private FunctionalTest checkIfFunctionalTestExists(Long testId) {
+
+        return repository.findFunctionalTestByIdAndCreator(testId, UserUtils.getLoggedInUser())
+                .orElseThrow(() -> new EntityNotFoundException(PerformanceTest.class, testId));
     }
 
 
