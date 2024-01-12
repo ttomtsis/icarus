@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +52,7 @@ public class FunctionService {
         Function existingFunction = checkIfFunctionExists(functionId);
 
         deleteFunctionSource(existingFunction);
+
         functionRepository.delete(existingFunction);
     }
 
@@ -142,14 +144,19 @@ public class FunctionService {
         Path functionSourceFilePath = Paths.get(functionSourceDirectory + "\\" + functionSourceFileName);
 
         if (!Files.exists(Paths.get(functionSourceDirectory))) {
-            throw new IOException("Function's source directory does not exist");
+            LoggerFactory.getLogger(FunctionService.class).warn("Source code directory" +
+                    " of Function {} does not exist", function.getName());
         }
 
-        if (!Files.exists(functionSourceFilePath)) {
-            throw new IOException("Function's source code does not exist");
+        else if (!Files.exists(functionSourceFilePath)) {
+            LoggerFactory.getLogger(FunctionService.class).warn("Source code of Function {}" +
+                    " does not exist", function.getName());
         }
 
-        Files.delete(functionSourceFilePath);
+        else {
+            Files.delete(functionSourceFilePath);
+        }
+
     }
 
 

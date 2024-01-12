@@ -56,7 +56,7 @@ public class Test {
     @Pattern(regexp = "^\\w*$", message = "Test's exposed path variable is invalid")
     private String pathVariable;
 
-    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
+    @ManyToOne
     @JoinColumn(name = "target_function_id")
     private Function targetFunction;
 

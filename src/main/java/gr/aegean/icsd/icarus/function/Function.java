@@ -53,7 +53,8 @@ public class Function {
     @NotBlank(message = "Function's handler cannot be blank")
     private String functionHandler;
 
-    @OneToMany(mappedBy = "targetFunction", targetEntity = Test.class, cascade = CascadeType.REFRESH)
+    @OneToMany(mappedBy = "targetFunction", targetEntity = Test.class,
+            orphanRemoval = true, cascade = CascadeType.REMOVE)
     private final Set<Test> createdTests = new HashSet<>();
 
 
@@ -83,15 +84,6 @@ public class Function {
         return new Function(model.getName(), model.getDescription(), model.getFunctionHandler(), model.getGithubURL());
     }
 
-
-
-    @PreRemove
-    private void removeForeignKeyConstraints() {
-
-        for (Test test : this.createdTests) {
-            test.setTargetFunction(null);
-        }
-    }
 
 
     public Long getId() {
@@ -161,4 +153,6 @@ public class Function {
     public void setAuthor(IcarusUser author) {
         this.author = author;
     }
+
+
 }
