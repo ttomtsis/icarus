@@ -73,40 +73,52 @@ public class TestExecutionService {
     }
 
 
-    public void addMetricResultsToExecution(@NotNull TestExecution testExecution,
-                                            @NotNull Set<MetricResult> metricResults) {
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public TestExecution saveMetricResults(TestExecution testExecution, Set<MetricResult> metricResults) {
 
         Instant endDate = Instant.now();
         testExecution.setEndDate(endDate);
 
-        Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAll(metricResults));
+        Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAllAndFlush(metricResults));
         testExecution.addMetricResults(resultSet);
 
-        testExecutionRepository.save(testExecution);
-
-        LoggerFactory.getLogger(TestExecutionService.class).warn
-                ("Producing report document for deployment: {}", testExecution.getDeploymentId());
-
-        @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
-        reportRepository.save(metricResultsReport);
+        return testExecutionRepository.saveAndFlush(testExecution);
     }
 
-    public void addTestCaseResultsToExecution(@NotNull TestExecution testExecution,
-                                              @NotNull Set<TestCaseResult> testCaseResults) {
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public TestExecution saveTestCaseResults(TestExecution testExecution, Set<TestCaseResult> testCaseResults) {
 
         Instant endDate = Instant.now();
         testExecution.setEndDate(endDate);
 
-        Set<TestCaseResult> resultSet = new HashSet<>(testCaseResultRepository.saveAll(testCaseResults));
+        Set<TestCaseResult> resultSet = new HashSet<>(testCaseResultRepository.saveAllAndFlush(testCaseResults));
         testExecution.addTestCaseResults(resultSet);
 
-        testExecutionRepository.save(testExecution);
+        return testExecutionRepository.saveAndFlush(testExecution);
+    }
+
+
+    public void produceReport(@NotNull TestExecution testExecution) {
 
         LoggerFactory.getLogger(TestExecutionService.class).warn
                 ("Producing report document for deployment: {}", testExecution.getDeploymentId());
 
-        @NotNull Report testResultsReport = reportService.createFunctionalTestReport(testExecution);
-        reportRepository.save(testResultsReport);
+        if (testExecution.getTestCaseResults().isEmpty()) {
+            @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
+            reportRepository.save(metricResultsReport);
+        }
+
+        else if (testExecution.getMetricResults().isEmpty()) {
+            @NotNull Report testCaseResultReport = reportService.createFunctionalTestReport(testExecution);
+            reportRepository.save(testCaseResultReport);
+        }
+
+        else {
+            throw new IllegalArgumentException("The test execution does not contain any " +
+                    "results in order to produce a report");
+        }
+
     }
 
 

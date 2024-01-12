@@ -122,7 +122,11 @@ public class PerformanceTestService extends TestService {
                     MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result);
 
                     log.warn("Saving execution results: {}", deploymentId);
-                    testExecutionService.addMetricResultsToExecution(testExecution, queryEngine.getMetricResults());
+
+                    testExecutionService.produceReport(
+                            testExecutionService.saveMetricResults(testExecution, queryEngine.getMetricResults())
+                    );
+
                 } catch (RuntimeException ex) {
 
                     log.error("Failed to execute tests: {}", deploymentId);
