@@ -96,6 +96,7 @@ public class SecurityConfiguration {
 
                         .requestMatchers("/api/v0/users/{username}/accounts/**").authenticated()
                         .requestMatchers("/api/v0/tests/**").authenticated()
+                        .requestMatchers("/api/v0/functions/**").authenticated()
                         .requestMatchers("/api/v0/users/**").authenticated()
                 )
 
