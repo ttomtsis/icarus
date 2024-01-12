@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.METRIC_QUERY_MAX_TIMEOUT;
+import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.*;
 
 
 public class MetricQueryEngine {
@@ -89,7 +89,7 @@ public class MetricQueryEngine {
             log.warn("Test finished at {}", formatInstant(testDoneInstant));
             log.warn("Test Completed, thread will sleep until metrics are logged in provider platform");
 
-            sleep(2);
+            sleep(METRIC_QUERY_INITIAL_DELAY);
 
             log.warn("Thread has awoken, querying metrics for {}", deploymentRecord.deployedFunctionName);
 
@@ -157,7 +157,7 @@ public class MetricQueryEngine {
 
             log.warn("{} minutes have passed", minutes);
 
-            sleep(1);
+            sleep(METRIC_QUERY_DELAY_PER_REQUEST);
 
             metricRequest = new AwsMetricRequest(account.getAwsAccessKey(), account.getAwsSecretKey(),
                     deploymentRecord.deployedFunctionName, deploymentRecord.deployedRegion,
@@ -194,7 +194,7 @@ public class MetricQueryEngine {
 
                 log.warn("{} minutes have passed", minutes);
 
-                sleep(1);
+                sleep(METRIC_QUERY_DELAY_PER_REQUEST);
 
                 request = new GcpMetricRequest(account.getGcpKeyfile(), account.getGcpProjectId(),
                         deploymentRecord.deployedFunctionName, metric);
