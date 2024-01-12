@@ -43,13 +43,14 @@ public class TestCaseResult {
 
 
     public TestCaseResult(TestCaseMember parentTestCaseMember, ResourceConfiguration resourceConfiguration,
-                          int actualResponseCode, String actualResponseBody, boolean pass) {
+                          int actualResponseCode, String actualResponseBody, boolean pass, IcarusUser creator) {
 
         this.parentTestCaseMember = parentTestCaseMember;
         this.resourceConfiguration = resourceConfiguration;
         this.actualResponseCode = actualResponseCode;
         this.actualResponseBody = actualResponseBody;
         this.pass = pass;
+        this.creator = creator;
     }
 
     public TestCaseResult() {}

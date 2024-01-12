@@ -8,6 +8,7 @@ import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
@@ -111,6 +112,8 @@ public class FunctionalTestService extends TestService {
 
         log.warn("Starting deployment of: {}", deploymentId);
 
+        IcarusUser creator = UserUtils.getLoggedInUser();
+
         super.getDeployer().deploy(requestedTest, deploymentId)
 
             .exceptionally(ex -> {
@@ -126,7 +129,7 @@ public class FunctionalTestService extends TestService {
                 try {
 
                     log.warn("Creating Rest Assured Tests of: {}", deploymentId);
-                    Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result);
+                    Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result, creator);
 
                     log.warn("Saving execution results of: {}", deploymentId);
 
@@ -151,7 +154,9 @@ public class FunctionalTestService extends TestService {
     }
 
 
-    private Set<TestCaseResult> createRestAssuredTests(FunctionalTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+    private Set<TestCaseResult> createRestAssuredTests(FunctionalTest requestedTest,
+                                                       Set<DeploymentRecord> deploymentRecords,
+                                                       IcarusUser creator) {
 
         Set<TestCaseResult> testCaseResults = new HashSet<>();
         Set<Thread> threadSet = new HashSet<>();
@@ -179,7 +184,9 @@ public class FunctionalTestService extends TestService {
                         // Save results
                         TestCaseResult testResult = new TestCaseResult(testCaseMember,
                                 deploymentRecord.configurationUsed,
-                                test.getActualResponseCode(), test.getActualResponseBody(), test.getPass());
+                                test.getActualResponseCode(), test.getActualResponseBody(), test.getPass(),
+                                creator
+                        );
 
                         testCaseResults.add(testResult);
                     });

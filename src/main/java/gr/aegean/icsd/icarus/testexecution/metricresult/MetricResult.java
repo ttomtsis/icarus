@@ -44,12 +44,13 @@ public class MetricResult {
 
 
     public MetricResult(Set<LoadProfile> profiles, ResourceConfiguration resourceConfiguration,
-                        Map<String, String> values, String metricName) {
+                        Map<String, String> values, String metricName, IcarusUser creator) {
 
         this.loadProfiles.addAll(profiles);
         this.resourceConfiguration = resourceConfiguration;
         this.metricValues.putAll(values);
         this.metricName = metricName;
+        this.creator = creator;
     }
 
     public MetricResult() {}

@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
+import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
@@ -109,6 +110,8 @@ public class PerformanceTestService extends TestService {
 
         log.warn("Starting deployment of: {}", deploymentId);
 
+        IcarusUser creator = UserUtils.getLoggedInUser();
+
         super.getDeployer().deploy(requestedTest, deploymentId)
 
             .exceptionally(ex -> {
@@ -124,7 +127,7 @@ public class PerformanceTestService extends TestService {
                 try {
                     
                     log.warn("Creating Load Tests: {}", deploymentId);
-                    MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result);
+                    MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result, creator);
 
                     log.warn("Saving execution results: {}", deploymentId);
 
