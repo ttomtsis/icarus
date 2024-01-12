@@ -74,6 +74,26 @@ public class ReportService {
     }
 
 
+    public Report getReport(Long testId, String deploymentId) {
+
+        Test associatedTest = testRepository.findTestByIdAndCreator(testId, UserUtils.getLoggedInUser())
+                .orElseThrow( () -> new EntityNotFoundException(Test.class, testId));
+
+        TestExecution associatedExecution = testExecutionRepository
+                .findTestExecutionByParentTestAndDeploymentIdAndCreator(associatedTest, deploymentId,
+                        UserUtils.getLoggedInUser())
+                .orElseThrow(() -> new EntityNotFoundException
+                        ("Test Execution with deployment ID: " + deploymentId + " was not found"));
+
+        if (associatedExecution.getReport() != null) {
+            return associatedExecution.getReport();
+        }
+
+        throw new EntityNotFoundException("Test Execution with deployment ID: " + deploymentId +
+                " does not have a Report associated with it");
+    }
+
+
     public Report createFunctionalTestReport(@NotNull TestExecution execution) {
 
         String documentName = execution.getParentTest().getName() + "-"
@@ -117,7 +137,6 @@ public class ReportService {
 
         return parameters;
     }
-
 
     private byte[] generateReport(@NotNull Map<String, Object> parameters,
                                  @NotBlank @ValidFilePath String reportDesignFilePath) {

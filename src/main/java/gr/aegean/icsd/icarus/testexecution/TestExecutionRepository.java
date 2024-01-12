@@ -12,10 +12,16 @@ import java.util.Optional;
 @Repository
 public interface TestExecutionRepository extends JpaRepository<TestExecution, Long> {
 
-    Page<TestExecution> findAllByParentTestAndCreator(Test parentTest, IcarusUser creator, Pageable pageable);
+    Page<TestExecution> findAllByParentTestAndCreator
+            (Test parentTest, IcarusUser creator, Pageable pageable);
 
-    Optional<TestExecution> findTestExecutionByIdAndParentTestAndCreator(Long id, Test test, IcarusUser creator);
+    Optional<TestExecution> findTestExecutionByIdAndParentTestAndCreator
+            (Long id, Test test, IcarusUser creator);
 
-    Optional<TestExecution> findTestExecutionByDeploymentIdAndParentTestAndCreator(String deploymentId, Test test, IcarusUser creator);
+    Optional<TestExecution> findTestExecutionByDeploymentIdAndParentTestAndCreator
+            (String deploymentId, Test test, IcarusUser creator);
+
+    Optional<TestExecution> findTestExecutionByParentTestAndDeploymentIdAndCreator
+            (Test parentTest, String deploymentId, IcarusUser creator);
 
 }
