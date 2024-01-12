@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestCaseMemberConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;

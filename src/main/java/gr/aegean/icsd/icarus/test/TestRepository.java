@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.test;
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

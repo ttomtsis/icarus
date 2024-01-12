@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.security;
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.IcarusConfigurationException;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
 import org.springframework.beans.factory.annotation.Value;

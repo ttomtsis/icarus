@@ -8,7 +8,7 @@ import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;

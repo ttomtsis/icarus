@@ -9,7 +9,7 @@ import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;

@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.security.httpbasic;
 
-import gr.aegean.icsd.icarus.user.IcarusUserRepository;
+import gr.aegean.icsd.icarus.icarususer.IcarusUserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;

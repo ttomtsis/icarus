@@ -4,7 +4,7 @@ import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

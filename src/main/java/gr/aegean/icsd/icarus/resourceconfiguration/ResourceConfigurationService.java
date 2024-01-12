@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.TestRepository;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;

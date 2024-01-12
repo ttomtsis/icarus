@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.user;
+package gr.aegean.icsd.icarus.icarususer;
 
 import org.springframework.hateoas.RepresentationModel;
 

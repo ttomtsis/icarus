@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.testexecution.metricresult;
 
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.CreatedBy;

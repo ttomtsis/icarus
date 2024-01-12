@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.user;
+package gr.aegean.icsd.icarus.icarususer;
 
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;

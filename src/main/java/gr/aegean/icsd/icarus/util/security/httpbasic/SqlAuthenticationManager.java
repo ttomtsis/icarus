@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.util.security.httpbasic;
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.user.IcarusUserRepository;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUserRepository;
 import gr.aegean.icsd.icarus.util.exceptions.InvalidPasswordException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;

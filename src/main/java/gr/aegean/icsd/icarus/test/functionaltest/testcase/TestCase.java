@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

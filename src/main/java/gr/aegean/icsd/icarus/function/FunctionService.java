@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.function;
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;

@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestRepository;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;

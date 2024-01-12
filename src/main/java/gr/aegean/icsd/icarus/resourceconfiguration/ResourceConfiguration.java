@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.resourceconfiguration;
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;

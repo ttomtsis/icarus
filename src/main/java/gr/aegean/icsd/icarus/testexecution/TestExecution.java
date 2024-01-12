@@ -4,7 +4,7 @@ import gr.aegean.icsd.icarus.report.Report;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.TestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

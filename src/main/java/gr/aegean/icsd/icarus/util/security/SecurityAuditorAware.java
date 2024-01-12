@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.util.security;
 
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.AuditorAware;

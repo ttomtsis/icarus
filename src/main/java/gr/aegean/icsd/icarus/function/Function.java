@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.function;
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
 import jakarta.persistence.*;
