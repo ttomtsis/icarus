@@ -5,6 +5,7 @@ import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionRepository;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
+import gr.aegean.icsd.icarus.util.enums.TestState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
@@ -57,9 +58,16 @@ public class ReportService {
                         (executionID, associatedTest, UserUtils.getLoggedInUser())
                 .orElseThrow( () -> new EntityNotFoundException(TestExecution.class, executionID));
 
-        if (parentExecution.getReport() == null) {
+        if (parentExecution.getReport() == null && !parentExecution.getState().equals(TestState.ERROR)) {
             throw new EntityNotFoundException
-                    ("Test execution: " + executionID + " does not have a Report associated with it");
+                    ("The report for Test Execution: " + parentExecution.getId()
+                    + " is not yet ready. \nExecution is still in state: " + parentExecution.getState());
+        }
+
+        else if (parentExecution.getReport() == null && parentExecution.getState().equals(TestState.ERROR)) {
+            throw new EntityNotFoundException
+                    ("Test Execution: " + parentExecution.getId() + " failed to execute due to an error." +
+                            "\nNo Report was produced");
         }
 
         return parentExecution.getReport();
