@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 
@@ -109,6 +111,14 @@ public class TestService {
         if (!oneConfigurationPerProviderAccount(requestedTest)) {
             throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a resource" +
                     " configuration for every provider account");
+        }
+
+        String functionSourceCodeLocation = requestedTest.getTargetFunction().getFunctionSourceDirectory()
+                + "\\" + requestedTest.getTargetFunction().getFunctionSourceFileName();
+
+        if(!Files.exists(Paths.get(functionSourceCodeLocation))) {
+            throw new InvalidTestConfigurationException(requestedTest.getId(), " is unable to find the source code" +
+                    " of it's target Function in the filesystem");
         }
 
     }
