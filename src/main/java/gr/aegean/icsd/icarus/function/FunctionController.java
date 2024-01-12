@@ -70,14 +70,17 @@ public class FunctionController {
 
     @PutMapping(value = "/{functionId}", consumes = "multipart/form-data")
     public ResponseEntity<Void> updateFunction(@PathVariable Long functionId,
-                                               @RequestPart(required = false) String textModel,
-                                               @RequestPart(required = false) MultipartFile functionSource) {
+                                               @RequestPart(name = "functionMetadata", required = false) String textModel,
+                                               @RequestPart(name = "functionSource", required = false) MultipartFile functionSource) {
 
         if (StringUtils.isBlank(textModel) && functionSource == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        FunctionModel functionModel = serializeToModel(textModel);
+        FunctionModel functionModel = null;
+        if (textModel != null) {
+            functionModel = serializeToModel(textModel);
+        }
 
         try {
             service.updateFunction(functionId, functionModel, functionSource);
