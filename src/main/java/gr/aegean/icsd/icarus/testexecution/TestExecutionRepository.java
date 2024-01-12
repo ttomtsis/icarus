@@ -7,9 +7,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface TestExecutionRepository extends JpaRepository<TestExecution, Long> {
 
     Page<TestExecution> findAllByParentTestAndCreator(Test parentTest, IcarusUser creator, Pageable pageable);
+
+    Optional<TestExecution> findTestExecutionByIdAndParentTestAndCreator(Long id, Test test, IcarusUser creator);
+
+    Optional<TestExecution> findTestExecutionByDeploymentIdAndParentTestAndCreator(String deploymentId, Test test, IcarusUser creator);
 
 }

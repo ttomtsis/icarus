@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +20,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import static gr.aegean.icsd.icarus.IcarusConfiguration.FUNCTION_SOURCES_DIRECTORY;
+
 
 @Service
 @Transactional
@@ -30,9 +31,6 @@ public class FunctionService {
 
     private final TestRepository testRepository;
     private final FunctionRepository functionRepository;
-
-    @Value("${security.users.functionSourcesDirectory}")
-    private String functionSourcesDirectory;
 
 
 
@@ -134,7 +132,7 @@ public class FunctionService {
                                                          @NotNull MultipartFile functionSourceFile)
             throws IOException {
 
-        String functionSourceDirectory = functionSourcesDirectory + "\\Functions\\" + UserUtils.getUsername();
+        String functionSourceDirectory = FUNCTION_SOURCES_DIRECTORY + "\\" + UserUtils.getUsername() + "\\Functions";
         String functionSourceFileName = function.getName() + ".zip";
 
         try {
@@ -163,9 +161,10 @@ public class FunctionService {
         }
     }
 
-    private void deleteFunctionSource(Function function) throws IOException {
+    private void deleteFunctionSource(Function function)
+            throws IOException {
 
-        String functionSourceDirectory = functionSourcesDirectory + "\\Functions\\" + UserUtils.getUsername();
+        String functionSourceDirectory = FUNCTION_SOURCES_DIRECTORY + "\\" + UserUtils.getUsername() + "\\Functions";
         String functionSourceFileName = function.getName() + ".zip";
 
         Path functionSourceFilePath = Paths.get(functionSourceDirectory + "\\" + functionSourceFileName);

@@ -8,8 +8,8 @@ import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.util.enums.TestState;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
@@ -70,7 +70,7 @@ public class FunctionalTestService extends TestService {
 
     public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
 
-        log.warn("Executing request: " + deploymentId);
+        log.warn("Executing request: {}", deploymentId);
 
         FunctionalTest requestedTest = (FunctionalTest) super.executeTest(testId);
 
@@ -96,12 +96,12 @@ public class FunctionalTestService extends TestService {
                     "associated with it");
         }
 
-        log.warn("All checks passed for: " + deploymentId);
+        log.warn("All checks passed for: {}", deploymentId);
 
         TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
         testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
 
-        log.warn("Starting deployment of: " + deploymentId);
+        log.warn("Starting deployment of: {}", deploymentId);
 
         super.getDeployer().deploy(requestedTest, deploymentId)
 
@@ -117,25 +117,27 @@ public class FunctionalTestService extends TestService {
 
                 try {
 
-                    log.warn("Creating Rest Assured Tests of: " + deploymentId);
+                    log.warn("Creating Rest Assured Tests of: {}", deploymentId);
                     Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result);
 
-                    log.warn("Saving execution results of: " + deploymentId);
-                    testExecutionService.addTestCaseResultsToExecution(testExecution, results);
+                    log.warn("Saving execution results of: {}", deploymentId);
 
+                    testExecutionService.produceReport(
+                            testExecutionService.saveTestCaseResults(testExecution, results)
+                    );
 
                 } catch (RuntimeException ex) {
 
-                    log.error("Failed to execute tests: " + deploymentId);
+                    log.error("Failed to execute tests: {}", deploymentId);
 
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
 
-                log.warn("Test completed, Deleting stack: " + deploymentId);
+                log.warn("Test completed, Deleting stack: {}", deploymentId);
                 testExecutionService.finalizeTestExecution(testExecution, deploymentId);
 
-                log.warn("Finished: " + deploymentId);
+                log.warn("Finished: {}", deploymentId);
             });
 
     }
@@ -152,8 +154,8 @@ public class FunctionalTestService extends TestService {
 
                     Thread thread = new Thread(() -> {
 
-                        log.warn("Running test " + testCaseMember.getId() + " for function: "
-                                + deploymentRecord.deployedFunctionName);
+                        log.warn("Running Test Case Member: {} for Function: {}",  testCaseMember.getId(),
+                                deploymentRecord.deployedFunctionName);
 
                         // Create rest assured test
                         RestAssuredTest test = new RestAssuredTest(deploymentRecord.deployedUrl, requestedTest.getPath(),
@@ -163,7 +165,8 @@ public class FunctionalTestService extends TestService {
                                 deploymentRecord.deployedPlatform
                         );
 
-                        log.warn("Saving results");
+                        log.warn("Saving Test Case Results of: {} for Function: {}", testCaseMember.getId(),
+                                deploymentRecord.deployedFunctionName);
 
                         // Save results
                         TestCaseResult testResult = new TestCaseResult(testCaseMember,

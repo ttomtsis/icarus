@@ -107,7 +107,7 @@ public class TestService {
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
             throw new InvalidTestConfigurationException(testId, "does not have a Function" +
-                    "associated with it");
+                    " associated with it");
         }
 
         // Test has at least 1 provider account
@@ -119,7 +119,7 @@ public class TestService {
         // Test has one configuration per provider account
         if (!oneConfigurationPerProviderAccount(requestedTest)) {
             throw new InvalidTestConfigurationException(testId, "does not have a resource" +
-                    "configuration for every provider account");
+                    " configuration for every provider account");
         }
 
         return requestedTest;

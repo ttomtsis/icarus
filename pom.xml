@@ -87,6 +87,16 @@
 
         <!--> ###  - External Tools - ###<!/-->
 
+        <!---> Eclipse BiRT <!/-->
+
+        <!--> https://stackoverflow.com/questions/75804853/eclipse-birt-report-design-file-version-3-2-24-missing <!/-->
+        <dependency>
+            <groupId>com.innoventsolutions.birt.runtime</groupId>
+            <artifactId>org.eclipse.birt.runtime_4.8.0-20180626</artifactId>
+            <version>4.8.0</version>
+        </dependency>
+
+
         <!-- JMeter Java API -->
         <dependency>
             <groupId>org.apache.jmeter</groupId>

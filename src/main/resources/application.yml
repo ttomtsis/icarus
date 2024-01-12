@@ -1,17 +1,23 @@
+icarus:
+
+  functionSourcesDirectory: ${FUNCTION_SOURCES_DIRECTORY:classpath/resources/user_resources}
+
+  reports:
+    testCaseResultReportTemplateLocation: ${TEST_CASE_RESULT_REPORT_DIRECTORY:classpath/resources/testCaseResultReportTemplate.rptdesign}
+    metricResultReportTemplateLocation: ${METRIC_RESULT_REPORT_DIRECTORY:classpath/resources/metricResultReportTemplate.rptdesign}
+
+
+
 security:
 
   credentialsExpirationPeriod: ${CREDENTIALS_EXPIRATION_PERIOD:355}
 
-
-
   users:
 
-    enableTestUser: ${ENABLE_TEST_USER}
-    testUserUsername: ${TEST_USER_USERNAME}
-    testUserPassword: ${TEST_USER_PASSWORD}
-    testUserEmail: ${TEST_USER_EMAIL}
-
-    functionSourcesDirectory: ${FUNCTION_SOURCES_DIRECTORY:classpath/resources}
+    enableTestUser: ${ENABLE_TEST_USER:false}
+    testUserUsername: ${TEST_USER_USERNAME:}
+    testUserPassword: ${TEST_USER_PASSWORD:}
+    testUserEmail: ${TEST_USER_EMAIL:}
 
 
 
@@ -25,9 +31,9 @@ jmeter:
 
 terraform:
 
-  stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY}
-  useLocalProviders: ${USE_LOCAL_PROVIDERS}
-  localProvidersDirectory: ${LOCAL_PROVIDERS_DIRECTORY}
+  stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY:classpath:/resources/terraform/stacks}
+  useLocalProviders: ${USE_LOCAL_PROVIDERS:true} # Increases terraform initialization time dramatically
+  localProvidersDirectory: ${LOCAL_PROVIDERS_DIRECTORY:classpath:resources/terraform/providers}
 
 
 

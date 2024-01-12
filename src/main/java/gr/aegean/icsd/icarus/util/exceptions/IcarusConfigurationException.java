@@ -7,5 +7,9 @@ public class IcarusConfigurationException extends RuntimeException {
         super(message);
     }
 
+    public IcarusConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 
 }
