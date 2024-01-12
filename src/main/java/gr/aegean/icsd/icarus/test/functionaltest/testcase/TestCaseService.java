@@ -62,7 +62,7 @@ public class TestCaseService {
             existingTestCase.setName(model.getName());
         }
 
-        if (StringUtils.isNotBlank(model.getDescription())) {
+        if (model.getDescription() != null) {
             existingTestCase.setDescription(model.getDescription());
         }
 

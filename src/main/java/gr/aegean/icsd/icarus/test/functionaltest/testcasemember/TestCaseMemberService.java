@@ -90,9 +90,9 @@ public class TestCaseMemberService {
             existingTestCaseMember.setExpectedResponseCode(model.getExpectedResponseCode());
         }
 
-        setIfNotBlank(existingTestCaseMember::setExpectedResponseBody, model.getExpectedResponseBody());
-        setIfNotBlank(existingTestCaseMember::setRequestPathVariableValue, model.getRequestPathVariableValue());
-        setIfNotBlank(existingTestCaseMember::setRequestBody, model.getRequestBody());
+        setIfNotNull(existingTestCaseMember::setExpectedResponseBody, model.getExpectedResponseBody());
+        setIfNotNull(existingTestCaseMember::setRequestPathVariableValue, model.getRequestPathVariableValue());
+        setIfNotNull(existingTestCaseMember::setRequestBody, model.getRequestBody());
 
         if (StringUtils.isBlank(parentTest.getPath()) &&
                 StringUtils.isNotBlank(model.getRequestPathVariableValue())) {
@@ -104,10 +104,9 @@ public class TestCaseMemberService {
     }
 
 
-    //TODO: Check for possible bug
-    private void setIfNotBlank(Consumer<String> setter, String value) {
+    private void setIfNotNull(Consumer<String> setter, String value) {
 
-        if (StringUtils.isNotBlank(value)) {
+        if (value != null) {
             setter.accept(value);
         }
     }

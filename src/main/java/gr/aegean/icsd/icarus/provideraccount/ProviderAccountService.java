@@ -8,7 +8,6 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -81,7 +80,7 @@ public class ProviderAccountService {
         }
 
         String updatedAwsAccountDescription = updatedAwsAccount.getDescription();
-        if (!StringUtils.isBlank(updatedAwsAccountDescription)) {
+        if (updatedAwsAccountDescription != null) {
             existingAwsAccount.setDescription(updatedAwsAccountDescription);
         }
 
@@ -99,15 +98,12 @@ public class ProviderAccountService {
         GcpAccount existingGcpAccount = (GcpAccount) existingProviderAccount.get();
 
         String updatedGcpKeyfile = updatedGcpAccount.getGcpKeyfile();
-
         if (!StringUtils.isBlank(updatedGcpKeyfile) && !updatedGcpKeyfile.equals("null")) {
             existingGcpAccount.setGcpKeyfile(updatedGcpKeyfile);
-            LoggerFactory.getLogger("bob").warn("Updating keyfile");
         }
 
         String updatedGcpAccountDescription = updatedGcpAccount.getDescription();
-
-        if (!StringUtils.isBlank(updatedGcpAccountDescription)) {
+        if (updatedGcpAccountDescription != null) {
             existingGcpAccount.setDescription(updatedGcpAccountDescription);
         }
 
