@@ -31,7 +31,7 @@ public class MetricQueryEngine {
     private final Set<LoadProfile> loadProfiles;
     private final Set<Metric> chosenMetrics;
 
-    private final Set<MetricResult> resultList = Collections.synchronizedSet(new HashSet<>());
+    private final Set<MetricResult> metricResults = Collections.synchronizedSet(new HashSet<>());
 
 
     private static final Logger log = LoggerFactory.getLogger("Metric Query Engine");
@@ -81,17 +81,17 @@ public class MetricQueryEngine {
 
         Thread loadTestExecutionThread = new Thread(() -> {
 
-            log.warn("Executing Load Test for: " + deploymentRecord.deployedFunctionName);
+            log.warn("Executing Load Test for: {}", deploymentRecord.deployedFunctionName);
             test.runTest();
 
             Instant testDoneInstant = Instant.now();
 
-            log.warn("Test finished at " + formatInstant(testDoneInstant));
+            log.warn("Test finished at {}", formatInstant(testDoneInstant));
             log.warn("Test Completed, thread will sleep until metrics are logged in provider platform");
 
             sleep(2);
 
-            log.warn("Thread has awoken, querying metrics for " + deploymentRecord.deployedFunctionName);
+            log.warn("Thread has awoken, querying metrics for {}", deploymentRecord.deployedFunctionName);
 
             List<Thread> metricQueryThreadsList = createMetrics(deploymentRecord, testDoneInstant);
             waitForThreadsToFinish(metricQueryThreadsList);
@@ -113,7 +113,7 @@ public class MetricQueryEngine {
 
             Thread thread = new Thread(() -> {
 
-                log.warn("Creating metric: " + metric.toString() + " for test: " + deploymentRecord.deployedFunctionName);
+                log.warn("Creating metric: {} for test: {}", metric, deploymentRecord.deployedFunctionName);
 
                 if (platform.equals(Platform.AWS)) {
 
@@ -150,12 +150,12 @@ public class MetricQueryEngine {
         boolean foundMetrics = compareTimestamps(metricRequest.getInstants(), testDone);
         while (!foundMetrics && minutes < METRIC_QUERY_MAX_TIMEOUT) {
 
-            log.warn("Metric " + metric + " has not been logged yet for deployment id: " + deploymentRecord.deploymentGuid
-                    + ", will sleep and retry");
+            log.warn("Metric {} has not been logged yet for deployment id: {}, will sleep and retry",
+                    metric, deploymentRecord.deploymentGuid);
 
             minutes++;
 
-            log.warn(minutes + " minutes have passed");
+            log.warn("{} minutes have passed", minutes);
 
             sleep(1);
 
@@ -167,7 +167,7 @@ public class MetricQueryEngine {
         }
 
         if (foundMetrics) {
-            resultList.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
+            metricResults.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
                     metricRequest.getMetricResults(), metric.toString()));
         }
         else {
@@ -192,7 +192,7 @@ public class MetricQueryEngine {
 
                 minutes++;
 
-                log.warn(minutes + " minutes have passed");
+                log.warn("{} minutes have passed", minutes);
 
                 sleep(1);
 
@@ -203,7 +203,7 @@ public class MetricQueryEngine {
             }
 
             if (foundMetrics) {
-                resultList.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
+                metricResults.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
                         request.getMetricResults(), metric.toString()));
             }
             else {
@@ -264,8 +264,8 @@ public class MetricQueryEngine {
     }
 
 
-    public Set<MetricResult> getResultList() {
-        return resultList;
+    public Set<MetricResult> getMetricResults() {
+        return metricResults;
     }
 
 

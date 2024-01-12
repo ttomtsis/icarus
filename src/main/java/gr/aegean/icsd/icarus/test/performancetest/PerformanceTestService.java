@@ -5,8 +5,8 @@ import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.util.enums.TestState;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
@@ -83,7 +83,7 @@ public class PerformanceTestService extends TestService {
 
     public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
 
-        log.warn("Executing request: " + deploymentId);
+        log.warn("Executing request: {}", deploymentId);
 
         PerformanceTest requestedTest = (PerformanceTest) super.executeTest(testId);
 
@@ -97,12 +97,12 @@ public class PerformanceTestService extends TestService {
                     " associated with it");
         }
 
-        log.warn("All checks passed for: " + deploymentId);
+        log.warn("All checks passed for: {}", deploymentId);
 
         TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
         testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
 
-        log.warn("Starting deployment of: " + deploymentId);
+        log.warn("Starting deployment of: {}", deploymentId);
 
         super.getDeployer().deploy(requestedTest, deploymentId)
 
@@ -118,23 +118,23 @@ public class PerformanceTestService extends TestService {
 
                 try {
                     
-                    log.warn("Creating Load Tests: " + deploymentId);
+                    log.warn("Creating Load Tests: {}", deploymentId);
                     MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result);
 
-                    log.warn("Saving execution results: " + deploymentId);
-                    testExecutionService.addMetricResultsToExecution(testExecution, queryEngine.getResultList());
+                    log.warn("Saving execution results: {}", deploymentId);
+                    testExecutionService.addMetricResultsToExecution(testExecution, queryEngine.getMetricResults());
                 } catch (RuntimeException ex) {
 
-                    log.error("Failed to execute tests: " + deploymentId);
+                    log.error("Failed to execute tests: {}", deploymentId);
 
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new TestExecutionFailedException(ex);
                 }
                 
-                log.warn("Test Completed, Deleting Stack: " + deploymentId);
+                log.warn("Test Completed, Deleting Stack: {}", deploymentId);
                 testExecutionService.finalizeTestExecution(testExecution, deploymentId);
 
-                log.warn("Finished: " + deploymentId);
+                log.warn("Finished: {}", deploymentId);
             });
 
     }
