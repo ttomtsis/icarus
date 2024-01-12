@@ -1,7 +1,5 @@
 package gr.aegean.icsd.icarus.function;
 
-import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.user.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
@@ -29,39 +27,26 @@ import static gr.aegean.icsd.icarus.IcarusConfiguration.FUNCTION_SOURCES_DIRECTO
 public class FunctionService {
 
 
-    private final TestRepository testRepository;
     private final FunctionRepository functionRepository;
 
 
 
-    public FunctionService(TestRepository testRepository, FunctionRepository repository) {
-        this.testRepository = testRepository;
+    public FunctionService(FunctionRepository repository) {
         this.functionRepository = repository;
     }
 
 
 
-    public Function createFunction(@NotNull Function newFunction, @NotNull MultipartFile functionSource,
-                                   @NotNull @Positive Long testId)
+    public Function createFunction(@NotNull Function newFunction, @NotNull MultipartFile functionSource)
             throws IOException {
 
-        // TODO: See issue #1 at GitHub
-        Test associatedTest = checkIfTestExists(testId);
-
         setFunctionSourceDirectoryAndSourceName(newFunction, functionSource);
-        Function savedFunction = functionRepository.save(newFunction);
-
-        associatedTest.setTargetFunction(savedFunction);
-        testRepository.save(associatedTest);
-
-        return savedFunction;
+        return functionRepository.save(newFunction);
     }
 
 
-    public void deleteFunction(@NotNull @Positive Long testId, @NotNull @Positive Long functionId)
+    public void deleteFunction(@NotNull @Positive Long functionId)
             throws IOException {
-
-        checkIfTestExists(testId);
 
         Function existingFunction = checkIfFunctionExists(functionId);
 
@@ -70,11 +55,9 @@ public class FunctionService {
     }
 
 
-    public void updateFunction(@NotNull @Positive Long testId, @NotNull @Positive Long functionId,
+    public void updateFunction(@NotNull @Positive Long functionId,
                                 FunctionModel model, MultipartFile newFunctionSource)
             throws IOException {
-
-        checkIfTestExists(testId);
 
         Function existingFunction = checkIfFunctionExists(functionId);
 
@@ -95,9 +78,7 @@ public class FunctionService {
     }
 
 
-    public Function getFunction(@NotNull @Positive Long testId, @NotNull @Positive Long functionId) {
-
-        checkIfTestExists(testId);
+    public Function getFunction(@NotNull @Positive Long functionId) {
 
         return checkIfFunctionExists(functionId);
     }
@@ -111,14 +92,6 @@ public class FunctionService {
         }
     }
 
-
-    private Test checkIfTestExists(Long associatedTestId) {
-
-        return testRepository.findTestByIdAndCreator(associatedTestId, UserUtils.getLoggedInUser())
-                .orElseThrow( () -> new EntityNotFoundException(Test.class, associatedTestId));
-    }
-
-
     private Function checkIfFunctionExists(Long functionId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
@@ -126,7 +99,6 @@ public class FunctionService {
         return functionRepository.findFunctionByIdAndAuthor(functionId, loggedInUser)
                 .orElseThrow( () -> new EntityNotFoundException(Function.class, functionId));
     }
-
 
     private void setFunctionSourceDirectoryAndSourceName(@NotNull Function function,
                                                          @NotNull MultipartFile functionSourceFile)

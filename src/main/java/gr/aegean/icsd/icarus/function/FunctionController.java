@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 
 @RestController
-@RequestMapping(value = "api/v0/tests/{testId}/functions", produces = "application/json")
+@RequestMapping(value = "api/v0/functions", produces = "application/json")
 public class FunctionController {
 
 
@@ -34,18 +34,16 @@ public class FunctionController {
 
 
     @GetMapping("/{functionId}")
-    public ResponseEntity<FunctionModel> getFunction(@PathVariable Long testId,
-                                                     @PathVariable Long functionId) {
+    public ResponseEntity<FunctionModel> getFunction(@PathVariable Long functionId) {
 
-        Function requestedFunction = service.getFunction(testId, functionId);
-        FunctionModel requestedFunctionModel = modelAssembler.toModel(requestedFunction, testId);
+        Function requestedFunction = service.getFunction(functionId);
+        FunctionModel requestedFunctionModel = modelAssembler.toModel(requestedFunction);
 
         return ResponseEntity.ok().body(requestedFunctionModel);
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<FunctionModel> createFunction(@PathVariable Long testId,
-                                                        @RequestPart("functionMetadata") String textModel,
+    public ResponseEntity<FunctionModel> createFunction(@RequestPart("functionMetadata") String textModel,
                                                         @RequestPart("functionSource") MultipartFile functionSource) {
 
         FunctionModel functionModel = serializeToModel(textModel);
@@ -54,16 +52,16 @@ public class FunctionController {
 
         Function savedFunction = null;
         try {
-            savedFunction = service.createFunction(newFunction, functionSource, testId);
+            savedFunction = service.createFunction(newFunction, functionSource);
         } catch (IOException e) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
         assert savedFunction != null;
-        FunctionModel savedFunctionModel = modelAssembler.toModel(savedFunction, testId);
+        FunctionModel savedFunctionModel = modelAssembler.toModel(savedFunction);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("api/v0/tests/" + testId + "/functions/" + savedFunction.getId())
+                .path("api/v0/functions/" + savedFunction.getId())
                 .buildAndExpand()
                 .toUri();
 
@@ -71,7 +69,7 @@ public class FunctionController {
     }
 
     @PutMapping(value = "/{functionId}", consumes = "multipart/form-data")
-    public ResponseEntity<Void> updateFunction(@PathVariable Long testId, @PathVariable Long functionId,
+    public ResponseEntity<Void> updateFunction(@PathVariable Long functionId,
                                                @RequestPart(required = false) String textModel,
                                                @RequestPart(required = false) MultipartFile functionSource) {
 
@@ -82,7 +80,7 @@ public class FunctionController {
         FunctionModel functionModel = serializeToModel(textModel);
 
         try {
-            service.updateFunction(testId, functionId, functionModel, functionSource);
+            service.updateFunction(functionId, functionModel, functionSource);
         }
         catch (IOException ex) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -92,10 +90,10 @@ public class FunctionController {
     }
 
     @DeleteMapping("/{functionId}")
-    public ResponseEntity<Void> deleteFunction(@PathVariable Long testId, @PathVariable Long functionId) {
+    public ResponseEntity<Void> deleteFunction(@PathVariable Long functionId) {
 
         try {
-            service.deleteFunction(testId, functionId);
+            service.deleteFunction(functionId);
         }
         catch (IOException ex) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
