@@ -103,6 +103,7 @@ public class PerformanceTest extends Test  {
         return new PerformanceTestBuilder(
                 model.getName(), model.getHttpMethod()
         )
+                .path(model.getPath())
                 .pathVariable(model.getPathVariable())
 
                 .pathVariableValue(model.getPathVariableValue())
