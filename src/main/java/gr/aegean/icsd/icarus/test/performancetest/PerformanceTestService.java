@@ -112,7 +112,7 @@ public class PerformanceTestService extends TestService {
 
         IcarusUser creator = UserUtils.getLoggedInUser();
 
-        super.getDeployer().deploy(requestedTest, deploymentId)
+        super.getDeployer().deployFunctions(requestedTest, deploymentId)
 
             .exceptionally(ex -> {
 

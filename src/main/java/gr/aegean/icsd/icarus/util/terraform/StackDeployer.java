@@ -6,11 +6,12 @@ import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
+import gr.aegean.icsd.icarus.util.FileService;
+import gr.aegean.icsd.icarus.util.ProcessService;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.async.StackDeploymentException;
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.transaction.Transactional;
@@ -23,12 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -44,39 +39,52 @@ import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.STACK_
 public class StackDeployer {
 
 
+    private final FileService fileService;
+    private final ProcessService processService;
+
     private static final Logger log = LoggerFactory.getLogger("Stack Deployer");
 
 
 
+    public StackDeployer(FileService fileService, ProcessService processService) {
+        this.fileService = fileService;
+        this.processService = processService;
+    }
+
+
+
     @Async
-    public CompletableFuture<Set<DeploymentRecord>> deploy(@NotNull Test associatedTest,
-                                                           @NotBlank String id) {
+    public CompletableFuture<Set<DeploymentRecord>> deployFunctions(@NotNull Test associatedTest,
+                                                                    @NotBlank String id) {
 
         String name = associatedTest.getTargetFunction().getName() + "-" + id;
 
         String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
         String stackDir = outputDir + "\\stacks\\" + name;
 
-        Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformConfiguration(outputDir, name,
+        // Create Terraform Stacks
+        Set<DeploymentRecord> incompleteDeploymentRecords = createInfrastructure(outputDir, name,
                 associatedTest, id);
 
         log.warn("Finished synthesizing: {}", id);
 
-        // Deploy
+        // Deploy Terraform Stacks
         log.warn("Deploying stack: {}", id);
-        deployStack(stackDir);
+        deployInfrastructure(stackDir);
 
         log.warn("Finished deploying: {}", id);
 
-        // Get functionUrls
+        // Get URLs of Deployed Stacks
         log.warn("Getting function URLs for: {}", id);
-        Set<DeploymentRecord> completeDeploymentRecords = getFunctionUrls(stackDir, incompleteDeploymentRecords);
+        Set<DeploymentRecord> completeDeploymentRecords = matchInfrastructureWithRecords
+                (stackDir, incompleteDeploymentRecords);
 
         return CompletableFuture.completedFuture(completeDeploymentRecords);
     }
 
-    private synchronized Set<DeploymentRecord> createTerraformConfiguration(String outputDir, String stackName,
-                                                                            Test associatedTest, String id) {
+
+    private synchronized Set<DeploymentRecord> createInfrastructure(String outputDir, String stackName,
+                                                                    Test associatedTest, String id) {
 
         App app = App.Builder.create()
                 .outdir(outputDir)
@@ -84,7 +92,7 @@ public class StackDeployer {
 
         // Create stack
         log.warn("Creating stack: {}", id);
-        Set<DeploymentRecord> incompleteDeploymentRecords = createStack(stackName, app, outputDir, associatedTest, id);
+        Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformStack(stackName, app, outputDir, associatedTest, id);
 
         log.warn("Finished creating: {}", id);
 
@@ -95,8 +103,84 @@ public class StackDeployer {
         return incompleteDeploymentRecords;
     }
 
-    private Set<DeploymentRecord> createStack(@NotBlank String name, @NotNull App app, @NotBlank String outputDir,
-                                              @NotNull Test associatedTest, @NotBlank String id) {
+
+    private void deployInfrastructure(@NotBlank String stackDir) {
+
+        File stackDirectory = new File(stackDir);
+
+        try {
+
+            // Initialize terraform
+            log.warn("Initializing terraform...");
+            processService.createProcess(stackDirectory, TerraformCommand.INIT.get());
+
+            // Deploy infrastructure
+            log.warn("Deploying infrastructure...");
+            processService.createProcess(stackDirectory, TerraformCommand.APPLY.get());
+        }
+        catch (RuntimeException ex) {
+            log.error("Error when deploying stack at: {}", stackDir);
+            throw new StackDeploymentException(ex.getMessage());
+        }
+
+
+    }
+
+
+    private Set<DeploymentRecord> matchInfrastructureWithRecords(@NotBlank String stackDirectory,
+                                                                 @NotNull Set<DeploymentRecord> deploymentRecords) {
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.directory(new File(stackDirectory));
+        processBuilder.command(TerraformCommand.OUTPUT.get());
+
+        try {
+            Process outputProcess = processBuilder.start();
+
+            // Get the input stream
+            InputStream inputStream = outputProcess.getInputStream();
+            InputStreamReader isr = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(isr);
+
+            // Read and print each line of the output
+            StringBuilder rawTerraformOutputs = new StringBuilder();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                rawTerraformOutputs.append(line).append("\n");
+            }
+
+            return extractUrlsFromTerraformOutputs(deploymentRecords, rawTerraformOutputs.toString());
+        }
+        catch (IOException ex) {
+            log.error(ex.getMessage());
+        }
+
+
+        File errorFile = new File(processBuilder.directory().getPath() + "\\output-errors.txt");
+        processBuilder.redirectError(errorFile);
+
+        throw new StackDeploymentException(errorFile, TerraformCommand.OUTPUT.get());
+    }
+
+
+
+    public void deleteInfrastructure(@NotBlank String stackName, @NotBlank String deploymentId) {
+
+        String name = stackName + "-" + deploymentId;
+        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
+        String stackDir = outputDir + "\\stacks\\" + name;
+
+        File stackDirectory = new File(stackDir);
+
+        processService.createProcess(stackDirectory, TerraformCommand.DESTROY.get());
+        fileService.deleteDirectory(outputDir);
+    }
+
+
+    private Set<DeploymentRecord> createTerraformStack(@NotBlank String name, @NotNull App app,
+                                                       @NotBlank String outputDir,
+                                                       @NotNull Test associatedTest, @NotBlank String id) {
 
         MainStack mainStack = new MainStack(app, name);
 
@@ -180,106 +264,8 @@ public class StackDeployer {
     }
 
 
-    private void deployStack(@NotBlank String stackDir) {
-
-        File stackDirectory = new File(stackDir);
-
-        try {
-
-            // Initialize terraform
-            log.warn("Initializing terraform...");
-            createProcess(stackDirectory, TerraformCommand.INIT.get());
-
-            // Deploy infrastructure
-            log.warn("Deploying infrastructure...");
-            createProcess(stackDirectory, TerraformCommand.APPLY.get());
-        }
-        catch (RuntimeException ex) {
-            log.error("Error when deploying stack at: {}", stackDir);
-            throw new StackDeploymentException(ex.getMessage());
-        }
-
-
-    }
-
-
-    public void deleteStack(@NotBlank String stackName, @NotBlank String deploymentId) {
-
-        String name = stackName + "-" + deploymentId;
-        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
-        String stackDir = outputDir + "\\stacks\\" + name;
-
-        File stackDirectory = new File(stackDir);
-
-        createProcess(stackDirectory, TerraformCommand.DESTROY.get());
-        deleteDirectory(outputDir);
-    }
-
-
-    private void deleteDirectory(String dir) {
-
-        try {
-
-            Files.walkFileTree(Path.of(dir), new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-
-        }
-        catch (IOException ex) {
-            throw new TestExecutionFailedException(ex);
-        }
-    }
-
-
-    private Set<DeploymentRecord> getFunctionUrls(@NotBlank String stackDirectory,
-                                                  @NotNull Set<DeploymentRecord> deploymentRecords) {
-
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.directory(new File(stackDirectory));
-        processBuilder.command(TerraformCommand.OUTPUT.get());
-
-        try {
-            Process outputProcess = processBuilder.start();
-
-            // Get the input stream
-            InputStream inputStream = outputProcess.getInputStream();
-            InputStreamReader isr = new InputStreamReader(inputStream);
-            BufferedReader br = new BufferedReader(isr);
-
-            // Read and print each line of the output
-            StringBuilder rawTerraformOutputs = new StringBuilder();
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                rawTerraformOutputs.append(line).append("\n");
-            }
-
-            return extractUrls(deploymentRecords, rawTerraformOutputs.toString());
-        }
-        catch (IOException ex) {
-            log.error(ex.getMessage());
-        }
-
-
-        File errorFile = new File(processBuilder.directory().getPath() + "\\output-errors.txt");
-        processBuilder.redirectError(errorFile);
-
-        throw new StackDeploymentException(errorFile, TerraformCommand.OUTPUT.get());
-    }
-
-
-    private Set<DeploymentRecord> extractUrls(@NotNull Set<DeploymentRecord> deploymentRecords,
-                                              @NotBlank String terraformOutputs) {
+    private Set<DeploymentRecord> extractUrlsFromTerraformOutputs(@NotNull Set<DeploymentRecord> deploymentRecords,
+                                                                  @NotBlank String terraformOutputs) {
 
         String[] lines = terraformOutputs.split("\\n");
 
@@ -306,37 +292,6 @@ public class StackDeployer {
     }
 
 
-    private void createProcess(@NotNull File stackDirectory, @NotNull String ... commands) {
-
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.directory(stackDirectory);
-        processBuilder.command(commands);
-
-        String commandString = "_" + commands[1];
-
-        log.warn("executing command: {}", Arrays.toString(commands));
-
-        File outputFile = new File(processBuilder.directory().getPath() + commandString + "_output.txt");
-        processBuilder.redirectOutput(outputFile);
-
-        File errorFile = new File(processBuilder.directory().getPath() + commandString + "_error_output.txt");
-        processBuilder.redirectError(errorFile);
-
-        try {
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode != 0) {
-                throw new StackDeploymentException(errorFile, exitCode, commands);
-            }
-        }
-        catch (InterruptedException | IOException ex) {
-            throw new TestExecutionFailedException(ex);
-        }
-
-    }
-
-
     private void addConfigurationAndAccountToRecords(@NotNull Set<DeploymentRecord> deploymentRecordSet,
                                                      @NotNull ResourceConfiguration configuration,
                                                      @NotNull ProviderAccount accountUsed) {
@@ -348,5 +303,6 @@ public class StackDeployer {
             deploymentRecord.configurationUsed = configuration;
         }
     }
+
 
 }

@@ -180,7 +180,7 @@ public class TestExecutionService {
         setExecutionState(requestedTestExecution, ExecutionState.ERROR);
 
         try {
-            deployer.deleteStack(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
+            deployer.deleteInfrastructure(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
         }
         catch (RuntimeException ex) {
             throw new TestExecutionFailedException(ex);
@@ -190,7 +190,7 @@ public class TestExecutionService {
 
     public void finalizeTestExecution(@NotNull TestExecution requestedTestExecution, @NotBlank String deploymentId) {
 
-        deployer.deleteStack(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
+        deployer.deleteInfrastructure(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
         setExecutionState(requestedTestExecution, ExecutionState.FINISHED);
     }
 
