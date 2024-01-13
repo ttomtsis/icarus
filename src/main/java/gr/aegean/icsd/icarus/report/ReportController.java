@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/v0/tests/{testId}/executions")
+@RequestMapping("api/v0/tests/{testId}/executions/reports")
 public class ReportController {
 
 
@@ -22,7 +22,7 @@ public class ReportController {
 
 
 
-    @GetMapping(value = "/reports/", produces = "application/pdf", params = "executionID")
+    @GetMapping(produces = "application/pdf", params = "executionID")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long testId, @RequestParam Long executionID) {
 
         Report pdfReport = service.getReport(testId, executionID);
@@ -33,10 +33,34 @@ public class ReportController {
         }
 
 
-    @GetMapping(value = "/reports/", produces = "application/pdf", params = "deploymentId")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable Long testId, @RequestParam String deploymentId) {
+    @GetMapping(produces = "application/pdf", params = "deploymentID")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long testId, @RequestParam String deploymentID) {
 
-        Report pdfReport = service.getReport(testId, deploymentId);
+        Report pdfReport = service.getReport(testId, deploymentID);
+
+        HttpHeaders headers = createHeaders(pdfReport);
+
+        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
+    }
+
+
+    @PostMapping(produces = "application/pdf", params = "deploymentID")
+    public ResponseEntity<byte[]> regenerateReport(@PathVariable Long testId,
+                                                   @RequestParam String deploymentID) {
+
+        Report pdfReport = service.regenerateReportByID(testId, deploymentID);
+
+        HttpHeaders headers = createHeaders(pdfReport);
+
+        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
+    }
+
+
+    @PostMapping(produces = "application/pdf", params = "executionID")
+    public ResponseEntity<byte[]> regenerateReport(@PathVariable Long testId,
+                                                   @RequestParam Long executionID) {
+
+        Report pdfReport = service.regenerateReportByID(testId, executionID);
 
         HttpHeaders headers = createHeaders(pdfReport);
 

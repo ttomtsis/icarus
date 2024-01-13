@@ -13,6 +13,7 @@ import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
 import jakarta.transaction.Transactional;
@@ -99,24 +100,36 @@ public class TestExecutionService {
     }
 
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void produceReport(@NotNull TestExecution testExecution) {
 
         LoggerFactory.getLogger(TestExecutionService.class).warn
                 ("Producing report document for deployment: {}", testExecution.getDeploymentId());
 
-        if (testExecution.getTestCaseResults().isEmpty()) {
-            @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
-            reportRepository.save(metricResultsReport);
-        }
+        try {
 
-        else if (testExecution.getMetricResults().isEmpty()) {
-            @NotNull Report testCaseResultReport = reportService.createFunctionalTestReport(testExecution);
-            reportRepository.save(testCaseResultReport);
-        }
+            if (testExecution.getTestCaseResults().isEmpty()) {
+                @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
+                reportRepository.save(metricResultsReport);
 
-        else {
-            throw new IllegalArgumentException("The test execution does not contain any " +
-                    "results in order to produce a report");
+            } else if (testExecution.getMetricResults().isEmpty()) {
+                @NotNull Report testCaseResultReport = reportService.createFunctionalTestReport(testExecution);
+                reportRepository.save(testCaseResultReport);
+
+            } else {
+                throw new ReportGenerationException("The test execution does not contain any " +
+                        "results in order to produce a report");
+            }
+        }
+        catch (RuntimeException ex) {
+            LoggerFactory.getLogger(TestExecutionService.class).error("Failed to generate the report for" +
+                    " Execution with deployment ID: {}", testExecution.getDeploymentId());
+
+            testExecution.setState(ExecutionState.REPORT_FAILED);
+            testExecutionRepository.save(testExecution);
+
+            throw new ReportGenerationException("Failed to generate Report for Execution with deployment ID: "
+                    + testExecution.getDeploymentId(), ex);
         }
 
     }
