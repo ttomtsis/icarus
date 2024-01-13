@@ -1173,35 +1173,14 @@ where public.function.id = ?]]></xml-property>
     rc.id, 
     rc.function_runtime, 
     rc.provider_platform,
-    (SELECT STRING_AGG(CAST(memory_configurations AS TEXT), ',') FROM resource_configuration_memory rcm WHERE rcm.id = rc.id) as memory_configurations,
-    (SELECT STRING_AGG(CAST(cpu_configurations AS TEXT), ',') FROM resource_configuration_cpu rcc WHERE rcc.id = rc.id) as cpu_configurations,
-    (SELECT STRING_AGG(CAST(regions AS TEXT), ',') FROM resource_configuration_regions rcr WHERE rcr.id = rc.id) as regions
+    (SELECT STRING_AGG(CAST(memory_configurations AS TEXT), ', ') FROM resource_configuration_memory rcm WHERE rcm.id = rc.id) as memory_configurations,
+    (SELECT STRING_AGG(CAST(cpu_configurations AS TEXT), ', ') FROM resource_configuration_cpu rcc WHERE rcc.id = rc.id) as cpu_configurations,
+    (SELECT STRING_AGG(CAST(regions AS TEXT), ', ') FROM resource_configuration_regions rcr WHERE rcr.id = rc.id) as regions
 FROM 
     resource_configuration rc
 WHERE 
     rc.parent_test_id = ?;
 ]]></xml-property>
-            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
-  <Version>2.0</Version>
-  <DataSetParameters>
-    <parameter>
-      <design:ParameterDefinition>
-        <design:inOutMode>In</design:inOutMode>
-        <design:attributes>
-          <design:identifier>
-            <design:name></design:name>
-            <design:position>1</design:position>
-          </design:identifier>
-          <design:nativeDataTypeCode>-5</design:nativeDataTypeCode>
-          <design:precision>0</design:precision>
-          <design:scale>0</design:scale>
-          <design:nullability>Unknown</design:nullability>
-        </design:attributes>
-      </design:ParameterDefinition>
-    </parameter>
-  </DataSetParameters>
-</model:DesignValues>]]></xml-property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="Metric names" id="486">
             <list-property name="columnHints">
@@ -2938,6 +2917,7 @@ and public.metric_result.id = public.metric_result_metric_values.id
             <detail>
                 <row id="648">
                     <property name="textAlign">center</property>
+                    <property name="verticalAlign">middle</property>
                     <cell id="649">
                         <property name="borderBottomStyle">solid</property>
                         <property name="borderBottomWidth">medium</property>
@@ -3171,6 +3151,7 @@ and public.metric_result.id = public.metric_result_metric_values.id
             <detail>
                 <row id="715">
                     <property name="textAlign">center</property>
+                    <property name="verticalAlign">middle</property>
                     <cell id="716">
                         <property name="borderBottomStyle">solid</property>
                         <property name="borderBottomWidth">medium</property>
