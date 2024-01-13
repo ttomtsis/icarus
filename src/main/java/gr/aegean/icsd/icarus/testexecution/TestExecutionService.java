@@ -10,7 +10,7 @@ import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
-import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
@@ -164,7 +164,7 @@ public class TestExecutionService {
 
     public void abortTestExecution(@NotNull TestExecution requestedTestExecution, @NotBlank String deploymentId) {
 
-        setExecutionState(requestedTestExecution, TestState.ERROR);
+        setExecutionState(requestedTestExecution, ExecutionState.ERROR);
 
         try {
             deployer.deleteStack(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
@@ -178,11 +178,11 @@ public class TestExecutionService {
     public void finalizeTestExecution(@NotNull TestExecution requestedTestExecution, @NotBlank String deploymentId) {
 
         deployer.deleteStack(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
-        setExecutionState(requestedTestExecution, TestState.FINISHED);
+        setExecutionState(requestedTestExecution, ExecutionState.FINISHED);
     }
 
 
-    public void setExecutionState(@NotNull TestExecution testExecution, @NotNull TestState testState) {
+    public void setExecutionState(@NotNull TestExecution testExecution, @NotNull ExecutionState testState) {
 
         testExecution.setState(testState);
         testExecutionRepository.save(testExecution);

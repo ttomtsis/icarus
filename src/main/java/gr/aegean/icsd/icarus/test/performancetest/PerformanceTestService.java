@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
-import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
@@ -106,7 +106,7 @@ public class PerformanceTestService extends TestService {
         log.warn("All checks passed for: {}", deploymentId);
 
         TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
-        testExecutionService.setExecutionState(testExecution, TestState.DEPLOYING);
+        testExecutionService.setExecutionState(testExecution, ExecutionState.DEPLOYING);
 
         log.warn("Starting deployment of: {}", deploymentId);
 
@@ -122,7 +122,7 @@ public class PerformanceTestService extends TestService {
 
             .thenAccept(result -> {
 
-                testExecutionService.setExecutionState(testExecution, TestState.RUNNING);
+                testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
 
                 try {
                     

@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.enums;
 
-public enum TestState {
+public enum ExecutionState {
 
 
     CREATED,
@@ -11,7 +11,9 @@ public enum TestState {
 
     FINISHED,
 
-    ERROR
+    ERROR,
+
+    REPORT_FAILED
 
 
 }
