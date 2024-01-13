@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.icarususer;
 
-import gr.aegean.icsd.icarus.util.FileService;
+import gr.aegean.icsd.icarus.util.services.FileService;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;

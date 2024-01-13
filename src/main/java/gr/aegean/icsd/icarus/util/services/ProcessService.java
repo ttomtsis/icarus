@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.util;
+package gr.aegean.icsd.icarus.util.services;
 
 import gr.aegean.icsd.icarus.util.exceptions.async.StackDeploymentException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
