@@ -60,16 +60,16 @@ public class StackDeployer {
         Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformConfiguration(outputDir, name,
                 associatedTest, id);
 
-        log.warn("Finished synthesizing: " + id);
+        log.warn("Finished synthesizing: {}", id);
 
         // Deploy
-        log.warn("Deploying stack: " + id);
+        log.warn("Deploying stack: {}", id);
         deployStack(stackDir);
 
-        log.warn("Finished deploying: " + id);
+        log.warn("Finished deploying: {}", id);
 
         // Get functionUrls
-        log.warn("Getting function URLs for: " + id);
+        log.warn("Getting function URLs for: {}", id);
         Set<DeploymentRecord> completeDeploymentRecords = getFunctionUrls(stackDir, incompleteDeploymentRecords);
 
         return CompletableFuture.completedFuture(completeDeploymentRecords);
@@ -83,13 +83,13 @@ public class StackDeployer {
                 .build();
 
         // Create stack
-        log.warn("Creating stack: " + id);
+        log.warn("Creating stack: {}", id);
         Set<DeploymentRecord> incompleteDeploymentRecords = createStack(stackName, app, outputDir, associatedTest, id);
 
-        log.warn("Finished creating: " + id);
+        log.warn("Finished creating: {}", id);
 
         // Synthesize it
-        log.warn("Synthesizing stack: " + id);
+        log.warn("Synthesizing stack: {}", id);
         app.synth();
 
         return incompleteDeploymentRecords;
@@ -123,11 +123,8 @@ public class StackDeployer {
 
             for (ResourceConfiguration configuration : associatedTest.getResourceConfigurations()) {
 
-                if (account.getAccountType().equals("AwsAccount") &&
+                if (account instanceof AwsAccount awsAccount &&
                         configuration.getProviderPlatform().equals(Platform.AWS)) {
-
-                    assert account instanceof AwsAccount;
-                    AwsAccount awsAccount = (AwsAccount) account;
 
                     AwsConstruct newAwsConstruct = mainStack.createAwsConstruct(id,
                             awsAccount.getAwsAccessKey(), awsAccount.getAwsSecretKey(),
@@ -143,15 +140,16 @@ public class StackDeployer {
                             associatedTest.getHttpMethod()
                     );
 
-                    deploymentRecordSet.addAll(newAwsConstruct.getDeploymentRecords());
-                    addConfigurationAndAccountToRecords(deploymentRecordSet, configuration, account);
+                    Set<DeploymentRecord> awsConstructsRecords = new HashSet<>
+                            (newAwsConstruct.getDeploymentRecords());
+
+                    addConfigurationAndAccountToRecords(awsConstructsRecords, configuration, account);
+
+                    deploymentRecordSet.addAll(awsConstructsRecords);
                 }
 
-                if (account.getAccountType().equals("GcpAccount") &&
+                if (account instanceof GcpAccount gcpAccount &&
                         configuration.getProviderPlatform().equals(Platform.GCP)) {
-
-                    assert account instanceof GcpAccount;
-                    GcpAccount gcpAccount = (GcpAccount) account;
 
                     GcpConstruct newGcpConstruct = mainStack.createGcpConstruct(id,
                             gcpAccount.getGcpKeyfile(),
@@ -168,8 +166,12 @@ public class StackDeployer {
                                     .collect(Collectors.toCollection(HashSet::new))
                     );
 
-                    deploymentRecordSet.addAll(newGcpConstruct.getDeploymentRecords());
-                    addConfigurationAndAccountToRecords(deploymentRecordSet, configuration, account);
+                    Set<DeploymentRecord> gcpConstructsRecords = new HashSet<>
+                            (newGcpConstruct.getDeploymentRecords());
+
+                    addConfigurationAndAccountToRecords(gcpConstructsRecords, configuration, account);
+
+                    deploymentRecordSet.addAll(gcpConstructsRecords);
                 }
             }
         }
@@ -193,7 +195,7 @@ public class StackDeployer {
             createProcess(stackDirectory, TerraformCommand.APPLY.get());
         }
         catch (RuntimeException ex) {
-            log.error("Error when deploying stack at: " + stackDir);
+            log.error("Error when deploying stack at: {}", stackDir);
             throw new StackDeploymentException(ex.getMessage());
         }
 
@@ -218,7 +220,7 @@ public class StackDeployer {
 
         try {
 
-            Files.walkFileTree(Path.of(dir), new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(Path.of(dir), new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
@@ -312,7 +314,7 @@ public class StackDeployer {
 
         String commandString = "_" + commands[1];
 
-        log.warn("executing command: " + Arrays.toString(commands));
+        log.warn("executing command: {}", Arrays.toString(commands));
 
         File outputFile = new File(processBuilder.directory().getPath() + commandString + "_output.txt");
         processBuilder.redirectOutput(outputFile);
@@ -342,6 +344,7 @@ public class StackDeployer {
         for (DeploymentRecord deploymentRecord : deploymentRecordSet) {
 
             deploymentRecord.accountUsed = accountUsed;
+
             deploymentRecord.configurationUsed = configuration;
         }
     }
