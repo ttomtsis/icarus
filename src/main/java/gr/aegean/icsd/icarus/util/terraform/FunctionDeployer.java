@@ -36,7 +36,7 @@ import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.STACK_
 @Service
 @Validated
 @Transactional
-public class StackDeployer {
+public class FunctionDeployer {
 
 
     private final FileService fileService;
@@ -46,7 +46,7 @@ public class StackDeployer {
 
 
 
-    public StackDeployer(FileService fileService, ProcessService processService) {
+    public FunctionDeployer(FileService fileService, ProcessService processService) {
         this.fileService = fileService;
         this.processService = processService;
     }

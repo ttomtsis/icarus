@@ -15,7 +15,7 @@ import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
-import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
+import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -43,7 +43,7 @@ public class TestExecutionService {
     private final MetricResultRepository metricResultRepository;
     private final TestCaseResultRepository testCaseResultRepository;
 
-    private final StackDeployer deployer;
+    private final FunctionDeployer deployer;
 
     private final ReportService reportService;
     private final ReportRepository reportRepository;
@@ -53,7 +53,7 @@ public class TestExecutionService {
     public TestExecutionService(TestExecutionRepository repository, TestRepository testRepository,
                                 MetricResultRepository metricResultRepository,
                                 TestCaseResultRepository testCaseResultRepository,
-                                StackDeployer deployer, ReportService reportService,
+                                FunctionDeployer deployer, ReportService reportService,
                                 ReportRepository reportRepository) {
 
         this.testExecutionRepository = repository;

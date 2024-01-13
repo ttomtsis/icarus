@@ -16,7 +16,7 @@ import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationExce
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
-import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
+import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -44,7 +44,7 @@ public class FunctionalTestService extends TestService {
 
 
     public FunctionalTestService(FunctionalTestRepository repository, TestRepository testRepository,
-                                 StackDeployer deployer, TestExecutionService testExecutionService) {
+                                 FunctionDeployer deployer, TestExecutionService testExecutionService) {
 
         super(testRepository, deployer);
         this.repository = repository;

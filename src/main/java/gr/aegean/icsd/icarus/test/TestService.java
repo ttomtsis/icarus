@@ -8,7 +8,7 @@ import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
-import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
+import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -29,11 +29,11 @@ public class TestService {
 
     private final TestRepository repository;
 
-    private final StackDeployer deployer;
+    private final FunctionDeployer deployer;
 
 
     public TestService(TestRepository repository,
-                       StackDeployer deployer) {
+                       FunctionDeployer deployer) {
 
         this.repository = repository;
         this.deployer = deployer;
@@ -163,7 +163,7 @@ public class TestService {
         }
     }
 
-    protected StackDeployer getDeployer() {
+    protected FunctionDeployer getDeployer() {
         return this.deployer;
     }
 
