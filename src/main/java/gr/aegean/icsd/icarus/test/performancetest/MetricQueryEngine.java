@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
 import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.aws.AwsMetricRequest;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import gr.aegean.icsd.icarus.util.enums.Platform;
@@ -33,15 +34,21 @@ public class MetricQueryEngine {
 
     private final Set<MetricResult> metricResults = Collections.synchronizedSet(new HashSet<>());
 
+    private final IcarusUser creator;
+
 
     private static final Logger log = LoggerFactory.getLogger("Metric Query Engine");
 
 
 
-    public MetricQueryEngine(PerformanceTest requestedTest, Set<DeploymentRecord> deploymentRecords) {
+    public MetricQueryEngine(PerformanceTest requestedTest,
+                             Set<DeploymentRecord> deploymentRecords,
+                             IcarusUser creator) {
 
         this.loadProfiles = requestedTest.getLoadProfiles();
         this.chosenMetrics = requestedTest.getChosenMetrics();
+
+        this.creator = creator;
 
         List<Thread> threadList = new ArrayList<>();
 
@@ -168,7 +175,7 @@ public class MetricQueryEngine {
 
         if (foundMetrics) {
             metricResults.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
-                    metricRequest.getMetricResults(), metric.toString()));
+                    metricRequest.getMetricResults(), metric.toString(), creator));
         }
         else {
             throw new MetricsTimeoutException(minutes);
@@ -204,7 +211,7 @@ public class MetricQueryEngine {
 
             if (foundMetrics) {
                 metricResults.add(new MetricResult(loadProfiles, deploymentRecord.configurationUsed,
-                        request.getMetricResults(), metric.toString()));
+                        request.getMetricResults(), metric.toString(), creator));
             }
             else {
                 throw new MetricsTimeoutException(minutes);

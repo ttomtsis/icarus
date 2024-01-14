@@ -2,7 +2,7 @@ package gr.aegean.icsd.icarus.testexecution;
 
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
-import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.PagedModel;
@@ -42,10 +42,10 @@ public class TestExecutionModelAssembler extends RepresentationModelAssemblerSup
             newModel.setReport(entity.getReport().getId());
         }
 
-        if(entity.getEndDate() == null && entity.getState().equals(TestState.ERROR)) {
+        if(entity.getEndDate() == null && entity.getState().equals(ExecutionState.ERROR)) {
             newModel.setEndDate("Execution did not complete because of an error");
         }
-        else if(entity.getEndDate() == null && !entity.getState().equals(TestState.ERROR)) {
+        else if(entity.getEndDate() == null && !entity.getState().equals(ExecutionState.ERROR)) {
             newModel.setEndDate("Execution has not yet completed");
         }
         else {

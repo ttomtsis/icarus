@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.provideraccount;
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,9 +1,8 @@
 package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
-import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestRepository;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
@@ -24,12 +23,12 @@ import java.util.function.Consumer;
 public class LoadProfileService {
 
 
-    private final TestRepository testRepository;
+    private final PerformanceTestRepository testRepository;
     private final LoadProfileRepository loadProfileRepository;
 
 
 
-    public LoadProfileService(TestRepository testRepository, LoadProfileRepository repository) {
+    public LoadProfileService(PerformanceTestRepository testRepository, LoadProfileRepository repository) {
         this.testRepository = testRepository;
         this.loadProfileRepository = repository;
     }
@@ -45,6 +44,7 @@ public class LoadProfileService {
 
     }
 
+
     public void deleteLoadProfile(@NotNull @Positive Long testId, @NotNull @Positive Long loadProfileId) {
 
         checkIfTestExists(testId);
@@ -53,6 +53,7 @@ public class LoadProfileService {
 
         loadProfileRepository.delete(existingLoadProfile);
     }
+
 
     public void updateLoadModel(@NotNull @Positive Long testId, @NotNull @Positive Long loadProfileId,
                                 @NotNull LoadProfileModel model) {
@@ -77,6 +78,7 @@ public class LoadProfileService {
         }
     }
 
+
     public Page<LoadProfile> getLoadProfiles(@NotNull @Positive Long testId, @NotNull Pageable pageable) {
 
         PerformanceTest parentTest = checkIfTestExists(testId);
@@ -86,11 +88,12 @@ public class LoadProfileService {
     }
 
 
+
     private PerformanceTest checkIfTestExists(Long parentTestId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
-        return (PerformanceTest) testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
-                .orElseThrow( () -> new EntityNotFoundException(Test.class, parentTestId));
+        return testRepository.findPerformanceTestByIdAndCreator(parentTestId, loggedInUser)
+                .orElseThrow( () -> new EntityNotFoundException(PerformanceTest.class, parentTestId));
     }
 
     private LoadProfile checkIfProfileExists(Long loadProfileId) {

@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

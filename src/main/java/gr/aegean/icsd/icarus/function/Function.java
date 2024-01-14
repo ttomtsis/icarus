@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.function;
 
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
 import jakarta.persistence.*;
@@ -53,7 +53,8 @@ public class Function {
     @NotBlank(message = "Function's handler cannot be blank")
     private String functionHandler;
 
-    @OneToMany(mappedBy = "targetFunction", targetEntity = Test.class, cascade = CascadeType.REFRESH)
+    @OneToMany(mappedBy = "targetFunction", targetEntity = Test.class,
+            orphanRemoval = true, cascade = CascadeType.REMOVE)
     private final Set<Test> createdTests = new HashSet<>();
 
 
@@ -83,15 +84,6 @@ public class Function {
         return new Function(model.getName(), model.getDescription(), model.getFunctionHandler(), model.getGithubURL());
     }
 
-
-
-    @PreRemove
-    private void removeForeignKeyConstraints() {
-
-        for (Test test : this.createdTests) {
-            test.setTargetFunction(null);
-        }
-    }
 
 
     public Long getId() {
@@ -161,4 +153,6 @@ public class Function {
     public void setAuthor(IcarusUser author) {
         this.author = author;
     }
+
+
 }

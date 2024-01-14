@@ -94,11 +94,11 @@ public class FunctionalTest extends Test {
         Function targetFunction = new Function();
         targetFunction.setId(model.getTargetFunction());
 
-
         return new FunctionalTestBuilder(
                 model.getName(),
                 model.getHttpMethod())
 
+                .path(model.getPath())
                 .pathVariable(model.getPathVariable())
 
                 .functionURL(model.getFunctionUrl())

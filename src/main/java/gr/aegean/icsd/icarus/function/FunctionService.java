@@ -1,14 +1,13 @@
 package gr.aegean.icsd.icarus.function;
 
-import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.TestRepository;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,52 +28,38 @@ import static gr.aegean.icsd.icarus.IcarusConfiguration.FUNCTION_SOURCES_DIRECTO
 public class FunctionService {
 
 
-    private final TestRepository testRepository;
     private final FunctionRepository functionRepository;
 
 
 
-    public FunctionService(TestRepository testRepository, FunctionRepository repository) {
-        this.testRepository = testRepository;
+    public FunctionService(FunctionRepository repository) {
         this.functionRepository = repository;
     }
 
 
 
-    public Function createFunction(@NotNull Function newFunction, @NotNull MultipartFile functionSource,
-                                   @NotNull @Positive Long testId)
+    public Function createFunction(@NotNull Function newFunction, @NotNull MultipartFile functionSource)
             throws IOException {
 
-        // TODO: See issue #1 at GitHub
-        Test associatedTest = checkIfTestExists(testId);
-
         setFunctionSourceDirectoryAndSourceName(newFunction, functionSource);
-        Function savedFunction = functionRepository.save(newFunction);
-
-        associatedTest.setTargetFunction(savedFunction);
-        testRepository.save(associatedTest);
-
-        return savedFunction;
+        return functionRepository.save(newFunction);
     }
 
 
-    public void deleteFunction(@NotNull @Positive Long testId, @NotNull @Positive Long functionId)
+    public void deleteFunction(@NotNull @Positive Long functionId)
             throws IOException {
-
-        checkIfTestExists(testId);
 
         Function existingFunction = checkIfFunctionExists(functionId);
 
         deleteFunctionSource(existingFunction);
+
         functionRepository.delete(existingFunction);
     }
 
 
-    public void updateFunction(@NotNull @Positive Long testId, @NotNull @Positive Long functionId,
+    public void updateFunction(@NotNull @Positive Long functionId,
                                 FunctionModel model, MultipartFile newFunctionSource)
             throws IOException {
-
-        checkIfTestExists(testId);
 
         Function existingFunction = checkIfFunctionExists(functionId);
 
@@ -95,9 +80,7 @@ public class FunctionService {
     }
 
 
-    public Function getFunction(@NotNull @Positive Long testId, @NotNull @Positive Long functionId) {
-
-        checkIfTestExists(testId);
+    public Function getFunction(@NotNull @Positive Long functionId) {
 
         return checkIfFunctionExists(functionId);
     }
@@ -111,14 +94,6 @@ public class FunctionService {
         }
     }
 
-
-    private Test checkIfTestExists(Long associatedTestId) {
-
-        return testRepository.findTestByIdAndCreator(associatedTestId, UserUtils.getLoggedInUser())
-                .orElseThrow( () -> new EntityNotFoundException(Test.class, associatedTestId));
-    }
-
-
     private Function checkIfFunctionExists(Long functionId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
@@ -126,7 +101,6 @@ public class FunctionService {
         return functionRepository.findFunctionByIdAndAuthor(functionId, loggedInUser)
                 .orElseThrow( () -> new EntityNotFoundException(Function.class, functionId));
     }
-
 
     private void setFunctionSourceDirectoryAndSourceName(@NotNull Function function,
                                                          @NotNull MultipartFile functionSourceFile)
@@ -170,14 +144,19 @@ public class FunctionService {
         Path functionSourceFilePath = Paths.get(functionSourceDirectory + "\\" + functionSourceFileName);
 
         if (!Files.exists(Paths.get(functionSourceDirectory))) {
-            throw new IOException("Function's source directory does not exist");
+            LoggerFactory.getLogger(FunctionService.class).warn("Source code directory" +
+                    " of Function {} does not exist", function.getName());
         }
 
-        if (!Files.exists(functionSourceFilePath)) {
-            throw new IOException("Function's source code does not exist");
+        else if (!Files.exists(functionSourceFilePath)) {
+            LoggerFactory.getLogger(FunctionService.class).warn("Source code of Function {}" +
+                    " does not exist", function.getName());
         }
 
-        Files.delete(functionSourceFilePath);
+        else {
+            Files.delete(functionSourceFilePath);
+        }
+
     }
 
 

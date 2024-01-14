@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.report;
 
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.CreatedBy;

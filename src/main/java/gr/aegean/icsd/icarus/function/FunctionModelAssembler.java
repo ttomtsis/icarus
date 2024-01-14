@@ -26,13 +26,7 @@ public class FunctionModelAssembler
 
     @Override
     @NotNull
-    public FunctionModel toModel(@NotNull Function entity) {
-        throw new UnsupportedOperationException("toModel(entity) in FunctionModelAssembler" +
-                " should not have been invoked");
-    }
-
-
-    public FunctionModel toModel(Function entity, Long testId) {
+    public FunctionModel toModel(Function entity) {
 
         FunctionModel newModel = new FunctionModel();
 
@@ -49,19 +43,20 @@ public class FunctionModelAssembler
 
         newModel.setCreatedTests(tests);
 
-        return addLinks(newModel, testId);
+        return addLinks(newModel);
     }
 
-    public FunctionModel addLinks(FunctionModel model, Long testId) {
+
+    public FunctionModel addLinks(FunctionModel model) {
 
         model.add(linkTo(methodOn(FunctionController.class)
-                .deleteFunction(testId, model.getId())).withRel("Delete"));
+                .deleteFunction(model.getId())).withRel("Delete"));
 
         model.add(linkTo(methodOn(FunctionController.class)
-                .updateFunction(testId, model.getId(), null, null)).withRel("Update"));
+                .updateFunction(model.getId(), null, null)).withRel("Update"));
 
         model.add(linkTo(methodOn(FunctionController.class)
-                .getFunction(testId, model.getId()))
+                .getFunction(model.getId()))
                 .withSelfRel());
 
         return model;

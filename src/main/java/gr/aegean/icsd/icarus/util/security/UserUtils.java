@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.security;
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 

@@ -1,4 +1,4 @@
-package gr.aegean.icsd.icarus.user;
+package gr.aegean.icsd.icarus.icarususer;
 
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.test.Test;

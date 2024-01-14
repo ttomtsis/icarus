@@ -4,10 +4,11 @@ import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -49,12 +50,13 @@ public class Test {
     @Enumerated(EnumType.STRING)
     private RequestMethod httpMethod;
 
-    // TODO: Add validation for path and pathVariable
+    @Pattern(regexp = "^[-a-zA-Z0-9@:%_+.~#?&=/{}]*$", message = "Test's exposed path is invalid")
     private String path;
 
+    @Pattern(regexp = "^\\w*$", message = "Test's exposed path variable is invalid")
     private String pathVariable;
 
-    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
+    @ManyToOne
     @JoinColumn(name = "target_function_id")
     private Function targetFunction;
 

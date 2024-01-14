@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcasemember;
 
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

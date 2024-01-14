@@ -3,12 +3,12 @@ package gr.aegean.icsd.icarus.test;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
-import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
+import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 
@@ -27,11 +29,11 @@ public class TestService {
 
     private final TestRepository repository;
 
-    private final StackDeployer deployer;
+    private final FunctionDeployer deployer;
 
 
     public TestService(TestRepository repository,
-                       StackDeployer deployer) {
+                       FunctionDeployer deployer) {
 
         this.repository = repository;
         this.deployer = deployer;
@@ -51,14 +53,7 @@ public class TestService {
         return repository.save(newTest);
     }
 
-    public Test searchTest(@NotNull @Positive Long testId) {
-
-        return checkIfTestExists(testId);
-    }
-
-    public Test updateTest(@NotNull @Positive Long testId, @NotNull TestModel testModel) {
-
-        Test requestedTest = checkIfTestExists(testId);
+    public void updateTest(@NotNull Test requestedTest, @NotNull TestModel testModel) {
 
         setIfNotNull(requestedTest::setName, testModel.getName());
         setIfNotNull(requestedTest::setDescription, testModel.getDescription());
@@ -90,7 +85,6 @@ public class TestService {
             }
         }
 
-        return requestedTest;
     }
 
     public void deleteTest(@NotNull @Positive Long testId) {
@@ -99,30 +93,34 @@ public class TestService {
         repository.delete(requestedTest);
     }
 
-    public Test executeTest(@NotNull @Positive Long testId) {
-
-        // Test exists
-        Test requestedTest = checkIfTestExists(testId);
+    public void executeTest(@NotNull Test requestedTest) {
 
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
-            throw new InvalidTestConfigurationException(testId, "does not have a Function" +
+            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a Function" +
                     " associated with it");
         }
 
         // Test has at least 1 provider account
         if (requestedTest.getAccountsList().isEmpty()) {
-            throw new InvalidTestConfigurationException(testId, "does not have " +
+            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have " +
                     "any provider accounts associated with it");
         }
 
         // Test has one configuration per provider account
         if (!oneConfigurationPerProviderAccount(requestedTest)) {
-            throw new InvalidTestConfigurationException(testId, "does not have a resource" +
+            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a resource" +
                     " configuration for every provider account");
         }
 
-        return requestedTest;
+        String functionSourceCodeLocation = requestedTest.getTargetFunction().getFunctionSourceDirectory()
+                + "\\" + requestedTest.getTargetFunction().getFunctionSourceFileName();
+
+        if(!Files.exists(Paths.get(functionSourceCodeLocation))) {
+            throw new InvalidTestConfigurationException(requestedTest.getId(), " is unable to find the source code" +
+                    " of it's target Function in the filesystem");
+        }
+
     }
 
 
@@ -165,7 +163,7 @@ public class TestService {
         }
     }
 
-    protected StackDeployer getDeployer() {
+    protected FunctionDeployer getDeployer() {
         return this.deployer;
     }
 

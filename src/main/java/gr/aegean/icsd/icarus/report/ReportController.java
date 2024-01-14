@@ -4,14 +4,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/v0/tests/{testId}/executions/{executionID}/reports")
+@RequestMapping("api/v0/tests/{testId}/executions/reports")
 public class ReportController {
 
 
@@ -25,22 +22,66 @@ public class ReportController {
 
 
 
-    @GetMapping(produces = "application/pdf")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable Long testId, @PathVariable Long executionID) {
+    @GetMapping(produces = "application/pdf", params = "executionID")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long testId, @RequestParam Long executionID) {
 
         Report pdfReport = service.getReport(testId, executionID);
 
+        HttpHeaders headers = createHeaders(pdfReport);
+
+        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
+        }
+
+
+    @GetMapping(produces = "application/pdf", params = "deploymentID")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long testId, @RequestParam String deploymentID) {
+
+        Report pdfReport = service.getReport(testId, deploymentID);
+
+        HttpHeaders headers = createHeaders(pdfReport);
+
+        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
+    }
+
+
+    @PostMapping(produces = "application/pdf", params = "deploymentID")
+    public ResponseEntity<byte[]> regenerateReport(@PathVariable Long testId,
+                                                   @RequestParam String deploymentID) {
+
+        Report pdfReport = service.regenerateReportByID(testId, deploymentID);
+
+        HttpHeaders headers = createHeaders(pdfReport);
+
+        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
+    }
+
+
+    @PostMapping(produces = "application/pdf", params = "executionID")
+    public ResponseEntity<byte[]> regenerateReport(@PathVariable Long testId,
+                                                   @RequestParam Long executionID) {
+
+        Report pdfReport = service.regenerateReportByID(testId, executionID);
+
+        HttpHeaders headers = createHeaders(pdfReport);
+
+        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
+    }
+
+
+
+    private HttpHeaders createHeaders(Report pdfReport) {
+
         HttpHeaders headers = new HttpHeaders();
+
         headers.setContentType(MediaType.APPLICATION_PDF);
 
-        // Here you have to set the actual filename of your pdf
         String filename = pdfReport.getDocumentName();
         headers.setContentDispositionFormData(filename, filename);
 
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
-        return new ResponseEntity<>(pdfReport.getReportDocument(), headers, HttpStatus.OK);
-        }
+        return headers;
+    }
 
 
 }

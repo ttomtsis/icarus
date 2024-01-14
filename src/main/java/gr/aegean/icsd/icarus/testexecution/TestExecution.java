@@ -4,8 +4,8 @@ import gr.aegean.icsd.icarus.report.Report;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
-import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.CreatedBy;
@@ -58,7 +58,7 @@ public class TestExecution {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private TestState state;
+    private ExecutionState state;
 
 
 
@@ -68,10 +68,10 @@ public class TestExecution {
         this.startDate = startDate;
         this.deploymentId = deploymentId;
 
-        this.state = TestState.CREATED;
+        this.state = ExecutionState.CREATED;
     }
 
-    public TestExecution() {this.state = TestState.CREATED;}
+    public TestExecution() {this.state = ExecutionState.CREATED;}
 
 
 
@@ -130,11 +130,11 @@ public class TestExecution {
         return metricResults;
     }
 
-    public TestState getState() {
+    public ExecutionState getState() {
         return state;
     }
 
-    public void setState(TestState state) {
+    public void setState(ExecutionState state) {
         this.state = state;
     }
 

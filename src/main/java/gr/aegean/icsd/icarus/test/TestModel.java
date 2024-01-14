@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.test;
 
-import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -22,7 +22,7 @@ public class TestModel extends RepresentationModel<TestModel> {
     private  Set<Long> accountsList;
     private Set<Long> resourceConfigurations;
     private String authorUsername;
-    private TestState state;
+    private ExecutionState state;
 
 
 
@@ -127,11 +127,11 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.authorUsername = authorUsername;
     }
 
-    public TestState getState() {
+    public ExecutionState getState() {
         return state;
     }
 
-    public void setState(TestState state) {
+    public void setState(ExecutionState state) {
         this.state = state;
     }
 

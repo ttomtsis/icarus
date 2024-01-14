@@ -19,10 +19,9 @@ public class SpringExceptionHandler {
 
         StringBuilder message = new StringBuilder();
 
-        ex.getConstraintViolations().forEach(constraintViolation -> {
-            message.append(constraintViolation.getPropertyPath()).append(" ");
-            message.append(constraintViolation.getMessage()).append("\n");
-        });
+        ex.getConstraintViolations().forEach(constraintViolation ->
+            message.append(constraintViolation.getMessage()).append("\n")
+        );
 
         return message.toString();
     }

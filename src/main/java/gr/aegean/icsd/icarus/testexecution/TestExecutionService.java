@@ -9,12 +9,13 @@ import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
-import gr.aegean.icsd.icarus.user.IcarusUser;
-import gr.aegean.icsd.icarus.util.enums.TestState;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
-import gr.aegean.icsd.icarus.util.terraform.StackDeployer;
+import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,7 +43,7 @@ public class TestExecutionService {
     private final MetricResultRepository metricResultRepository;
     private final TestCaseResultRepository testCaseResultRepository;
 
-    private final StackDeployer deployer;
+    private final FunctionDeployer deployer;
 
     private final ReportService reportService;
     private final ReportRepository reportRepository;
@@ -52,7 +53,7 @@ public class TestExecutionService {
     public TestExecutionService(TestExecutionRepository repository, TestRepository testRepository,
                                 MetricResultRepository metricResultRepository,
                                 TestCaseResultRepository testCaseResultRepository,
-                                StackDeployer deployer, ReportService reportService,
+                                FunctionDeployer deployer, ReportService reportService,
                                 ReportRepository reportRepository) {
 
         this.testExecutionRepository = repository;
@@ -99,24 +100,36 @@ public class TestExecutionService {
     }
 
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void produceReport(@NotNull TestExecution testExecution) {
 
         LoggerFactory.getLogger(TestExecutionService.class).warn
                 ("Producing report document for deployment: {}", testExecution.getDeploymentId());
 
-        if (testExecution.getTestCaseResults().isEmpty()) {
-            @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
-            reportRepository.save(metricResultsReport);
-        }
+        try {
 
-        else if (testExecution.getMetricResults().isEmpty()) {
-            @NotNull Report testCaseResultReport = reportService.createFunctionalTestReport(testExecution);
-            reportRepository.save(testCaseResultReport);
-        }
+            if (testExecution.getTestCaseResults().isEmpty()) {
+                @NotNull Report metricResultsReport = reportService.createPerformanceTestReport(testExecution);
+                reportRepository.save(metricResultsReport);
 
-        else {
-            throw new IllegalArgumentException("The test execution does not contain any " +
-                    "results in order to produce a report");
+            } else if (testExecution.getMetricResults().isEmpty()) {
+                @NotNull Report testCaseResultReport = reportService.createFunctionalTestReport(testExecution);
+                reportRepository.save(testCaseResultReport);
+
+            } else {
+                throw new ReportGenerationException("The test execution does not contain any " +
+                        "results in order to produce a report");
+            }
+        }
+        catch (RuntimeException ex) {
+            LoggerFactory.getLogger(TestExecutionService.class).error("Failed to generate the report for" +
+                    " Execution with deployment ID: {}", testExecution.getDeploymentId());
+
+            testExecution.setState(ExecutionState.REPORT_FAILED);
+            testExecutionRepository.save(testExecution);
+
+            throw new ReportGenerationException("Failed to generate Report for Execution with deployment ID: "
+                    + testExecution.getDeploymentId(), ex);
         }
 
     }
@@ -164,10 +177,10 @@ public class TestExecutionService {
 
     public void abortTestExecution(@NotNull TestExecution requestedTestExecution, @NotBlank String deploymentId) {
 
-        setExecutionState(requestedTestExecution, TestState.ERROR);
+        setExecutionState(requestedTestExecution, ExecutionState.ERROR);
 
         try {
-            deployer.deleteStack(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
+            deployer.deleteInfrastructure(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
         }
         catch (RuntimeException ex) {
             throw new TestExecutionFailedException(ex);
@@ -177,12 +190,12 @@ public class TestExecutionService {
 
     public void finalizeTestExecution(@NotNull TestExecution requestedTestExecution, @NotBlank String deploymentId) {
 
-        deployer.deleteStack(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
-        setExecutionState(requestedTestExecution, TestState.FINISHED);
+        deployer.deleteInfrastructure(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
+        setExecutionState(requestedTestExecution, ExecutionState.FINISHED);
     }
 
 
-    public void setExecutionState(@NotNull TestExecution testExecution, @NotNull TestState testState) {
+    public void setExecutionState(@NotNull TestExecution testExecution, @NotNull ExecutionState testState) {
 
         testExecution.setState(testState);
         testExecutionRepository.save(testExecution);

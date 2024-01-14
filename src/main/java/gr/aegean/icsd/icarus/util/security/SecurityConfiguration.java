@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.security;
 
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.IcarusConfigurationException;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,6 +96,7 @@ public class SecurityConfiguration {
 
                         .requestMatchers("/api/v0/users/{username}/accounts/**").authenticated()
                         .requestMatchers("/api/v0/tests/**").authenticated()
+                        .requestMatchers("/api/v0/functions/**").authenticated()
                         .requestMatchers("/api/v0/users/**").authenticated()
                 )
 

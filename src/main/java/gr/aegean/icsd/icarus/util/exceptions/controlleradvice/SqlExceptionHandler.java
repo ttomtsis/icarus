@@ -33,11 +33,6 @@ public class SqlExceptionHandler {
         } else if (errorMessage.contains("not-null property references a null or transient value")) {
             responseMessage += "A required field is null.";
 
-        } else if (errorMessage.contains("could not execute statement")) {
-            responseMessage += "There was a problem executing a statement.";
-            LoggerFactory.getLogger(SqlExceptionHandler.class).error(ex.getMessage());
-            return new ResponseEntity<>(responseMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-
         } else {
             responseMessage += errorMessage;
             LoggerFactory.getLogger(SqlExceptionHandler.class).error("SQL Error occurred: {}", responseMessage);

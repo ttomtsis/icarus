@@ -1165,7 +1165,7 @@ where public.function.id = ?]]></xml-property>
                     <structure>
                         <property name="position">9</property>
                         <property name="name">pass</property>
-                        <property name="dataType">integer</property>
+                        <property name="dataType">string</property>
                     </structure>
                 </list-property>
             </structure>
@@ -1231,8 +1231,8 @@ where public.function.id = ?]]></xml-property>
                     <property name="position">9</property>
                     <property name="name">pass</property>
                     <property name="nativeName">pass</property>
-                    <property name="dataType">integer</property>
-                    <property name="nativeDataType">-7</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[SELECT public.test_case_member.parent_test_case_id,
@@ -1243,7 +1243,10 @@ where public.function.id = ?]]></xml-property>
        public.test_case_member.request_path_variable_value,
        public.test_case_result.actual_response_code,
        public.test_case_result.actual_response_body,
-       public.test_case_result.pass
+       CASE
+           WHEN public.test_case_result.pass THEN 'PASS'
+           ELSE 'FAIL'
+       END AS pass
 FROM public.functional_test
 INNER JOIN public.test_case ON public.functional_test.id = public.test_case.parent_test_id
 INNER JOIN public.test_case_member ON public.test_case.id = public.test_case_member.parent_test_case_id
@@ -1837,9 +1840,9 @@ WHERE public.functional_test.id = ?;
     rc.id, 
     rc.function_runtime, 
     rc.provider_platform,
-    (SELECT STRING_AGG(CAST(memory_configurations AS TEXT), ',') FROM resource_configuration_memory rcm WHERE rcm.id = rc.id) as memory_configurations,
-    (SELECT STRING_AGG(CAST(cpu_configurations AS TEXT), ',') FROM resource_configuration_cpu rcc WHERE rcc.id = rc.id) as cpu_configurations,
-    (SELECT STRING_AGG(CAST(regions AS TEXT), ',') FROM resource_configuration_regions rcr WHERE rcr.id = rc.id) as regions
+    (SELECT STRING_AGG(CAST(memory_configurations AS TEXT), ', ') FROM resource_configuration_memory rcm WHERE rcm.id = rc.id) as memory_configurations,
+    (SELECT STRING_AGG(CAST(cpu_configurations AS TEXT), ', ') FROM resource_configuration_cpu rcc WHERE rcc.id = rc.id) as cpu_configurations,
+    (SELECT STRING_AGG(CAST(regions AS TEXT), ', ') FROM resource_configuration_regions rcr WHERE rcr.id = rc.id) as regions
 FROM 
     resource_configuration rc
 WHERE 
@@ -1848,23 +1851,6 @@ WHERE
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
-  <DataSetParameters>
-    <parameter>
-      <design:ParameterDefinition>
-        <design:inOutMode>In</design:inOutMode>
-        <design:attributes>
-          <design:identifier>
-            <design:name></design:name>
-            <design:position>1</design:position>
-          </design:identifier>
-          <design:nativeDataTypeCode>-5</design:nativeDataTypeCode>
-          <design:precision>0</design:precision>
-          <design:scale>0</design:scale>
-          <design:nullability>Unknown</design:nullability>
-        </design:attributes>
-      </design:ParameterDefinition>
-    </parameter>
-  </DataSetParameters>
   <design:ResultSets derivedMetaData="true">
     <design:resultSetDefinitions>
       <design:resultSetColumns>
@@ -2301,25 +2287,21 @@ WHERE
             <property name="textUnderline">none</property>
             <text-property name="text">Test details:</text-property>
         </label>
-        <grid id="135">
-            <column id="136"/>
-            <column id="137">
-                <property name="textAlign">center</property>
+        <grid id="715">
+            <property name="width">7.958333333333333in</property>
+            <column id="716">
+                <property name="fontWeight">bold</property>
+                <property name="color">navy</property>
+                <property name="verticalAlign">middle</property>
+                <property name="width">1.625in</property>
             </column>
-            <column id="138"/>
-            <column id="139">
+            <column id="717">
                 <property name="textAlign">center</property>
+                <property name="verticalAlign">middle</property>
+                <property name="width">6.333333333333333in</property>
             </column>
-            <row id="140">
-                <property name="borderBottomStyle">solid</property>
-                <property name="borderBottomWidth">medium</property>
-                <property name="borderLeftStyle">solid</property>
-                <property name="borderLeftWidth">medium</property>
-                <property name="borderRightStyle">solid</property>
-                <property name="borderRightWidth">medium</property>
-                <property name="borderTopStyle">solid</property>
-                <property name="borderTopWidth">medium</property>
-                <cell id="141">
+            <row id="718">
+                <cell id="719">
                     <property name="borderBottomStyle">solid</property>
                     <property name="borderBottomWidth">medium</property>
                     <property name="borderLeftStyle">solid</property>
@@ -2328,13 +2310,11 @@ WHERE
                     <property name="borderRightWidth">medium</property>
                     <property name="borderTopStyle">solid</property>
                     <property name="borderTopWidth">medium</property>
-                    <label id="142">
-                        <property name="fontWeight">bold</property>
-                        <property name="color">#000080</property>
+                    <label id="736">
                         <text-property name="text">Test ID:</text-property>
                     </label>
                 </cell>
-                <cell id="143">
+                <cell id="720">
                     <property name="borderBottomStyle">solid</property>
                     <property name="borderBottomWidth">medium</property>
                     <property name="borderLeftStyle">solid</property>
@@ -2343,7 +2323,7 @@ WHERE
                     <property name="borderRightWidth">medium</property>
                     <property name="borderTopStyle">solid</property>
                     <property name="borderTopWidth">medium</property>
-                    <data id="167">
+                    <data id="742">
                         <property name="dataSet">Tests</property>
                         <list-property name="boundDataColumns">
                             <structure>
@@ -2356,7 +2336,9 @@ WHERE
                         <property name="resultSetColumn">id</property>
                     </data>
                 </cell>
-                <cell id="145">
+            </row>
+            <row id="721">
+                <cell id="722">
                     <property name="borderBottomStyle">solid</property>
                     <property name="borderBottomWidth">medium</property>
                     <property name="borderLeftStyle">solid</property>
@@ -2365,13 +2347,11 @@ WHERE
                     <property name="borderRightWidth">medium</property>
                     <property name="borderTopStyle">solid</property>
                     <property name="borderTopWidth">medium</property>
-                    <label id="146">
-                        <property name="fontWeight">bold</property>
-                        <property name="color">#000080</property>
-                        <text-property name="text">Exposed path:</text-property>
+                    <label id="737">
+                        <text-property name="text">Test Name:</text-property>
                     </label>
                 </cell>
-                <cell id="147">
+                <cell id="723">
                     <property name="borderBottomStyle">solid</property>
                     <property name="borderBottomWidth">medium</property>
                     <property name="borderLeftStyle">solid</property>
@@ -2380,7 +2360,118 @@ WHERE
                     <property name="borderRightWidth">medium</property>
                     <property name="borderTopStyle">solid</property>
                     <property name="borderTopWidth">medium</property>
-                    <data id="172">
+                    <data id="743">
+                        <property name="dataSet">Tests</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">name</property>
+                                <text-property name="displayName">name</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["name"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">name</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="724">
+                <cell id="725">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">medium</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">medium</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">medium</property>
+                    <label id="738">
+                        <text-property name="text">Test Description:</text-property>
+                    </label>
+                </cell>
+                <cell id="726">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">medium</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">medium</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">medium</property>
+                    <data id="744">
+                        <property name="dataSet">Tests</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">description</property>
+                                <text-property name="displayName">description</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["description"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">description</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="727">
+                <cell id="728">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">medium</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">medium</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">medium</property>
+                    <label id="739">
+                        <text-property name="text">Http Method:</text-property>
+                    </label>
+                </cell>
+                <cell id="729">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">medium</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">medium</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">medium</property>
+                    <data id="745">
+                        <property name="dataSet">Tests</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">http_method</property>
+                                <text-property name="displayName">http_method</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["http_method"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">http_method</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="730">
+                <cell id="731">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">medium</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">medium</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">medium</property>
+                    <label id="740">
+                        <text-property name="text">Exposed Path:</text-property>
+                    </label>
+                </cell>
+                <cell id="732">
+                    <property name="borderBottomStyle">solid</property>
+                    <property name="borderBottomWidth">medium</property>
+                    <property name="borderLeftStyle">solid</property>
+                    <property name="borderLeftWidth">medium</property>
+                    <property name="borderRightStyle">solid</property>
+                    <property name="borderRightWidth">medium</property>
+                    <property name="borderTopStyle">solid</property>
+                    <property name="borderTopWidth">medium</property>
+                    <data id="746">
                         <property name="dataSet">Tests</property>
                         <list-property name="boundDataColumns">
                             <structure>
@@ -2394,16 +2485,8 @@ WHERE
                     </data>
                 </cell>
             </row>
-            <row id="149">
-                <property name="borderBottomStyle">solid</property>
-                <property name="borderBottomWidth">medium</property>
-                <property name="borderLeftStyle">solid</property>
-                <property name="borderLeftWidth">medium</property>
-                <property name="borderRightStyle">solid</property>
-                <property name="borderRightWidth">medium</property>
-                <property name="borderTopStyle">solid</property>
-                <property name="borderTopWidth">medium</property>
-                <cell id="150">
+            <row id="733">
+                <cell id="734">
                     <property name="borderBottomStyle">solid</property>
                     <property name="borderBottomWidth">medium</property>
                     <property name="borderLeftStyle">solid</property>
@@ -2412,13 +2495,11 @@ WHERE
                     <property name="borderRightWidth">medium</property>
                     <property name="borderTopStyle">solid</property>
                     <property name="borderTopWidth">medium</property>
-                    <label id="151">
-                        <property name="fontWeight">bold</property>
-                        <property name="color">#000080</property>
-                        <text-property name="text">Test name:</text-property>
+                    <label id="741">
+                        <text-property name="text">Exposed Path Variable:</text-property>
                     </label>
                 </cell>
-                <cell id="152">
+                <cell id="735">
                     <property name="borderBottomStyle">solid</property>
                     <property name="borderBottomWidth">medium</property>
                     <property name="borderLeftStyle">solid</property>
@@ -2427,44 +2508,7 @@ WHERE
                     <property name="borderRightWidth">medium</property>
                     <property name="borderTopStyle">solid</property>
                     <property name="borderTopWidth">medium</property>
-                    <data id="168">
-                        <property name="dataSet">Tests</property>
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">name</property>
-                                <text-property name="displayName">name</text-property>
-                                <expression name="expression" type="javascript">dataSetRow["name"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
-                        <property name="resultSetColumn">name</property>
-                    </data>
-                </cell>
-                <cell id="154">
-                    <property name="borderBottomStyle">solid</property>
-                    <property name="borderBottomWidth">medium</property>
-                    <property name="borderLeftStyle">solid</property>
-                    <property name="borderLeftWidth">medium</property>
-                    <property name="borderRightStyle">solid</property>
-                    <property name="borderRightWidth">medium</property>
-                    <property name="borderTopStyle">solid</property>
-                    <property name="borderTopWidth">medium</property>
-                    <label id="155">
-                        <property name="fontWeight">bold</property>
-                        <property name="color">#000080</property>
-                        <text-property name="text">Exposed path variable:</text-property>
-                    </label>
-                </cell>
-                <cell id="156">
-                    <property name="borderBottomStyle">solid</property>
-                    <property name="borderBottomWidth">medium</property>
-                    <property name="borderLeftStyle">solid</property>
-                    <property name="borderLeftWidth">medium</property>
-                    <property name="borderRightStyle">solid</property>
-                    <property name="borderRightWidth">medium</property>
-                    <property name="borderTopStyle">solid</property>
-                    <property name="borderTopWidth">medium</property>
-                    <data id="171">
+                    <data id="747">
                         <property name="dataSet">Tests</property>
                         <list-property name="boundDataColumns">
                             <structure>
@@ -2475,90 +2519,6 @@ WHERE
                             </structure>
                         </list-property>
                         <property name="resultSetColumn">path_variable</property>
-                    </data>
-                </cell>
-            </row>
-            <row id="158">
-                <property name="borderBottomStyle">solid</property>
-                <property name="borderBottomWidth">medium</property>
-                <property name="borderLeftStyle">solid</property>
-                <property name="borderLeftWidth">medium</property>
-                <property name="borderRightStyle">solid</property>
-                <property name="borderRightWidth">medium</property>
-                <property name="borderTopStyle">solid</property>
-                <property name="borderTopWidth">medium</property>
-                <cell id="159">
-                    <property name="borderBottomStyle">solid</property>
-                    <property name="borderBottomWidth">medium</property>
-                    <property name="borderLeftStyle">solid</property>
-                    <property name="borderLeftWidth">medium</property>
-                    <property name="borderRightStyle">solid</property>
-                    <property name="borderRightWidth">medium</property>
-                    <property name="borderTopStyle">solid</property>
-                    <property name="borderTopWidth">medium</property>
-                    <label id="160">
-                        <property name="fontWeight">bold</property>
-                        <property name="color">#000080</property>
-                        <text-property name="text">Test description:</text-property>
-                    </label>
-                </cell>
-                <cell id="161">
-                    <property name="borderBottomStyle">solid</property>
-                    <property name="borderBottomWidth">medium</property>
-                    <property name="borderLeftStyle">solid</property>
-                    <property name="borderLeftWidth">medium</property>
-                    <property name="borderRightStyle">solid</property>
-                    <property name="borderRightWidth">medium</property>
-                    <property name="borderTopStyle">solid</property>
-                    <property name="borderTopWidth">medium</property>
-                    <data id="169">
-                        <property name="dataSet">Tests</property>
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">description</property>
-                                <text-property name="displayName">description</text-property>
-                                <expression name="expression" type="javascript">dataSetRow["description"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
-                        <property name="resultSetColumn">description</property>
-                    </data>
-                </cell>
-                <cell id="163">
-                    <property name="borderBottomStyle">solid</property>
-                    <property name="borderBottomWidth">medium</property>
-                    <property name="borderLeftStyle">solid</property>
-                    <property name="borderLeftWidth">medium</property>
-                    <property name="borderRightStyle">solid</property>
-                    <property name="borderRightWidth">medium</property>
-                    <property name="borderTopStyle">solid</property>
-                    <property name="borderTopWidth">medium</property>
-                    <label id="164">
-                        <property name="fontWeight">bold</property>
-                        <property name="color">#000080</property>
-                        <text-property name="text">Http Method:</text-property>
-                    </label>
-                </cell>
-                <cell id="165">
-                    <property name="borderBottomStyle">solid</property>
-                    <property name="borderBottomWidth">medium</property>
-                    <property name="borderLeftStyle">solid</property>
-                    <property name="borderLeftWidth">medium</property>
-                    <property name="borderRightStyle">solid</property>
-                    <property name="borderRightWidth">medium</property>
-                    <property name="borderTopStyle">solid</property>
-                    <property name="borderTopWidth">medium</property>
-                    <data id="170">
-                        <property name="dataSet">Tests</property>
-                        <list-property name="boundDataColumns">
-                            <structure>
-                                <property name="name">http_method</property>
-                                <text-property name="displayName">http_method</text-property>
-                                <expression name="expression" type="javascript">dataSetRow["http_method"]</expression>
-                                <property name="dataType">string</property>
-                            </structure>
-                        </list-property>
-                        <property name="resultSetColumn">http_method</property>
                     </data>
                 </cell>
             </row>
@@ -2703,6 +2663,7 @@ WHERE
             <detail>
                 <row id="689">
                     <property name="textAlign">center</property>
+                    <property name="verticalAlign">middle</property>
                     <cell id="690">
                         <property name="borderBottomStyle">solid</property>
                         <property name="borderBottomWidth">medium</property>
@@ -2800,8 +2761,16 @@ WHERE
             <property name="borderRightWidth">medium</property>
             <property name="borderTopStyle">solid</property>
             <property name="borderTopWidth">medium</property>
-            <column id="391"/>
-            <column id="392"/>
+            <property name="width">7.958333333333333in</property>
+            <column id="391">
+                <property name="verticalAlign">middle</property>
+                <property name="width">1in</property>
+            </column>
+            <column id="392">
+                <property name="textAlign">center</property>
+                <property name="verticalAlign">middle</property>
+                <property name="width">6.958333333333333in</property>
+            </column>
             <row id="393">
                 <property name="borderBottomStyle">solid</property>
                 <property name="borderBottomWidth">medium</property>
@@ -3049,7 +3018,8 @@ WHERE
                     <property name="name">pass</property>
                     <text-property name="displayName">pass</text-property>
                     <expression name="expression" type="javascript">dataSetRow["pass"]</expression>
-                    <property name="dataType">integer</property>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
                 </structure>
             </list-property>
             <column id="466"/>

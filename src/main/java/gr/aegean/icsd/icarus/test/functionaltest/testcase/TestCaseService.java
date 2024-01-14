@@ -1,9 +1,8 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcase;
 
-import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
-import gr.aegean.icsd.icarus.user.IcarusUser;
+import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTestRepository;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
@@ -23,11 +22,11 @@ public class TestCaseService {
 
     
     private final TestCaseRepository testCaseRepository;
-    private final TestRepository testRepository;
+    private final FunctionalTestRepository testRepository;
 
 
 
-    public TestCaseService(TestCaseRepository repository, TestRepository testRepository) {
+    public TestCaseService(TestCaseRepository repository, FunctionalTestRepository testRepository) {
         this.testCaseRepository = repository;
         this.testRepository = testRepository;
     }
@@ -42,6 +41,7 @@ public class TestCaseService {
         return testCaseRepository.findAllByParentTestAndCreator(parentTest, loggedInUser, pageable);
     }
 
+
     public TestCase createTestCase(@NotNull TestCase newTestCase, @NotNull @Positive Long testId) {
 
         FunctionalTest parentTest = checkIfTestExists(testId);
@@ -49,6 +49,7 @@ public class TestCaseService {
         newTestCase.setParentTest(parentTest);
         return testCaseRepository.save(newTestCase);
     }
+
 
     public void updateTestCase(@NotNull @Positive Long testId, @NotNull @Positive Long testCaseId,
                                @NotNull TestCaseModel model) {
@@ -61,12 +62,13 @@ public class TestCaseService {
             existingTestCase.setName(model.getName());
         }
 
-        if (StringUtils.isNotBlank(model.getDescription())) {
+        if (model.getDescription() != null) {
             existingTestCase.setDescription(model.getDescription());
         }
 
         testCaseRepository.save(existingTestCase);
     }
+
 
     public void deleteTestCase(@NotNull @Positive Long testId, @NotNull @Positive Long testCaseId) {
 
@@ -78,11 +80,12 @@ public class TestCaseService {
     }
 
 
+
     private FunctionalTest checkIfTestExists(@NotNull @Positive Long parentTestId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
-        return (FunctionalTest) testRepository.findTestByIdAndCreator(parentTestId, loggedInUser)
-                .orElseThrow( () -> new EntityNotFoundException(Test.class, parentTestId));
+        return testRepository.findFunctionalTestByIdAndCreator(parentTestId, loggedInUser)
+                .orElseThrow( () -> new EntityNotFoundException(FunctionalTest.class, parentTestId));
     }
 
     private TestCase checkIfTestCaseExists(@NotNull @Positive Long testCaseId) {
