@@ -1,14 +1,13 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
-import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
-import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
@@ -213,7 +212,7 @@ public class FunctionalTestService extends TestService {
     private FunctionalTest checkIfFunctionalTestExists(Long testId) {
 
         return repository.findFunctionalTestByIdAndCreator(testId, UserUtils.getLoggedInUser())
-                .orElseThrow(() -> new EntityNotFoundException(PerformanceTest.class, testId));
+                .orElseThrow(() -> new EntityNotFoundException(FunctionalTest.class, testId));
     }
 
 
