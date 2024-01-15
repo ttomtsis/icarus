@@ -29,6 +29,13 @@
 
     <dependencies>
 
+        <!--> SLF4J <!/-->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.20.0</version> <!-- replace with your desired version -->
+        </dependency>
+
         <!--> ###  - Spring Boot Starters - ###<!/-->
 
         <!--> Spring Boot Data JPA<!/-->
@@ -70,14 +77,7 @@
 
         <!--> ###  - Database Drivers - ###<!/-->
 
-        <!--> H2 </!-->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!--> PostgreSQL </!-->
+        <!--> PostgresSQL </!-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -94,6 +94,33 @@
             <groupId>com.innoventsolutions.birt.runtime</groupId>
             <artifactId>org.eclipse.birt.runtime_4.8.0-20180626</artifactId>
             <version>4.8.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Eclipse JGit -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>6.8.0.202311291450-r</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 

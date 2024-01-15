@@ -9,7 +9,7 @@ import gr.aegean.icsd.icarus.util.aws.AwsMetricRequest;
 import gr.aegean.icsd.icarus.util.enums.Metric;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.async.MetricsTimeoutException;
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.gcp.GcpMetricRequest;
 import gr.aegean.icsd.icarus.util.jmeter.LoadTest;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
@@ -219,7 +219,7 @@ public class MetricQueryEngine {
 
         }
         catch (IOException ex) {
-            throw new TestExecutionFailedException(ex);
+            throw new AsyncExecutionFailedException(ex);
         }
 
     }
@@ -238,7 +238,7 @@ public class MetricQueryEngine {
         try {
             Thread.sleep(minutes * 60000L);
         } catch (InterruptedException e) {
-            throw new TestExecutionFailedException(e);
+            throw new AsyncExecutionFailedException(e);
         }
     }
 
@@ -248,7 +248,7 @@ public class MetricQueryEngine {
             try {
                 thread.join();
             } catch (InterruptedException e) {
-                throw new TestExecutionFailedException(e);
+                throw new AsyncExecutionFailedException(e);
             }
         }
     }

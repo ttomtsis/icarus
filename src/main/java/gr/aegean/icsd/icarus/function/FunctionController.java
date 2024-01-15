@@ -44,7 +44,8 @@ public class FunctionController {
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<FunctionModel> createFunction(@RequestPart("functionMetadata") String textModel,
-                                                        @RequestPart("functionSource") MultipartFile functionSource) {
+                                                        @RequestPart(value = "functionSource", required = false)
+                                                        MultipartFile functionSource) {
 
         FunctionModel functionModel = serializeToModel(textModel);
 

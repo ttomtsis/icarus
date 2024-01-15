@@ -1,6 +1,6 @@
 package gr.aegean.icsd.icarus.util.jmeter;
 
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import io.micrometer.common.util.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.config.gui.ArgumentsPanel;
@@ -245,7 +245,7 @@ public class LoadTest {
     public void runTest() {
 
         if (testPlanTree.isEmpty()) {
-            throw new TestExecutionFailedException("Load Test failed to execute," +
+            throw new AsyncExecutionFailedException("Load Test failed to execute," +
                     " no load profiles are associated with it");
         }
 

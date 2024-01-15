@@ -1,13 +1,13 @@
 package gr.aegean.icsd.icarus.test.functionaltest.testcasemember;
 
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTest;
 import gr.aegean.icsd.icarus.test.functionaltest.FunctionalTestRepository;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
-import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestCaseMemberConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -67,7 +67,8 @@ public class TestCaseMemberService {
         if (StringUtils.isBlank(parentTest.getPath()) &&
                 StringUtils.isNotBlank(newTestCaseMember.getRequestPathVariableValue())) {
 
-            throw new InvalidTestCaseMemberConfigurationException("A test case member cannot set a path variable " +
+            throw new InvalidEntityConfigurationException(TestCaseMember.class,
+                    "A test case member cannot set a path variable " +
                     " if the parent Test does not expose a path");
         }
 
@@ -97,7 +98,7 @@ public class TestCaseMemberService {
         if (StringUtils.isBlank(parentTest.getPath()) &&
                 StringUtils.isNotBlank(model.getRequestPathVariableValue())) {
 
-            throw new InvalidTestCaseMemberConfigurationException("A test case member cannot set a path variable " +
+            throw new InvalidEntityConfigurationException(TestCaseMember.class, "A test case member cannot set a path variable " +
                     " if the parent Test does not expose a path");
         }
         testCaseMemberRepository.save(existingTestCaseMember);

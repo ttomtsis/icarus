@@ -55,13 +55,25 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+    hikari:
+      initialization-fail-timeout: 0
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
+
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+
+
+
+server:
+  shutdown: graceful
 
 
 
 logging:
   level:
     org.apache.jmeter: ERROR
+
