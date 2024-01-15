@@ -5,7 +5,7 @@ import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -122,7 +122,8 @@ public class FunctionalTest extends Test {
         }
 
         if (totalAwsConfigurations > 1 || totalGcpConfigurations > 1) {
-            throw new InvalidTestConfigurationException("A Functional Test may only contain one type of " +
+            throw new InvalidEntityConfigurationException(FunctionalTest.class,
+                    "A Functional Test may only contain one type of " +
                     "resource configuration per platform");
         }
     }

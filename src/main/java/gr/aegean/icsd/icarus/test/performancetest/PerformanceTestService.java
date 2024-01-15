@@ -1,14 +1,14 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
-import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
@@ -57,13 +57,13 @@ public class PerformanceTestService extends TestService {
         if (!StringUtils.isBlank(newTest.getPathVariableValue()) &&
                 StringUtils.isBlank(newTest.getPath())) {
 
-            throw new InvalidTestConfigurationException
-                    ("Cannot set a Path variable value if the test does not expose a path");
+            throw new InvalidEntityConfigurationException
+                    (PerformanceTest.class, "Cannot set a Path variable value if the test does not expose a path");
         }
 
         if (newTest.getChosenMetrics() == null) {
-            throw new InvalidTestConfigurationException
-                    ("A Performance test must utilize at least 1 Metric");
+            throw new InvalidEntityConfigurationException
+                    (PerformanceTest.class, "A Performance test must utilize at least 1 Metric");
         }
 
         return (PerformanceTest) super.createTest(newTest);
@@ -94,12 +94,14 @@ public class PerformanceTestService extends TestService {
         super.executeTest(requestedTest);
 
         if (requestedTest.getLoadProfiles().isEmpty()) {
-            throw new InvalidTestConfigurationException(testId, " does not have any Load Profiles" +
+            throw new InvalidEntityConfigurationException(PerformanceTest.class, testId,
+                    " does not have any Load Profiles" +
                     " associated with it");
         }
 
         if (requestedTest.getChosenMetrics().isEmpty()) {
-            throw new InvalidTestConfigurationException(testId, " does not have any Metrics" +
+            throw new InvalidEntityConfigurationException(PerformanceTest.class, testId,
+                    " does not have any Metrics" +
                     " associated with it");
         }
 

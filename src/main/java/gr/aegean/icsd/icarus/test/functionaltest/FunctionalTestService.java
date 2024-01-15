@@ -11,7 +11,7 @@ import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
@@ -84,7 +84,7 @@ public class FunctionalTestService extends TestService {
 
         // Has at least 1 TestCase
         if (requestedTest.getTestCases().isEmpty()) {
-            throw new InvalidTestConfigurationException(testId, "does not have any Test Cases" +
+            throw new InvalidEntityConfigurationException(FunctionalTest.class, testId, "does not have any Test Cases" +
                     "associated with it");
         }
 
@@ -100,7 +100,8 @@ public class FunctionalTestService extends TestService {
         }
 
         if (!atLeastOneTestCaseMember) {
-            throw new InvalidTestConfigurationException(testId, "does not have any Test Case Members " +
+            throw new InvalidEntityConfigurationException(FunctionalTest.class, testId,
+                    "does not have any Test Case Members " +
                     "associated with it");
         }
 

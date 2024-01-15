@@ -1,11 +1,11 @@
 package gr.aegean.icsd.icarus.resourceconfiguration;
 
-import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidResourceConfigurationConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import jakarta.persistence.*;
@@ -113,13 +113,15 @@ public class ResourceConfiguration {
 
         if (this.providerPlatform.equals(Platform.AWS) && !this.cpuConfigurations.isEmpty()) {
 
-            throw new InvalidResourceConfigurationConfigurationException("AWS does not support CPU configurations");
+            throw new InvalidEntityConfigurationException(ResourceConfiguration.class,
+                    "AWS does not support CPU configurations");
         }
 
         for (Integer cpuConfiguration : this.cpuConfigurations) {
 
             if (cpuConfiguration < GCP_MIN_CPU || cpuConfiguration > GCP_MAX_CPU) {
-                throw new InvalidResourceConfigurationConfigurationException("GCP CPU configurations can only range from " +
+                throw new InvalidEntityConfigurationException(ResourceConfiguration.class,
+                        "GCP CPU configurations can only range from " +
                         GCP_MIN_CPU + " to " + GCP_MAX_CPU);
             }
         }
@@ -128,8 +130,9 @@ public class ResourceConfiguration {
     private void validateRegionsList() {
 
         if (this.regions.isEmpty()) {
-            throw new InvalidResourceConfigurationConfigurationException
-                    ("At least one region must be provided per resource configuration");
+            throw new InvalidEntityConfigurationException
+                    (ResourceConfiguration.class,
+                            "At least one region must be provided per resource configuration");
         }
 
         for (String region : this.regions) {
@@ -140,8 +143,9 @@ public class ResourceConfiguration {
                     GcpRegion.valueOf(region);
                 }
                 catch (IllegalArgumentException ex) {
-                    throw new InvalidResourceConfigurationConfigurationException
-                            ("The provided region: " + region + " is not a valid GCP region");
+                    throw new InvalidEntityConfigurationException
+                            (ResourceConfiguration.class,
+                                    "The provided region: " + region + " is not a valid GCP region");
                 }
             }
 
@@ -151,8 +155,9 @@ public class ResourceConfiguration {
                     AwsRegion.valueOf(region);
                 }
                 catch (IllegalArgumentException ex) {
-                    throw new InvalidResourceConfigurationConfigurationException
-                            ("The provided region: " + region + " is not a valid AWS region");
+                    throw new InvalidEntityConfigurationException
+                            (ResourceConfiguration.class,
+                                    "The provided region: " + region + " is not a valid AWS region");
                 }
             }
 
@@ -167,8 +172,9 @@ public class ResourceConfiguration {
                 GcfRuntime.valueOf(functionRuntime);
             }
             catch (IllegalArgumentException ex) {
-                throw new InvalidResourceConfigurationConfigurationException
-                        ("The provided function runtime: " + functionRuntime + " is not a valid GCF runtime");
+                throw new InvalidEntityConfigurationException
+                        (ResourceConfiguration.class,
+                                "The provided function runtime: " + functionRuntime + " is not a valid GCF runtime");
             }
         }
 
@@ -178,8 +184,9 @@ public class ResourceConfiguration {
                 LambdaRuntime.valueOf(functionRuntime);
             }
             catch (IllegalArgumentException ex) {
-                throw new InvalidResourceConfigurationConfigurationException
-                        ("The provided function runtime: " + functionRuntime + " is not a valid Lambda runtime");
+                throw new InvalidEntityConfigurationException
+                        (ResourceConfiguration.class,
+                                "The provided function runtime: " + functionRuntime + " is not a valid Lambda runtime");
             }
         }
     }
@@ -188,16 +195,18 @@ public class ResourceConfiguration {
 
         if (this.memoryConfigurations == null || this.memoryConfigurations.isEmpty()) {
 
-            throw new InvalidResourceConfigurationConfigurationException
-                    ("At least one memory configuration must be provided per resource configuration");
+            throw new InvalidEntityConfigurationException
+                    (ResourceConfiguration.class,
+                            "At least one memory configuration must be provided per resource configuration");
         }
 
         for (Integer memoryConfiguration : this.memoryConfigurations) {
 
             if (memoryConfiguration < FUNCTION_MEMORY_MIN) {
 
-                throw new InvalidResourceConfigurationConfigurationException
-                        ("Provided memory configurations must be greater than the required minimum of: "
+                throw new InvalidEntityConfigurationException
+                        (ResourceConfiguration.class,
+                                "Provided memory configurations must be greater than the required minimum of: "
                         + FUNCTION_MEMORY_MIN);
             }
         }

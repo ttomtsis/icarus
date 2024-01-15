@@ -1,12 +1,12 @@
 package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
@@ -46,8 +46,8 @@ public class TestService {
         if (StringUtils.isBlank(newTest.getPath()) &&
                 !StringUtils.isBlank(newTest.getPathVariable())) {
 
-            throw new InvalidTestConfigurationException
-                    ("Cannot set a Path variable if the test does not expose a path");
+            throw new InvalidEntityConfigurationException
+                    (Test.class, "Cannot set a Path variable if the test does not expose a path");
         }
 
         return repository.save(newTest);
@@ -97,19 +97,20 @@ public class TestService {
 
         // Test has a Function associated with it
         if (requestedTest.getTargetFunction() == null) {
-            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a Function" +
+            throw new InvalidEntityConfigurationException(Test.class, requestedTest.getId(), "does not have a Function" +
                     " associated with it");
         }
 
         // Test has at least 1 provider account
         if (requestedTest.getAccountsList().isEmpty()) {
-            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have " +
+            throw new InvalidEntityConfigurationException(Test.class, requestedTest.getId(), "does not have " +
                     "any provider accounts associated with it");
         }
 
         // Test has one configuration per provider account
         if (!oneConfigurationPerProviderAccount(requestedTest)) {
-            throw new InvalidTestConfigurationException(requestedTest.getId(), "does not have a resource" +
+            throw new InvalidEntityConfigurationException(Test.class, requestedTest.getId(),
+                    "does not have a resource" +
                     " configuration for every provider account");
         }
 
@@ -117,7 +118,8 @@ public class TestService {
                 + "\\" + requestedTest.getTargetFunction().getFunctionSourceFileName();
 
         if(!Files.exists(Paths.get(functionSourceCodeLocation))) {
-            throw new InvalidTestConfigurationException(requestedTest.getId(), " is unable to find the source code" +
+            throw new InvalidEntityConfigurationException(Test.class, requestedTest.getId(),
+                    " is unable to find the source code" +
                     " of it's target Function in the filesystem");
         }
 

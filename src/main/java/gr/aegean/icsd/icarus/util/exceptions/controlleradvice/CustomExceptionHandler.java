@@ -2,8 +2,7 @@ package gr.aegean.icsd.icarus.util.exceptions.controlleradvice;
 
 import gr.aegean.icsd.icarus.util.exceptions.InvalidPasswordException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidResourceConfigurationConfigurationException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,14 +16,12 @@ public class CustomExceptionHandler {
 
 
     @ExceptionHandler({
-            InvalidTestConfigurationException.class,
-            InvalidResourceConfigurationConfigurationException.class,
-            InvalidTestConfigurationException.class,
+            InvalidEntityConfigurationException.class,
             ReportGenerationException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public String handleInvalidTestConfigurationException(RuntimeException ex) {
+    public String handleConfigurationExceptions(RuntimeException ex) {
         return ex.getMessage();
     }
 

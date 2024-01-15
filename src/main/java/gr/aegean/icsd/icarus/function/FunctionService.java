@@ -3,7 +3,7 @@ package gr.aegean.icsd.icarus.function;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.entity.FunctionConfigurationException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.services.FileService;
 import jakarta.transaction.Transactional;
@@ -48,7 +48,8 @@ public class FunctionService {
         // Source code not provided
         if (StringUtils.isBlank(newFunction.getGithubURL()) && functionSource == null) {
 
-            throw new FunctionConfigurationException("No source code has been provided for the function");
+            throw new InvalidEntityConfigurationException(Function.class,
+                    "No source code has been provided for the function");
         }
 
         // Github url provided
@@ -193,7 +194,7 @@ public class FunctionService {
         }
 
         catch (GitAPIException | IOException e) {
-            throw new FunctionConfigurationException("Exception when cloning function's source " +
+            throw new InvalidEntityConfigurationException(Function.class, "Exception when cloning function's source " +
                     "code from repository", e);
         }
 
