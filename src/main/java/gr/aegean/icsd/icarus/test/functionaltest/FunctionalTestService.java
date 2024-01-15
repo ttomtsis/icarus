@@ -1,6 +1,10 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
+import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
@@ -9,6 +13,7 @@ import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
+import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
@@ -110,7 +115,10 @@ public class FunctionalTestService extends TestService {
     private void deployFunctionAndExecuteTest(FunctionalTest requestedTest, String deploymentId,
                                               TestExecution testExecution, IcarusUser creator) {
 
-        super.getDeployer().deployFunctions(requestedTest, deploymentId)
+        Set<ResourceConfiguration> configurations = new HashSet<>();
+        configurations.add(requestedTest.getResourceConfiguration());
+
+        super.getDeployer().deployFunctions(requestedTest, configurations, deploymentId)
 
                 .exceptionally(ex -> {
 
@@ -246,6 +254,30 @@ public class FunctionalTestService extends TestService {
                     "does not have any Test Case Members " +
                             "associated with it");
         }
+
+        // One Resource configuration per account type
+        for (ProviderAccount account : requestedTest.getAccountsList()) {
+
+            boolean foundAssociatedConfiguration = false;
+
+            if (account instanceof AwsAccount &&
+                    requestedTest.getResourceConfiguration().getProviderPlatform().equals(Platform.AWS)) {
+                foundAssociatedConfiguration = true;
+            }
+
+            if (account instanceof GcpAccount &&
+                    requestedTest.getResourceConfiguration().getProviderPlatform().equals(Platform.GCP)) {
+                foundAssociatedConfiguration = true;
+            }
+
+            if (!foundAssociatedConfiguration) {
+                throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),
+                        "does not have a resource" +
+                                " configuration for every provider account");
+            }
+
+        }
+
     }
 
     private Set<DeploymentRecord> createDeploymentRecord(FunctionalTest requestedTest) {

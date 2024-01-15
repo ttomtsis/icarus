@@ -1,11 +1,15 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.TestRepository;
 import gr.aegean.icsd.icarus.test.TestService;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
+import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
@@ -91,19 +95,7 @@ public class PerformanceTestService extends TestService {
         log.warn("Executing request: {}", deploymentId);
 
         PerformanceTest requestedTest = checkIfPerformanceTestExists(testId);
-        super.executeTest(requestedTest);
-
-        if (requestedTest.getLoadProfiles().isEmpty()) {
-            throw new InvalidEntityConfigurationException(PerformanceTest.class, testId,
-                    " does not have any Load Profiles" +
-                    " associated with it");
-        }
-
-        if (requestedTest.getChosenMetrics().isEmpty()) {
-            throw new InvalidEntityConfigurationException(PerformanceTest.class, testId,
-                    " does not have any Metrics" +
-                    " associated with it");
-        }
+        validateTest(requestedTest);
 
         log.warn("All checks passed for: {}", deploymentId);
 
@@ -114,43 +106,50 @@ public class PerformanceTestService extends TestService {
 
         IcarusUser creator = UserUtils.getLoggedInUser();
 
-        super.getDeployer().deployFunctions(requestedTest, deploymentId)
+        executePerformanceTest(requestedTest, deploymentId, testExecution, creator);
 
-            .exceptionally(ex -> {
+    }
 
-                testExecutionService.abortTestExecution(testExecution, deploymentId);
-                throw new AsyncExecutionFailedException(ex);
-            })
 
-            .thenAccept(result -> {
+    private void executePerformanceTest(PerformanceTest requestedTest, String deploymentId,
+                                        TestExecution testExecution, IcarusUser creator) {
 
-                testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
+        super.getDeployer().deployFunctions(requestedTest, requestedTest.getResourceConfigurations(), deploymentId)
 
-                try {
-                    
-                    log.warn("Creating Load Tests: {}", deploymentId);
-                    MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result, creator);
-
-                    log.warn("Saving execution results: {}", deploymentId);
-
-                    testExecutionService.produceReport(
-                            testExecutionService.saveMetricResults(testExecution, queryEngine.getMetricResults())
-                    );
-
-                } catch (RuntimeException ex) {
-
-                    log.error("Failed to execute tests: {}", deploymentId);
+                .exceptionally(ex -> {
 
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new AsyncExecutionFailedException(ex);
-                }
-                
-                log.warn("Test Completed, Deleting Stack: {}", deploymentId);
-                testExecutionService.finalizeTestExecution(testExecution, deploymentId);
+                })
 
-                log.warn("Finished: {}", deploymentId);
-            });
+                .thenAccept(result -> {
 
+                    testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
+
+                    try {
+
+                        log.warn("Creating Load Tests: {}", deploymentId);
+                        MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result, creator);
+
+                        log.warn("Saving execution results: {}", deploymentId);
+
+                        testExecutionService.produceReport(
+                                testExecutionService.saveMetricResults(testExecution, queryEngine.getMetricResults())
+                        );
+
+                    } catch (RuntimeException ex) {
+
+                        log.error("Failed to execute tests: {}", deploymentId);
+
+                        testExecutionService.abortTestExecution(testExecution, deploymentId);
+                        throw new AsyncExecutionFailedException(ex);
+                    }
+
+                    log.warn("Test Completed, Deleting Stack: {}", deploymentId);
+                    testExecutionService.finalizeTestExecution(testExecution, deploymentId);
+
+                    log.warn("Finished: {}", deploymentId);
+                });
     }
 
 
@@ -159,6 +158,53 @@ public class PerformanceTestService extends TestService {
 
         return repository.findPerformanceTestByIdAndCreator(testId, UserUtils.getLoggedInUser())
                 .orElseThrow(() -> new EntityNotFoundException(PerformanceTest.class, testId));
+    }
+
+    private void validateTest(PerformanceTest requestedTest) {
+
+        super.executeTest(requestedTest);
+
+        if (requestedTest.getLoadProfiles().isEmpty()) {
+            throw new InvalidEntityConfigurationException(PerformanceTest.class, requestedTest.getId(),
+                    " does not have any Load Profiles" +
+                            " associated with it");
+        }
+
+        if (requestedTest.getChosenMetrics().isEmpty()) {
+            throw new InvalidEntityConfigurationException(PerformanceTest.class, requestedTest.getId(),
+                    " does not have any Metrics" +
+                            " associated with it");
+        }
+
+        for (ProviderAccount account : requestedTest.getAccountsList()) {
+
+            boolean foundAssociatedConfiguration = false;
+
+                for (ResourceConfiguration configuration : requestedTest.getResourceConfigurations()){
+
+                    if (account instanceof AwsAccount &&
+                            configuration.getProviderPlatform().equals(Platform.AWS)) {
+
+                        foundAssociatedConfiguration = true;
+                        break;
+                    }
+
+                    if (account.getAccountType().equals("GcpAccount") &&
+                            configuration.getProviderPlatform().equals(Platform.GCP)) {
+
+                        foundAssociatedConfiguration = true;
+                        break;
+                    }
+
+                }
+
+
+            if (!foundAssociatedConfiguration) {
+                throw new InvalidEntityConfigurationException(PerformanceTest.class, requestedTest.getId(),
+                        "does not have a resource" +
+                                " configuration for every provider account");
+            }
+        }
     }
 
 

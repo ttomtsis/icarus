@@ -73,7 +73,7 @@ public class FunctionalTestController {
     public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
 
         String deploymentId = UUID.randomUUID().toString().substring(0, 8);
-        LoggerFactory.getLogger("Functional Test Controller").warn("New request received: " + deploymentId);
+        LoggerFactory.getLogger(FunctionalTestController.class).warn("New request received: {}", deploymentId);
 
         service.executeTest(testId, deploymentId);
 

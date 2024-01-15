@@ -3,8 +3,6 @@ package gr.aegean.icsd.icarus.test;
 import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
-import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
@@ -107,13 +105,7 @@ public class TestService {
                     "any provider accounts associated with it");
         }
 
-        // Test has one configuration per provider account
-        if (!oneConfigurationPerProviderAccount(requestedTest)) {
-            throw new InvalidEntityConfigurationException(Test.class, requestedTest.getId(),
-                    "does not have a resource" +
-                    " configuration for every provider account");
-        }
-
+        // Function's source code is available
         String functionSourceCodeLocation = requestedTest.getTargetFunction().getFunctionSourceDirectory()
                 + "\\" + requestedTest.getTargetFunction().getFunctionSourceFileName();
 
@@ -125,37 +117,6 @@ public class TestService {
 
     }
 
-
-    private boolean oneConfigurationPerProviderAccount(Test requestedTest) {
-
-        for (ProviderAccount account : requestedTest.getAccountsList()) {
-
-            boolean foundAssociatedConfiguration = false;
-            for (ResourceConfiguration configuration : requestedTest.getResourceConfigurations()){
-
-                if (account.getAccountType().equals("AwsAccount") &&
-                        configuration.getProviderPlatform().equals(Platform.AWS)) {
-
-                    foundAssociatedConfiguration = true;
-                    break;
-                }
-
-                if (account.getAccountType().equals("GcpAccount") &&
-                        configuration.getProviderPlatform().equals(Platform.GCP)) {
-
-                    foundAssociatedConfiguration = true;
-                    break;
-                }
-
-            }
-
-            if (!foundAssociatedConfiguration) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
 
     protected void setIfNotNull(Consumer<String> setter, String value) {
