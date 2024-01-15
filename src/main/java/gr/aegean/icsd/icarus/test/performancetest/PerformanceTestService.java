@@ -6,7 +6,7 @@ import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidTestConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
@@ -117,7 +117,7 @@ public class PerformanceTestService extends TestService {
             .exceptionally(ex -> {
 
                 testExecutionService.abortTestExecution(testExecution, deploymentId);
-                throw new TestExecutionFailedException(ex);
+                throw new AsyncExecutionFailedException(ex);
             })
 
             .thenAccept(result -> {
@@ -140,7 +140,7 @@ public class PerformanceTestService extends TestService {
                     log.error("Failed to execute tests: {}", deploymentId);
 
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
-                    throw new TestExecutionFailedException(ex);
+                    throw new AsyncExecutionFailedException(ex);
                 }
                 
                 log.warn("Test Completed, Deleting Stack: {}", deploymentId);

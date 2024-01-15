@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.util.services;
 
 import gr.aegean.icsd.icarus.util.exceptions.async.StackDeploymentException;
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class ProcessService {
             }
         }
         catch (InterruptedException | IOException ex) {
-            throw new TestExecutionFailedException(ex);
+            throw new AsyncExecutionFailedException(ex);
         }
 
     }

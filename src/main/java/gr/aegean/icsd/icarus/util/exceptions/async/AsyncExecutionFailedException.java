@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class TestExecutionFailedException extends RuntimeException {
+public class AsyncExecutionFailedException extends RuntimeException {
 
 
     private static final Logger log = LoggerFactory.getLogger("Test Execution Exception");
 
 
-    public TestExecutionFailedException(Throwable throwable) {
+    public AsyncExecutionFailedException(Throwable throwable) {
         super();
 
         if (throwable.getCause() != null) {
@@ -52,7 +52,7 @@ public class TestExecutionFailedException extends RuntimeException {
 
     }
 
-    public TestExecutionFailedException(String message) {
+    public AsyncExecutionFailedException(String message) {
 
         super(message);
 

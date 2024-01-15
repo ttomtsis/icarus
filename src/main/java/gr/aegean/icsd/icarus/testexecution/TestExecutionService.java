@@ -12,7 +12,7 @@ import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultReposito
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
@@ -183,7 +183,7 @@ public class TestExecutionService {
             deployer.deleteInfrastructure(requestedTestExecution.getParentTest().getTargetFunction().getName(), deploymentId);
         }
         catch (RuntimeException ex) {
-            throw new TestExecutionFailedException(ex);
+            throw new AsyncExecutionFailedException(ex);
         }
     }
 

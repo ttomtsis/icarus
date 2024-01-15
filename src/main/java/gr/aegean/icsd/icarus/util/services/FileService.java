@@ -1,7 +1,7 @@
 package gr.aegean.icsd.icarus.util.services;
 
 import gr.aegean.icsd.icarus.function.FunctionService;
-import gr.aegean.icsd.icarus.util.exceptions.async.TestExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class FileService {
             }
             catch (RuntimeException ex) {
                 LoggerFactory.getLogger(FileService.class).warn("Unable to access: {}\n Will not delete", filePath);
-                throw new TestExecutionFailedException(ex);
+                throw new AsyncExecutionFailedException(ex);
             }
         }
 
@@ -58,7 +58,7 @@ public class FileService {
         }
         catch (RuntimeException ex) {
 
-            throw new TestExecutionFailedException(ex);
+            throw new AsyncExecutionFailedException(ex);
         }
 
     }
