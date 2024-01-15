@@ -20,6 +20,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -80,77 +81,79 @@ public class FunctionalTestService extends TestService {
         log.warn("Executing request: {}", deploymentId);
 
         FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
-        super.executeTest(requestedTest);
-
-        // Has at least 1 TestCase
-        if (requestedTest.getTestCases().isEmpty()) {
-            throw new InvalidEntityConfigurationException(FunctionalTest.class, testId, "does not have any Test Cases" +
-                    "associated with it");
-        }
-
-        // Has at least 1 Test Case Member
-        boolean atLeastOneTestCaseMember = false;
-        for (TestCase testCase : requestedTest.getTestCases()) {
-
-            if (!testCase.getTestCaseMembers().isEmpty()) {
-
-                atLeastOneTestCaseMember = true;
-                break;
-            }
-        }
-
-        if (!atLeastOneTestCaseMember) {
-            throw new InvalidEntityConfigurationException(FunctionalTest.class, testId,
-                    "does not have any Test Case Members " +
-                    "associated with it");
-        }
+        validateTest(requestedTest);
 
         log.warn("All checks passed for: {}", deploymentId);
 
         TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
         testExecutionService.setExecutionState(testExecution, ExecutionState.DEPLOYING);
 
-        log.warn("Starting deployment of: {}", deploymentId);
-
         IcarusUser creator = UserUtils.getLoggedInUser();
+
+        if (StringUtils.isBlank(requestedTest.getFunctionURL())) {
+
+            log.warn("Starting deployment of: {}", deploymentId);
+            deployFunctionAndExecuteTest(requestedTest, deploymentId, testExecution, creator);
+        }
+        else {
+
+            log.warn("Function is already deployed, will execute Functional Test for: {}", deploymentId);
+            Set<DeploymentRecord> deploymentRecords = createDeploymentRecord(requestedTest);
+            executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator);
+        }
+
+
+    }
+
+
+
+    private void deployFunctionAndExecuteTest(FunctionalTest requestedTest, String deploymentId,
+                                              TestExecution testExecution, IcarusUser creator) {
 
         super.getDeployer().deployFunctions(requestedTest, deploymentId)
 
-            .exceptionally(ex -> {
+                .exceptionally(ex -> {
 
-                testExecutionService.abortTestExecution(testExecution, deploymentId);
-                throw new AsyncExecutionFailedException(ex);
-            })
-
-            .thenAccept(result -> {
-
-                testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
-
-                try {
-
-                    log.warn("Creating Rest Assured Tests of: {}", deploymentId);
-                    Set<TestCaseResult> results = createRestAssuredTests(requestedTest, result, creator);
-
-                    log.warn("Saving execution results of: {}", deploymentId);
-
-                    testExecutionService.produceReport(
-                            testExecutionService.saveTestCaseResults(testExecution, results)
-                    );
-
-                } catch (RuntimeException ex) {
-
-                    log.error("Failed to execute tests: {}", deploymentId);
-
+                    log.error("Deployment of: {} FAILED", deploymentId);
                     testExecutionService.abortTestExecution(testExecution, deploymentId);
                     throw new AsyncExecutionFailedException(ex);
-                }
+                })
 
-                log.warn("Test completed, Deleting stack: {}", deploymentId);
-                testExecutionService.finalizeTestExecution(testExecution, deploymentId);
+                .thenAccept(deploymentRecords ->
+                        executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator));
 
-                log.warn("Finished: {}", deploymentId);
-            });
+    }
 
+
+    private void executeFunctionalTest(FunctionalTest requestedTest, TestExecution testExecution,
+                                       Set<DeploymentRecord> deploymentRecords, String deploymentId,
+                                       IcarusUser creator) {
+
+        testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
+
+        try {
+
+            log.warn("Creating Rest Assured Tests of: {}", deploymentId);
+            Set<TestCaseResult> results = createRestAssuredTests(requestedTest, deploymentRecords, creator);
+
+            log.warn("Saving execution results of: {}", deploymentId);
+
+            testExecutionService.produceReport(
+                    testExecutionService.saveTestCaseResults(testExecution, results)
+            );
+
+        } catch (RuntimeException ex) {
+
+            log.error("Failed to execute tests: {}", deploymentId);
+
+            testExecutionService.abortTestExecution(testExecution, deploymentId);
+            throw new AsyncExecutionFailedException(ex);
+        }
+
+        log.warn("Test completed, Deleting stack: {}", deploymentId);
+        testExecutionService.finalizeTestExecution(testExecution, deploymentId);
+
+        log.warn("Finished: {}", deploymentId);
     }
 
 
@@ -214,6 +217,40 @@ public class FunctionalTestService extends TestService {
 
         return repository.findFunctionalTestByIdAndCreator(testId, UserUtils.getLoggedInUser())
                 .orElseThrow(() -> new EntityNotFoundException(FunctionalTest.class, testId));
+    }
+
+    private void validateTest(FunctionalTest requestedTest) {
+
+        super.executeTest(requestedTest);
+
+        // Has at least 1 TestCase
+        if (requestedTest.getTestCases().isEmpty()) {
+            throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),
+                    "does not have any Test Cases" +
+                    "associated with it");
+        }
+
+        // Has at least 1 Test Case Member
+        boolean atLeastOneTestCaseMember = false;
+        for (TestCase testCase : requestedTest.getTestCases()) {
+
+            if (!testCase.getTestCaseMembers().isEmpty()) {
+
+                atLeastOneTestCaseMember = true;
+                break;
+            }
+        }
+
+        if (!atLeastOneTestCaseMember) {
+            throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),
+                    "does not have any Test Case Members " +
+                            "associated with it");
+        }
+    }
+
+    private Set<DeploymentRecord> createDeploymentRecord(FunctionalTest requestedTest) {
+
+        return null;
     }
 
 
