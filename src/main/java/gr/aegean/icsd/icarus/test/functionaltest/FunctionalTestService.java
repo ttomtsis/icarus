@@ -1,5 +1,6 @@
 package gr.aegean.icsd.icarus.test.functionaltest;
 
+import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.provideraccount.AwsAccount;
 import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
@@ -81,6 +82,7 @@ public class FunctionalTestService extends TestService {
     }
 
 
+
     public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
 
         log.warn("Executing request: {}", deploymentId);
@@ -102,8 +104,9 @@ public class FunctionalTestService extends TestService {
         }
         else {
 
-            log.warn("Function is already deployed, will execute Functional Test for: {}", deploymentId);
-            Set<DeploymentRecord> deploymentRecords = createDeploymentRecord(requestedTest);
+            log.warn("Function is already deployed, will execute Functional Test for: {}",
+                    deploymentId);
+            Set<DeploymentRecord> deploymentRecords = createDeploymentRecord(requestedTest, deploymentId);
             executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator);
         }
 
@@ -137,31 +140,36 @@ public class FunctionalTestService extends TestService {
                                        Set<DeploymentRecord> deploymentRecords, String deploymentId,
                                        IcarusUser creator) {
 
-        testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
+        Thread functionalTestExecution = new Thread( () -> {
 
-        try {
+            testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
 
-            log.warn("Creating Rest Assured Tests of: {}", deploymentId);
-            Set<TestCaseResult> results = createRestAssuredTests(requestedTest, deploymentRecords, creator);
+            try {
 
-            log.warn("Saving execution results of: {}", deploymentId);
+                log.warn("Creating Rest Assured Tests of: {}", deploymentId);
+                Set<TestCaseResult> results = createRestAssuredTests(requestedTest, deploymentRecords, creator);
 
-            testExecutionService.produceReport(
-                    testExecutionService.saveTestCaseResults(testExecution, results)
-            );
+                log.warn("Saving execution results of: {}", deploymentId);
 
-        } catch (RuntimeException ex) {
+                testExecutionService.produceReport(
+                        testExecutionService.saveTestCaseResults(testExecution, results)
+                );
 
-            log.error("Failed to execute tests: {}", deploymentId);
+            } catch (RuntimeException ex) {
 
-            testExecutionService.abortTestExecution(testExecution, deploymentId);
-            throw new AsyncExecutionFailedException(ex);
-        }
+                log.error("Failed to execute tests: {}", deploymentId);
 
-        log.warn("Test completed, Deleting stack: {}", deploymentId);
-        testExecutionService.finalizeTestExecution(testExecution, deploymentId);
+                testExecutionService.setExecutionState(testExecution, ExecutionState.ERROR);
+                throw new AsyncExecutionFailedException(ex);
+            }
 
-        log.warn("Finished: {}", deploymentId);
+            log.warn("Test completed: {}", deploymentId);
+            testExecutionService.setExecutionState(testExecution, ExecutionState.FINISHED);
+
+            log.warn("Finished: {}", deploymentId);
+        });
+
+        functionalTestExecution.start();
     }
 
 
@@ -235,7 +243,7 @@ public class FunctionalTestService extends TestService {
         if (requestedTest.getTestCases().isEmpty()) {
             throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),
                     "does not have any Test Cases" +
-                    "associated with it");
+                    " associated with it");
         }
 
         // Has at least 1 Test Case Member
@@ -280,9 +288,33 @@ public class FunctionalTestService extends TestService {
 
     }
 
-    private Set<DeploymentRecord> createDeploymentRecord(FunctionalTest requestedTest) {
+    private Set<DeploymentRecord> createDeploymentRecord(FunctionalTest requestedTest, String deploymentId) {
 
-        return null;
+        Set<DeploymentRecord> deploymentRecords = new HashSet<>();
+
+        ResourceConfiguration configuration = requestedTest.getResourceConfiguration();
+        Function targetFunction = requestedTest.getTargetFunction();
+
+        String functionName = targetFunction.getName() + "-" + deploymentId;
+
+        Integer memory = configuration.getMemoryConfigurations().stream().findFirst()
+                .orElseThrow(() -> new AsyncExecutionFailedException("The configuration associated with "
+                        + deploymentId + " does not contain any memory specifications"));
+
+        String region = configuration.getRegions().stream().findFirst()
+                .orElseThrow(() -> new AsyncExecutionFailedException("The configuration associated with "
+                        + deploymentId + " does not contain any region specifications"));
+
+
+        Platform platform = configuration.getProviderPlatform();
+
+        DeploymentRecord deploymentRecord = new DeploymentRecord(functionName, region, memory, deploymentId, platform);
+        deploymentRecord.deployedUrl = requestedTest.getFunctionURL();
+        deploymentRecord.configurationUsed = configuration;
+
+        deploymentRecords.add(deploymentRecord);
+
+        return deploymentRecords;
     }
 
 

@@ -1,5 +1,6 @@
 package gr.aegean.icsd.icarus.testexecution;
 
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.report.Report;
 import gr.aegean.icsd.icarus.report.ReportRepository;
 import gr.aegean.icsd.icarus.report.ReportService;
@@ -9,10 +10,9 @@ import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResultRepository;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
-import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
-import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
@@ -66,7 +66,7 @@ public class TestExecutionService {
     }
 
 
-
+    @Transactional(Transactional.TxType.REQUIRED)
     public TestExecution createEmptyExecution(@NotNull Test requestedTest, @NotBlank String deploymentId) {
 
         TestExecution newTestExecution = new TestExecution(requestedTest, Instant.now(), deploymentId);
@@ -96,7 +96,7 @@ public class TestExecutionService {
         Set<TestCaseResult> resultSet = new HashSet<>(testCaseResultRepository.saveAllAndFlush(testCaseResults));
         testExecution.addTestCaseResults(resultSet);
 
-        return testExecutionRepository.saveAndFlush(testExecution);
+        return testExecutionRepository.save(testExecution);
     }
 
 
