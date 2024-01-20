@@ -14,6 +14,7 @@ import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
+import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
@@ -22,8 +23,13 @@ import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Set;
 
 
 @Service
@@ -90,66 +96,66 @@ public class PerformanceTestService extends TestService {
     }
 
 
-    public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
-
-        log.warn("Executing request: {}", deploymentId);
-
-        PerformanceTest requestedTest = checkIfPerformanceTestExists(testId);
-        validateTest(requestedTest);
+    @Async
+    public void executeTest(@NotNull PerformanceTest requestedTest, @NotBlank String deploymentId,
+                            @NotNull IcarusUser creator) {
 
         log.warn("All checks passed for: {}", deploymentId);
 
-        TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
+        TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId, creator);
         testExecutionService.setExecutionState(testExecution, ExecutionState.DEPLOYING);
 
-        log.warn("Starting deployment of: {}", deploymentId);
+        log.warn("Starting deployment of: {} for Execution: {}", deploymentId, testExecution.getId());
 
-        IcarusUser creator = UserUtils.getLoggedInUser();
+        Set<DeploymentRecord> deploymentRecords = deployFunctions(requestedTest, testExecution, deploymentId);
+        executePerformanceTest(requestedTest, deploymentId, testExecution, creator, deploymentRecords);
+    }
 
-        executePerformanceTest(requestedTest, deploymentId, testExecution, creator);
 
+    private Set<DeploymentRecord> deployFunctions(PerformanceTest requestedTest, TestExecution testExecution, String deploymentId) {
+        try{
+            testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
+            return super.getDeployer()
+                    .deployFunctions(requestedTest, requestedTest.getResourceConfigurations(), deploymentId);
+        }
+        catch (RuntimeException ex) {
+            testExecutionService.abortTestExecution(testExecution, deploymentId);
+            throw new AsyncExecutionFailedException(ex);
+        }
     }
 
 
     private void executePerformanceTest(PerformanceTest requestedTest, String deploymentId,
-                                        TestExecution testExecution, IcarusUser creator) {
+                                        TestExecution testExecution, IcarusUser creator,
+                                        Set<DeploymentRecord> deploymentRecords) {
 
-        super.getDeployer().deployFunctions(requestedTest, requestedTest.getResourceConfigurations(), deploymentId)
+            try {
 
-                .exceptionally(ex -> {
+                log.warn("Creating Load Tests: {} for Execution {}", deploymentId, testExecution.getId());
+                MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, deploymentRecords, creator);
 
-                    testExecutionService.abortTestExecution(testExecution, deploymentId);
-                    throw new AsyncExecutionFailedException(ex);
-                })
+                log.warn("Saving execution results: {} for Execution {}", deploymentId, testExecution.getId());
+                testExecutionService.saveMetricResults(testExecution, queryEngine.getMetricResults());
 
-                .thenAccept(result -> {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 
-                    testExecutionService.setExecutionState(testExecution, ExecutionState.RUNNING);
-
-                    try {
-
-                        log.warn("Creating Load Tests: {}", deploymentId);
-                        MetricQueryEngine queryEngine = new MetricQueryEngine(requestedTest, result, creator);
-
-                        log.warn("Saving execution results: {}", deploymentId);
-
-                        testExecutionService.produceReport(
-                                testExecutionService.saveMetricResults(testExecution, queryEngine.getMetricResults())
-                        );
-
-                    } catch (RuntimeException ex) {
-
-                        log.error("Failed to execute tests: {}", deploymentId);
-
-                        testExecutionService.abortTestExecution(testExecution, deploymentId);
-                        throw new AsyncExecutionFailedException(ex);
+                    @Override
+                    public void afterCommit() {
+                        testExecutionService.produceReport(testExecution);
+                        log.warn("Finished: {} - Execution: {}", deploymentId, testExecution.getId());
                     }
-
-                    log.warn("Test Completed, Deleting Stack: {}", deploymentId);
-                    testExecutionService.finalizeTestExecution(testExecution, deploymentId);
-
-                    log.warn("Finished: {}", deploymentId);
                 });
+
+            } catch (RuntimeException ex) {
+
+                log.error("Failed to execute tests: {}", deploymentId);
+
+                testExecutionService.abortTestExecution(testExecution, deploymentId);
+                throw new AsyncExecutionFailedException(ex);
+            }
+
+            log.warn("Test Completed, Deleting Stack: {} for Execution: {}", deploymentId, testExecution.getId());
+            testExecutionService.finalizeTestExecution(testExecution, deploymentId);
     }
 
 
@@ -160,7 +166,10 @@ public class PerformanceTestService extends TestService {
                 .orElseThrow(() -> new EntityNotFoundException(PerformanceTest.class, testId));
     }
 
-    private void validateTest(PerformanceTest requestedTest) {
+
+    public PerformanceTest validateTest(@NotNull @Positive Long testId) {
+
+        PerformanceTest requestedTest = checkIfPerformanceTestExists(testId);
 
         super.executeTest(requestedTest);
 
@@ -205,6 +214,8 @@ public class PerformanceTestService extends TestService {
                                 " configuration for every provider account");
             }
         }
+
+        return requestedTest;
     }
 
 

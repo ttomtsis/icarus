@@ -16,7 +16,6 @@ import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -76,7 +75,7 @@ public class TestExecutionService {
     }
 
 
-    public TestExecution saveMetricResults(TestExecution testExecution, Set<MetricResult> metricResults) {
+    public void saveMetricResults(TestExecution testExecution, Set<MetricResult> metricResults) {
 
         Instant endDate = Instant.now();
         testExecution.setEndDate(endDate);
@@ -84,7 +83,7 @@ public class TestExecutionService {
         Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAllAndFlush(metricResults));
         testExecution.addMetricResults(resultSet);
 
-        return testExecutionRepository.save(testExecution);
+        testExecutionRepository.save(testExecution);
     }
 
 
