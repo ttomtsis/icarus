@@ -16,7 +16,7 @@ import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
-import jakarta.transaction.Transactional;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Instant;
@@ -66,7 +68,7 @@ public class TestExecutionService {
     }
 
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    //@Transactional(Transactional.TxType.REQUIRED)
     public TestExecution createEmptyExecution(@NotNull Test requestedTest, @NotBlank String deploymentId) {
 
         TestExecution newTestExecution = new TestExecution(requestedTest, Instant.now(), deploymentId);
@@ -74,7 +76,6 @@ public class TestExecutionService {
     }
 
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public TestExecution saveMetricResults(TestExecution testExecution, Set<MetricResult> metricResults) {
 
         Instant endDate = Instant.now();
@@ -83,28 +84,28 @@ public class TestExecutionService {
         Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAllAndFlush(metricResults));
         testExecution.addMetricResults(resultSet);
 
-        return testExecutionRepository.saveAndFlush(testExecution);
-    }
-
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public TestExecution saveTestCaseResults(TestExecution testExecution, Set<TestCaseResult> testCaseResults) {
-
-        Instant endDate = Instant.now();
-        testExecution.setEndDate(endDate);
-
-        Set<TestCaseResult> resultSet = new HashSet<>(testCaseResultRepository.saveAllAndFlush(testCaseResults));
-        testExecution.addTestCaseResults(resultSet);
-
         return testExecutionRepository.save(testExecution);
     }
 
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void saveTestCaseResults(TestExecution testExecution, Set<TestCaseResult> testCaseResults) {
+
+        Instant endDate = Instant.now();
+        testExecution.setEndDate(endDate);
+
+        Set<TestCaseResult> resultSet = new HashSet<>(testCaseResultRepository.saveAll(testCaseResults));
+        testExecution.addTestCaseResults(resultSet);
+
+        testExecutionRepository.save(testExecution);
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void produceReport(@NotNull TestExecution testExecution) {
 
         LoggerFactory.getLogger(TestExecutionService.class).warn
-                ("Producing report document for deployment: {}", testExecution.getDeploymentId());
+                ("Producing report document for deployment: {} and Execution: {}",
+                        testExecution.getDeploymentId(), testExecution.getId());
 
         try {
 
@@ -128,7 +129,7 @@ public class TestExecutionService {
             testExecution.setState(ExecutionState.REPORT_FAILED);
             testExecutionRepository.save(testExecution);
 
-            throw new ReportGenerationException("Failed to generate Report for Execution with deployment ID: "
+            throw new AsyncExecutionFailedException("Failed to generate Report for Execution with deployment ID: "
                     + testExecution.getDeploymentId(), ex);
         }
 
