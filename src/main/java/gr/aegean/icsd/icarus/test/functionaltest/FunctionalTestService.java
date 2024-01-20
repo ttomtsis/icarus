@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.annotation.Validated;
 
@@ -150,31 +150,24 @@ public class FunctionalTestService extends TestService {
 
             log.warn("Creating Rest Assured Tests of: {} for Execution: {}",
                     deploymentId, testExecution.getId());
+
             Set<TestCaseResult> results = createRestAssuredTests(requestedTest, deploymentRecords, creator);
 
             log.warn("Saving execution results of: {} for Execution: {}",
                     deploymentId, testExecution.getId());
 
-
             testExecutionService.saveTestCaseResults(testExecution, results);
-            if(TransactionSynchronizationManager.isActualTransactionActive()) {
-                LoggerFactory.getLogger("bobz").warn("TRANSACTION EXISTS");
-            }
-            else {
-                LoggerFactory.getLogger("bobz").warn("NO TRANSACTION LUL");
-            }
 
-            TransactionSynchronizationManager.registerSynchronization(
-                    new TransactionSynchronizationAdapter() {
-                        @Override
-                        public void afterCommit() {
 
-                            testExecutionService.produceReport(testExecution);
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 
-                            LoggerFactory.getLogger("bobz").warn("done");
-                        }
-                    }
-            );
+                @Override
+                public void afterCommit() {
+                    testExecutionService.produceReport(testExecution);
+                    log.warn("Finished: {} - Execution: {}", deploymentId, testExecution.getId());
+                }
+            });
+
 
         } catch (RuntimeException ex) {
 
@@ -188,10 +181,6 @@ public class FunctionalTestService extends TestService {
                 deploymentId, testExecution.getId());
 
         testExecutionService.setExecutionState(testExecution, ExecutionState.FINISHED);
-
-        log.warn("Finished: {} - Execution: {}",
-                deploymentId, testExecution.getId());
-
     }
 
 
