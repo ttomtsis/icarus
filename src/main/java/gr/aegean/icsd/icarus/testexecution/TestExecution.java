@@ -62,11 +62,13 @@ public class TestExecution {
 
 
 
-    public TestExecution(Test parentTest, Instant startDate, String deploymentId) {
+    public TestExecution(Test parentTest, Instant startDate, String deploymentId, IcarusUser creator) {
 
         this.parentTest = parentTest;
         this.startDate = startDate;
         this.deploymentId = deploymentId;
+
+        this.creator = creator;
 
         this.state = ExecutionState.CREATED;
     }

@@ -13,7 +13,6 @@ import gr.aegean.icsd.icarus.test.functionaltest.testcasemember.TestCaseMember;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.TestExecutionService;
 import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResult;
-import gr.aegean.icsd.icarus.testexecution.testcaseresult.TestCaseResultRepository;
 import gr.aegean.icsd.icarus.util.enums.ExecutionState;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
@@ -23,23 +22,14 @@ import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.FlushModeType;
-import jakarta.persistence.PersistenceContext;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.FlushMode;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -96,19 +86,15 @@ public class FunctionalTestService extends TestService {
 
 
 
-    public void executeTest(@NotNull @Positive Long testId, @NotBlank String deploymentId) {
-
-        log.warn("Executing request: {}", deploymentId);
-
-        FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
-        validateTest(requestedTest);
+    @Async
+    public void executeTest(@NotNull FunctionalTest requestedTest, @NotBlank String deploymentId,
+                            @NotNull IcarusUser creator) {
 
         log.warn("All checks passed for: {}, creating Test Execution", deploymentId);
 
-        TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId);
+        TestExecution testExecution = testExecutionService.createEmptyExecution(requestedTest, deploymentId, creator);
         testExecutionService.setExecutionState(testExecution, ExecutionState.DEPLOYING);
 
-        IcarusUser creator = UserUtils.getLoggedInUser();
 
         if (StringUtils.isBlank(requestedTest.getFunctionURL())) {
 
@@ -135,25 +121,25 @@ public class FunctionalTestService extends TestService {
         Set<ResourceConfiguration> configurations = new HashSet<>();
         configurations.add(requestedTest.getResourceConfiguration());
 
-        super.getDeployer().deployFunctions(requestedTest, configurations, deploymentId)
+        try {
+            Set<DeploymentRecord> deploymentRecords =  super.getDeployer()
+                    .deployFunctions(requestedTest, configurations, deploymentId);
 
-                .exceptionally(ex -> {
+            executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator);
+        }
+        catch (RuntimeException ex) {
 
-                    log.error("Deployment of: {} and Execution {} - FAILED", deploymentId, testExecution.getId());
-                    testExecutionService.abortTestExecution(testExecution, deploymentId);
-                    throw new AsyncExecutionFailedException(ex);
-                })
+            log.error("Deployment of: {} and Execution {} - FAILED", deploymentId, testExecution.getId());
+            testExecutionService.abortTestExecution(testExecution, deploymentId);
 
-                .thenAccept(deploymentRecords ->
-                        executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator));
+            throw new AsyncExecutionFailedException(ex);
+        }
 
     }
 
 
 
-    @Autowired
-    TestCaseResultRepository testCaseResultRepository;
-    @Transactional(propagation = Propagation.MANDATORY)
+
     public void executeFunctionalTest(FunctionalTest requestedTest, TestExecution testExecution,
                                        Set<DeploymentRecord> deploymentRecords, String deploymentId,
                                        IcarusUser creator) {
@@ -177,16 +163,11 @@ public class FunctionalTestService extends TestService {
             else {
                 LoggerFactory.getLogger("bobz").warn("NO TRANSACTION LUL");
             }
+
             TransactionSynchronizationManager.registerSynchronization(
                     new TransactionSynchronizationAdapter() {
                         @Override
                         public void afterCommit() {
-
-                            for (TestCaseResult result : testExecution.getTestCaseResults()) {
-                                TestCaseResult dbResult = testCaseResultRepository.findById(result.getId())
-                                        .orElseThrow(() -> new RuntimeException("poop! no " + result.getId() + " exists"));
-                                LoggerFactory.getLogger("bobz").warn("found result: {}", dbResult.getId());
-                            }
 
                             testExecutionService.produceReport(testExecution);
 
@@ -214,8 +195,7 @@ public class FunctionalTestService extends TestService {
     }
 
 
-    @Transactional(propagation = Propagation.MANDATORY)
-    public Set<TestCaseResult> createRestAssuredTests(FunctionalTest requestedTest,
+    private Set<TestCaseResult> createRestAssuredTests(FunctionalTest requestedTest,
                                                        Set<DeploymentRecord> deploymentRecords,
                                                        IcarusUser creator) {
 
@@ -249,7 +229,7 @@ public class FunctionalTestService extends TestService {
                                 creator
                         );
 
-                        testCaseResults.add(testCaseResultRepository.saveAndFlush(testResult));
+                        testCaseResults.add(testResult);
                     });
 
                     threadSet.add(thread);
@@ -277,7 +257,11 @@ public class FunctionalTestService extends TestService {
                 .orElseThrow(() -> new EntityNotFoundException(FunctionalTest.class, testId));
     }
 
-    private void validateTest(FunctionalTest requestedTest) {
+
+    public FunctionalTest validateTest(Long testId) {
+
+
+        FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
 
         super.executeTest(requestedTest);
 
@@ -328,7 +312,9 @@ public class FunctionalTestService extends TestService {
 
         }
 
+        return requestedTest;
     }
+
 
     private Set<DeploymentRecord> createDeploymentRecord(FunctionalTest requestedTest, String deploymentId) {
 

@@ -19,7 +19,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,7 +26,6 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.STACK_OUTPUT_DIRECTORY;
@@ -53,10 +51,9 @@ public class FunctionDeployer {
 
 
 
-    @Async
-    public CompletableFuture<Set<DeploymentRecord>> deployFunctions(@NotNull Test associatedTest,
-                                                                    @NotNull Set<ResourceConfiguration> resourceConfigurations,
-                                                                    @NotBlank String id) {
+    public Set<DeploymentRecord> deployFunctions(@NotNull Test associatedTest,
+                                                 @NotNull Set<ResourceConfiguration> resourceConfigurations,
+                                                 @NotBlank String id) {
 
         String name = associatedTest.getTargetFunction().getName() + "-" + id;
 
@@ -77,10 +74,9 @@ public class FunctionDeployer {
 
         // Get URLs of Deployed Stacks
         log.warn("Getting function URLs for: {}", id);
-        Set<DeploymentRecord> completeDeploymentRecords = matchInfrastructureWithRecords
-                (stackDir, incompleteDeploymentRecords);
 
-        return CompletableFuture.completedFuture(completeDeploymentRecords);
+        return matchInfrastructureWithRecords
+                (stackDir, incompleteDeploymentRecords);
     }
 
 

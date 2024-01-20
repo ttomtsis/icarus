@@ -68,10 +68,10 @@ public class TestExecutionService {
     }
 
 
-    //@Transactional(Transactional.TxType.REQUIRED)
-    public TestExecution createEmptyExecution(@NotNull Test requestedTest, @NotBlank String deploymentId) {
+    public TestExecution createEmptyExecution(@NotNull Test requestedTest, @NotBlank String deploymentId
+            , @NotNull IcarusUser creator) {
 
-        TestExecution newTestExecution = new TestExecution(requestedTest, Instant.now(), deploymentId);
+        TestExecution newTestExecution = new TestExecution(requestedTest, Instant.now(), deploymentId, creator);
         return testExecutionRepository.save(newTestExecution);
     }
 
