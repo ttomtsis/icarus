@@ -3,20 +3,6 @@
     <property name="author">The Icarus Project</property>
     <property name="createdBy">Eclipse BIRT Designer Version 4.14.0.v202312020807</property>
     <text-property name="title">Test execution report</text-property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">queryText</property>
-            <property name="id">416</property>
-        </structure>
-        <structure>
-            <property name="name">queryTimeOut</property>
-            <property name="id">416</property>
-        </structure>
-        <structure>
-            <property name="name">rowFetchSize</property>
-            <property name="id">416</property>
-        </structure>
-    </list-property>
     <property name="units">in</property>
     <property name="iconFile">/templates/blank_report.gif</property>
     <property name="layoutPreference">fixed layout</property>
@@ -25,10 +11,12 @@
     <parameters>
         <scalar-parameter name="ExecutionID" id="12">
             <property name="valueType">static</property>
+            <property name="isRequired">true</property>
             <property name="dataType">string</property>
             <property name="distinct">true</property>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
+            <property name="concealValue">false</property>
             <property name="controlType">text-box</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
@@ -1111,11 +1099,21 @@ where public.function.id = ?]]></xml-property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">param_1</property>
-                    <property name="paramName">TestID</property>
+                    <property name="paramName">ExecutionID</property>
                     <property name="nativeName"></property>
                     <property name="dataType">integer</property>
                     <property name="nativeDataType">-5</property>
                     <property name="position">1</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">param_2</property>
+                    <property name="paramName">TestID</property>
+                    <property name="nativeName"></property>
+                    <property name="dataType">integer</property>
+                    <property name="nativeDataType">-5</property>
+                    <property name="position">2</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1250,12 +1248,30 @@ where public.function.id = ?]]></xml-property>
 FROM public.functional_test
 INNER JOIN public.test_case ON public.functional_test.id = public.test_case.parent_test_id
 INNER JOIN public.test_case_member ON public.test_case.id = public.test_case_member.parent_test_case_id
-INNER JOIN public.test_case_result ON public.test_case_member.id = public.test_case_result.test_case_results_id
+INNER JOIN public.test_case_result ON public.test_case_member.id = public.test_case_result.parent_test_case_member_id
+AND public.test_case_result.test_case_results_id = ?
 WHERE public.functional_test.id = ?;
 ]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name></design:name>
+            <design:position>2</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>-5</design:nativeDataTypeCode>
+          <design:precision>0</design:precision>
+          <design:scale>0</design:scale>
+          <design:nullability>Unknown</design:nullability>
+        </design:attributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
   <design:ResultSets derivedMetaData="true">
     <design:resultSetDefinitions>
       <design:resultSetColumns>
