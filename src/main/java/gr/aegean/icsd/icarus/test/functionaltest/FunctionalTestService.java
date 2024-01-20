@@ -247,7 +247,7 @@ public class FunctionalTestService extends TestService {
     }
 
 
-    public FunctionalTest validateTest(Long testId) {
+    public FunctionalTest validateTest(@NotNull @Positive Long testId) {
 
 
         FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
