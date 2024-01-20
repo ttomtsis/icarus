@@ -6,20 +6,19 @@ import gr.aegean.icsd.icarus.provideraccount.GcpAccount;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
-import gr.aegean.icsd.icarus.util.services.FileService;
-import gr.aegean.icsd.icarus.util.services.ProcessService;
 import gr.aegean.icsd.icarus.util.aws.AwsRegion;
 import gr.aegean.icsd.icarus.util.aws.LambdaRuntime;
 import gr.aegean.icsd.icarus.util.enums.Platform;
 import gr.aegean.icsd.icarus.util.exceptions.async.StackDeploymentException;
 import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
+import gr.aegean.icsd.icarus.util.services.FileService;
+import gr.aegean.icsd.icarus.util.services.ProcessService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,7 +26,6 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static gr.aegean.icsd.icarus.util.terraform.TerraformConfiguration.STACK_OUTPUT_DIRECTORY;
@@ -53,9 +51,9 @@ public class FunctionDeployer {
 
 
 
-    @Async
-    public CompletableFuture<Set<DeploymentRecord>> deployFunctions(@NotNull Test associatedTest,
-                                                                    @NotBlank String id) {
+    public Set<DeploymentRecord> deployFunctions(@NotNull Test associatedTest,
+                                                 @NotNull Set<ResourceConfiguration> resourceConfigurations,
+                                                 @NotBlank String id) {
 
         String name = associatedTest.getTargetFunction().getName() + "-" + id;
 
@@ -64,7 +62,7 @@ public class FunctionDeployer {
 
         // Create Terraform Stacks
         Set<DeploymentRecord> incompleteDeploymentRecords = createInfrastructure(outputDir, name,
-                associatedTest, id);
+                associatedTest, id, resourceConfigurations);
 
         log.warn("Finished synthesizing: {}", id);
 
@@ -76,15 +74,15 @@ public class FunctionDeployer {
 
         // Get URLs of Deployed Stacks
         log.warn("Getting function URLs for: {}", id);
-        Set<DeploymentRecord> completeDeploymentRecords = matchInfrastructureWithRecords
-                (stackDir, incompleteDeploymentRecords);
 
-        return CompletableFuture.completedFuture(completeDeploymentRecords);
+        return matchInfrastructureWithRecords
+                (stackDir, incompleteDeploymentRecords);
     }
 
 
     private synchronized Set<DeploymentRecord> createInfrastructure(String outputDir, String stackName,
-                                                                    Test associatedTest, String id) {
+                                                                    Test associatedTest, String id,
+                                                                    Set<ResourceConfiguration> resourceConfigurations) {
 
         App app = App.Builder.create()
                 .outdir(outputDir)
@@ -92,7 +90,8 @@ public class FunctionDeployer {
 
         // Create stack
         log.warn("Creating stack: {}", id);
-        Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformStack(stackName, app, outputDir, associatedTest, id);
+        Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformStack(stackName, app, outputDir,
+                resourceConfigurations, associatedTest, id);
 
         log.warn("Finished creating: {}", id);
 
@@ -180,6 +179,7 @@ public class FunctionDeployer {
 
     private Set<DeploymentRecord> createTerraformStack(@NotBlank String name, @NotNull App app,
                                                        @NotBlank String outputDir,
+                                                       @NotNull Set<ResourceConfiguration> resourceConfigurations,
                                                        @NotNull Test associatedTest, @NotBlank String id) {
 
         MainStack mainStack = new MainStack(app, name);
@@ -205,7 +205,7 @@ public class FunctionDeployer {
 
         for (ProviderAccount account : associatedTest.getAccountsList()) {
 
-            for (ResourceConfiguration configuration : associatedTest.getResourceConfigurations()) {
+            for (ResourceConfiguration configuration : resourceConfigurations) {
 
                 if (account instanceof AwsAccount awsAccount &&
                         configuration.getProviderPlatform().equals(Platform.AWS)) {

@@ -1,6 +1,7 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.performancetest.loadprofile.LoadProfile;
 import gr.aegean.icsd.icarus.util.enums.Metric;
@@ -29,6 +30,11 @@ public class PerformanceTest extends Test  {
     @OneToMany(mappedBy = "parentTest", cascade = CascadeType.ALL,
             targetEntity = LoadProfile.class, orphanRemoval = true)
     private final Set<LoadProfile> loadProfiles = new HashSet<>();
+
+    @OneToMany(mappedBy = "parentTest", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
+            targetEntity = ResourceConfiguration.class, orphanRemoval = true,
+            fetch = FetchType.EAGER)
+    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
 
 
@@ -157,6 +163,10 @@ public class PerformanceTest extends Test  {
 
     public Set<LoadProfile> getLoadProfiles() {
         return loadProfiles;
+    }
+
+    public Set<ResourceConfiguration> getResourceConfigurations() {
+        return resourceConfigurations;
     }
 
 

@@ -10,8 +10,32 @@ public class AsyncExecutionFailedException extends RuntimeException {
     private static final Logger log = LoggerFactory.getLogger("Test Execution Exception");
 
 
+
     public AsyncExecutionFailedException(Throwable throwable) {
+
         super();
+        printDetails(throwable);
+    }
+
+
+    public AsyncExecutionFailedException(String message) {
+
+        super(message);
+
+        String errorMessage = String.format("Async exception caught: %s",  message);
+        log.error(errorMessage);
+    }
+
+
+    public AsyncExecutionFailedException(String message, Throwable throwable) {
+
+        super(message, throwable);
+        printDetails(throwable);
+    }
+
+
+
+    private void printDetails(Throwable throwable) {
 
         if (throwable.getCause() != null) {
 
@@ -49,18 +73,7 @@ public class AsyncExecutionFailedException extends RuntimeException {
 
             log.error(errorMessage);
         }
-
     }
-
-    public AsyncExecutionFailedException(String message) {
-
-        super(message);
-
-        String errorMessage = String.format("Async exception caught: %s",  message);
-        log.error(errorMessage);
-    }
-
-
 
 
 }

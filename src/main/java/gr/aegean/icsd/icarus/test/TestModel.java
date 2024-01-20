@@ -20,7 +20,6 @@ public class TestModel extends RepresentationModel<TestModel> {
     private Long testAuthor;
     private Long targetFunction;
     private  Set<Long> accountsList;
-    private Set<Long> resourceConfigurations;
     private String authorUsername;
     private ExecutionState state;
 
@@ -37,7 +36,6 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.testAuthor = model.getTestAuthor();
         this.targetFunction = model.getTestAuthor();
         this.accountsList = model.getAccountsList();
-        this.resourceConfigurations = model.getResourceConfigurations();
         this.authorUsername = model.getAuthorUsername();
         this.state = model.getState();
         this.creator = model.getCreator();
@@ -133,14 +131,6 @@ public class TestModel extends RepresentationModel<TestModel> {
 
     public void setState(ExecutionState state) {
         this.state = state;
-    }
-
-    public Set<Long> getResourceConfigurations() {
-        return resourceConfigurations;
-    }
-
-    public void setResourceConfigurations(Set<Long> resourceConfigurations) {
-        this.resourceConfigurations = resourceConfigurations;
     }
 
     public String getCreator() {

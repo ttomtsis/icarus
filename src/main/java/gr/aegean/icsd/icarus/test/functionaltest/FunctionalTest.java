@@ -4,8 +4,6 @@ import gr.aegean.icsd.icarus.function.Function;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
-import gr.aegean.icsd.icarus.util.enums.Platform;
-import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +16,11 @@ import java.util.Set;
 @Table(name = "functional_test")
 public class FunctionalTest extends Test {
 
+
+    @OneToOne(mappedBy = "parentTest", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
+            targetEntity = ResourceConfiguration.class, orphanRemoval = true,
+            fetch = FetchType.EAGER)
+    private ResourceConfiguration resourceConfiguration;
 
     @URL(message = "Functional Test's function URL is not a valid URL")
     private String functionURL;
@@ -94,6 +97,9 @@ public class FunctionalTest extends Test {
         Function targetFunction = new Function();
         targetFunction.setId(model.getTargetFunction());
 
+        ResourceConfiguration configuration = new ResourceConfiguration();
+        configuration.setId(model.getResourceConfiguration());
+
         return new FunctionalTestBuilder(
                 model.getName(),
                 model.getHttpMethod())
@@ -106,28 +112,6 @@ public class FunctionalTest extends Test {
     }
 
 
-    @PrePersist
-    private void checkConfigurations() {
-
-        int totalAwsConfigurations = 0;
-        int totalGcpConfigurations = 0;
-
-        for (ResourceConfiguration configuration : this.getResourceConfigurations()) {
-            if (configuration.getProviderPlatform().equals(Platform.AWS)) {
-                totalAwsConfigurations++;
-            }
-            if (configuration.getProviderPlatform().equals(Platform.GCP)) {
-                totalGcpConfigurations++;
-            }
-        }
-
-        if (totalAwsConfigurations > 1 || totalGcpConfigurations > 1) {
-            throw new InvalidEntityConfigurationException(FunctionalTest.class,
-                    "A Functional Test may only contain one type of " +
-                    "resource configuration per platform");
-        }
-    }
-
 
     public String getFunctionURL() {
         return functionURL;
@@ -139,6 +123,14 @@ public class FunctionalTest extends Test {
 
     public Set<TestCase> getTestCases() {
         return testCases;
+    }
+
+    public ResourceConfiguration getResourceConfiguration() {
+        return resourceConfiguration;
+    }
+
+    public void setResourceConfiguration(ResourceConfiguration resourceConfiguration) {
+        this.resourceConfiguration = resourceConfiguration;
     }
 
 

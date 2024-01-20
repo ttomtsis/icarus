@@ -1,10 +1,9 @@
 package gr.aegean.icsd.icarus.test;
 
 import gr.aegean.icsd.icarus.function.Function;
-import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
-import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
-import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
+import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -63,11 +62,6 @@ public class Test {
     @ManyToMany(cascade = CascadeType.REFRESH, targetEntity = ProviderAccount.class,
     fetch = FetchType.EAGER)
     private final Set<ProviderAccount> accountsList = new HashSet<>();
-
-    @OneToMany(mappedBy = "parentTest", cascade = {CascadeType.REFRESH, CascadeType.REMOVE},
-            targetEntity = ResourceConfiguration.class, orphanRemoval = true,
-    fetch = FetchType.EAGER)
-    private final Set<ResourceConfiguration> resourceConfigurations = new HashSet<>();
 
     @OneToMany(targetEntity = TestExecution.class, mappedBy = "parentTest", cascade = {CascadeType.REFRESH,
             CascadeType.REMOVE}, orphanRemoval = true)
@@ -159,10 +153,6 @@ public class Test {
 
     public void setTargetFunction(Function targetFunction) {
         this.targetFunction = targetFunction;
-    }
-
-    public Set<ResourceConfiguration> getResourceConfigurations() {
-        return resourceConfigurations;
     }
 
     public Set<TestExecution> getTestExecutions() {

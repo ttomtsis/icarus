@@ -3,7 +3,6 @@ package gr.aegean.icsd.icarus.test.functionaltest;
 import gr.aegean.icsd.icarus.test.TestModel;
 import gr.aegean.icsd.icarus.test.TestModelAssembler;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
-import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
@@ -44,17 +43,14 @@ public class FunctionalTestModelAssembler
             testCases.add(testCase.getId());
         }
 
-        Set<Long> resourceConfigurations = new HashSet<>();
-        for (ResourceConfiguration configuration : entity.getResourceConfigurations()) {
-            resourceConfigurations.add(configuration.getId());
-        }
-
+        Long configurationID = entity.getResourceConfiguration() != null ? entity.getId() : null;
 
         FunctionalTestModel newModel = new FunctionalTestModel(parentModel, entity.getFunctionURL(),
-                testCases, resourceConfigurations);
+                testCases, configurationID);
 
         return addLinksToModel(newModel);
     }
+
 
     private FunctionalTestModel addLinksToModel(FunctionalTestModel model) {
 

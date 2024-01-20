@@ -10,18 +10,18 @@ public class FunctionalTestModel extends TestModel {
 
     private String functionUrl;
     private Set<Long> testCases;
-    private Set<Long> resourceConfigurations;
+    private Long resourceConfiguration;
 
 
 
     public FunctionalTestModel(TestModel parentModel , String functionUrl,
                                Set<Long> testCases,
-                               Set<Long> resourceConfigurations) {
+                               Long resourceConfiguration) {
 
         super(parentModel);
         this.functionUrl = functionUrl;
         this.testCases = testCases;
-        this.resourceConfigurations = resourceConfigurations;
+        this.resourceConfiguration = resourceConfiguration;
     }
 
     public FunctionalTestModel() {}
@@ -44,12 +44,12 @@ public class FunctionalTestModel extends TestModel {
         this.testCases = testCases;
     }
 
-    public Set<Long> getResourceConfigurations() {
-        return resourceConfigurations;
+    public Long getResourceConfiguration() {
+        return resourceConfiguration;
     }
 
-    public void setResourceConfigurations(Set<Long> resourceConfigurations) {
-        this.resourceConfigurations = resourceConfigurations;
+    public void setResourceConfiguration(Long resourceConfiguration) {
+        this.resourceConfiguration = resourceConfiguration;
     }
 
 

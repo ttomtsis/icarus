@@ -1,6 +1,8 @@
 package gr.aegean.icsd.icarus.test.performancetest;
 
 
+import gr.aegean.icsd.icarus.util.security.UserUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +18,7 @@ public class PerformanceTestController {
 
     private final PerformanceTestService service;
     private final PerformanceTestModelAssembler assembler;
-
+    private static final Logger log = LoggerFactory.getLogger(PerformanceTestController.class);
 
 
     public PerformanceTestController(PerformanceTestService service, PerformanceTestModelAssembler assembler) {
@@ -73,9 +75,12 @@ public class PerformanceTestController {
     public ResponseEntity<Void> executeTest(@PathVariable Long testId) {
 
         String deploymentId = UUID.randomUUID().toString().substring(0, 8);
-        LoggerFactory.getLogger("Performance Test Controller").warn("New request received: " + deploymentId);
 
-        service.executeTest(testId, deploymentId);
+        log.warn("New request received: {}", deploymentId);
+        log.warn("Validating request: {}", deploymentId);
+
+        PerformanceTest test = service.validateTest(testId);
+        service.executeTest(test, deploymentId, UserUtils.getLoggedInUser());
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/v0/tests/{testId}/executions/" + deploymentId + "/status")

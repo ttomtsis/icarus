@@ -47,12 +47,12 @@ public class TestExecution {
     private Test parentTest;
 
     @OneToMany(targetEntity = TestCaseResult.class, orphanRemoval = true,
-            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
+            cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn
     private final Set<TestCaseResult> testCaseResults = new HashSet<>();
 
     @OneToMany(targetEntity = MetricResult.class, orphanRemoval = true,
-            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
+            cascade = {CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn
     private final Set<MetricResult> metricResults = new HashSet<>();
 
@@ -62,11 +62,13 @@ public class TestExecution {
 
 
 
-    public TestExecution(Test parentTest, Instant startDate, String deploymentId) {
+    public TestExecution(Test parentTest, Instant startDate, String deploymentId, IcarusUser creator) {
 
         this.parentTest = parentTest;
         this.startDate = startDate;
         this.deploymentId = deploymentId;
+
+        this.creator = creator;
 
         this.state = ExecutionState.CREATED;
     }
