@@ -3,6 +3,7 @@ package gr.aegean.icsd.icarus.util.security;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.IcarusConfigurationException;
 import gr.aegean.icsd.icarus.util.security.httpbasic.SqlAuthenticationManager;
+import gr.aegean.icsd.icarus.util.security.oauth2.Auth0AuthenticationConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +56,6 @@ public class SecurityConfiguration {
     private String testAccountEmail;
 
 
-
     @Value("${security.credentialsExpirationPeriod}")
     public void setCredentialsExpirationPeriod(Integer credentialsExpirationPeriod) {
 
@@ -67,6 +67,7 @@ public class SecurityConfiguration {
                     + credentialsExpirationPeriod);
         }
     }
+
 
 
     /**
@@ -128,10 +129,13 @@ public class SecurityConfiguration {
 
                 .csrf(AbstractHttpConfigurer::disable)
 
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new Auth0AuthenticationConverter()))
+                )
+
                 .httpBasic(Customizer.withDefaults());
 
         return http.build();
-
     }
 
 
