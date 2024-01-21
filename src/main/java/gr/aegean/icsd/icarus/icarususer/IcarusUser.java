@@ -12,9 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.MAX_LENGTH;
 import static gr.aegean.icsd.icarus.util.constants.IcarusConstants.MIN_LENGTH;
@@ -26,8 +24,7 @@ public class IcarusUser implements UserDetails {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Username cannot be blank")
     @Column(nullable = false, unique = true)
@@ -106,11 +103,18 @@ public class IcarusUser implements UserDetails {
 
 
 
-    public Long getId() {
+    @PrePersist
+    public void generateIdIfNotProvided() {
+        id = id == null ? UUID.randomUUID().toString() : id;
+    }
+
+
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -185,6 +189,19 @@ public class IcarusUser implements UserDetails {
         this.credentialsLastChanged = credentialsLastChanged;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IcarusUser that = (IcarusUser) o;
+        return Objects.equals(username, that.username) && Objects.equals(email, that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, email);
+    }
 
     @Override
     public String toString() {

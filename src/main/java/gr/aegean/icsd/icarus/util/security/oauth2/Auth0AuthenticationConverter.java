@@ -23,6 +23,7 @@ public class Auth0AuthenticationConverter implements Converter<Jwt, AbstractAuth
         // Create an instance of IcarusUser
         IcarusUser icarusUser = new IcarusUser();
 
+        icarusUser.setId(id);
         icarusUser.setUsername(username);
         icarusUser.setEmail(email);
 
