@@ -10,6 +10,7 @@ import com.auth0.json.mgmt.users.UsersPage;
 import com.auth0.net.Response;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.icarususer.IcarusUserRepository;
+import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -48,11 +49,19 @@ public class Auth0DatabaseSynchronizer {
     @Transactional
     public void synchroniseDatabase() throws Auth0Exception {
 
-        ManagementAPI management = connectToManagementAPI();
+        try {
+            ManagementAPI management = connectToManagementAPI();
 
-        Set<String> auth0Users = getAuth0Users(management);
+            Set<String> auth0Users = getAuth0Users(management);
 
-        synchroniseDatabase(auth0Users);
+            synchroniseDatabase(auth0Users);
+        }
+        catch (RuntimeException ex) {
+
+            log.error("Failed to synchronize the local database with Auth0");
+            throw new AsyncExecutionFailedException(ex);
+        }
+
     }
 
 
