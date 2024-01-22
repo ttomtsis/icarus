@@ -43,20 +43,23 @@ public class SecurityConfiguration {
     public static final int MAXIMUM_PASSWORD_LENGTH = 150;
 
 
-    @Value("${security.users.enableTestUser}")
+    @Value("${security.httpBasic.users.enableTestUser}")
     private boolean enableTestAccounts;
 
-    @Value("${security.users.testUserUsername}")
+    @Value("${security.httpBasic.users.testUserUsername}")
     private String testAccountUsername;
 
-    @Value("${security.users.testUserPassword}")
+    @Value("${security.httpBasic.users.testUserPassword}")
     private String testAccountPassword;
 
-    @Value("${security.users.testUserEmail}")
+    @Value("${security.httpBasic.users.testUserEmail}")
     private String testAccountEmail;
 
+    @Value("${security.httpBasic.enableHttpBasic}")
+    private boolean enableHttpBasic;
 
-    @Value("${security.credentialsExpirationPeriod}")
+
+    @Value("${security.httpBasic.credentialsExpirationPeriod}")
     public void setCredentialsExpirationPeriod(Integer credentialsExpirationPeriod) {
 
         if (credentialsExpirationPeriod != null && credentialsExpirationPeriod > 0) {
@@ -131,9 +134,12 @@ public class SecurityConfiguration {
 
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(converter))
-                )
 
-                .httpBasic(Customizer.withDefaults());
+                );
+
+        if (enableHttpBasic) {
+               http.httpBasic(Customizer.withDefaults());
+        }
 
         return http.build();
     }
@@ -166,7 +172,7 @@ public class SecurityConfiguration {
     @Bean
     boolean createTestUsers(SqlAuthenticationManager userManager) {
 
-        if (enableTestAccounts && !userManager.userExists(testAccountUsername)) {
+        if (enableTestAccounts && enableHttpBasic && !userManager.userExists(testAccountUsername)) {
 
             UserDetails testJournalist = new IcarusUser(testAccountUsername, testAccountPassword, testAccountEmail);
             userManager.createUser(testJournalist);

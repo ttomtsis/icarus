@@ -10,13 +10,16 @@ icarus:
 
 security:
 
-  credentialsExpirationPeriod: ${CREDENTIALS_EXPIRATION_PERIOD:355}
+  httpBasic:
+    enableHttpBasic: ${ENABLE_HTTP_BASIC:false}
 
-  users:
-    enableTestUser: ${ENABLE_TEST_USER:false}
-    testUserUsername: ${TEST_USER_USERNAME:}
-    testUserPassword: ${TEST_USER_PASSWORD:}
-    testUserEmail: ${TEST_USER_EMAIL:}
+    credentialsExpirationPeriod: ${CREDENTIALS_EXPIRATION_PERIOD:355}
+
+    users:
+      enableTestUser: ${ENABLE_TEST_USER:false}
+      testUserUsername: ${TEST_USER_USERNAME:}
+      testUserPassword: ${TEST_USER_PASSWORD:}
+      testUserEmail: ${TEST_USER_EMAIL:}
 
   auth0:
     clientId: ${AUTH0_CLIENT_ID}
