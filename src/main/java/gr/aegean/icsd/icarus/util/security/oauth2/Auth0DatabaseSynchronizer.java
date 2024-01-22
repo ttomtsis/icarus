@@ -47,7 +47,7 @@ public class Auth0DatabaseSynchronizer {
     @Bean
     @Async
     @Transactional
-    public void synchroniseDatabase() throws Auth0Exception {
+    public void synchroniseDatabase()  {
 
         try {
             ManagementAPI management = connectToManagementAPI();
@@ -56,7 +56,7 @@ public class Auth0DatabaseSynchronizer {
 
             synchroniseDatabase(auth0Users);
         }
-        catch (RuntimeException ex) {
+        catch (Auth0Exception ex) {
 
             log.error("Failed to synchronize the local database with Auth0");
             throw new AsyncExecutionFailedException(ex);
