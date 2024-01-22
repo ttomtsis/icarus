@@ -49,18 +49,24 @@ public class Auth0DatabaseSynchronizer {
     @Transactional
     public void synchroniseDatabase()  {
 
-        try {
-            ManagementAPI management = connectToManagementAPI();
+        if (configuration.getSynchronizeDatabase()) {
 
-            Set<String> auth0Users = getAuth0Users(management);
+            log.warn("Starting database synchronization process");
 
-            synchroniseDatabase(auth0Users);
+            try {
+                ManagementAPI management = connectToManagementAPI();
+
+                Set<String> auth0Users = getAuth0Users(management);
+
+                synchroniseDatabase(auth0Users);
+            }
+            catch (Auth0Exception ex) {
+
+                log.error("Failed to synchronize the local database with Auth0");
+                throw new AsyncExecutionFailedException(ex);
+            }
         }
-        catch (Auth0Exception ex) {
 
-            log.error("Failed to synchronize the local database with Auth0");
-            throw new AsyncExecutionFailedException(ex);
-        }
 
     }
 

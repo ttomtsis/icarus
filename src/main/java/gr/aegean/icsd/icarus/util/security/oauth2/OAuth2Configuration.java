@@ -14,6 +14,7 @@ public class OAuth2Configuration {
     private String clientSecret;
     private String domain;
     private String managementApiId;
+    private Boolean synchronizeDatabase;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.audiences}")
     private String audiences;
@@ -58,6 +59,14 @@ public class OAuth2Configuration {
 
     public void setManagementApiId(String managementApiId) {
         this.managementApiId = managementApiId;
+    }
+
+    public Boolean getSynchronizeDatabase() {
+        return synchronizeDatabase;
+    }
+
+    public void setSynchronizeDatabase(Boolean synchronizeDatabase) {
+        this.synchronizeDatabase = synchronizeDatabase;
     }
 
 
