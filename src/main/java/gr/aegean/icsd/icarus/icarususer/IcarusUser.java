@@ -3,10 +3,7 @@ package gr.aegean.icsd.icarus.icarususer;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.test.Test;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import jdk.jfr.BooleanFlag;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,8 +24,9 @@ public class IcarusUser implements UserDetails {
     private String id;
 
     @NotBlank(message = "Username cannot be blank")
-    @Column(nullable = false, unique = true)
+    @Pattern(regexp = "^[a-z0-9]*$", message = "A user's username must be an alphanumerical all lowercase string")
     @Size(min = MIN_LENGTH, max = MAX_LENGTH, message = "Username does not conform to length limitations")
+    @Column(nullable = false, unique = true)
     private String username;
 
     @NotBlank(message = "Password cannot be blank")
