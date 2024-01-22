@@ -21,8 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static gr.aegean.icsd.icarus.util.security.oauth2.OAuth2Configuration.*;
-
 
 @Component
 public class Auth0DatabaseSynchronizer {
@@ -32,11 +30,15 @@ public class Auth0DatabaseSynchronizer {
 
 
     private final IcarusUserRepository icarusUserRepository;
+    private final OAuth2Configuration configuration;
 
 
 
-    public Auth0DatabaseSynchronizer(IcarusUserRepository icarusUserRepository) {
+    public Auth0DatabaseSynchronizer(IcarusUserRepository icarusUserRepository,
+                                     OAuth2Configuration configuration) {
+
         this.icarusUserRepository = icarusUserRepository;
+        this.configuration = configuration;
     }
 
 
@@ -47,7 +49,9 @@ public class Auth0DatabaseSynchronizer {
     public void synchroniseDatabase() throws Auth0Exception {
 
         ManagementAPI management = connectToManagementAPI();
+
         Set<String> auth0Users = getAuth0Users(management);
+
         synchroniseDatabase(auth0Users);
     }
 
@@ -57,23 +61,23 @@ public class Auth0DatabaseSynchronizer {
         log.warn("Connecting to Auth0 Management API");
 
         // Auth0 domain shared across auth0 apps
-        String domain = DOMAIN;
+        String domain = configuration.getDomain();
 
         // ID and Secret of the M2M Auth0 app
-        String id = CLIENT_ID;
-        String secret = CLIENT_SECRET;
+        String id = configuration.getClientId();
+        String secret = configuration.getClientSecret();
 
         // Identifier of the auth0 management api
-        String managementApiId = MANAGEMENT_API_ID;
+        String managementApiId = configuration.getManagementApiId();
 
-        AuthAPI auth = new AuthAPI(domain, id, secret);
+        AuthAPI auth = AuthAPI.newBuilder(domain, id, secret).build();
         Response<TokenHolder> response = auth.requestToken(managementApiId).execute();
         TokenHolder holder = response.getBody();
         String managementApiToken = holder.getAccessToken();
 
         log.warn("Connection to Auth0 Management API successful");
 
-        return new ManagementAPI(domain, managementApiToken);
+        return ManagementAPI.newBuilder(domain, managementApiToken).build();
     }
 
 

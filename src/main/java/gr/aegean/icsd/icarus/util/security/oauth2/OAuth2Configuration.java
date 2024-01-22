@@ -1,43 +1,63 @@
 package gr.aegean.icsd.icarus.util.security.oauth2;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
+@ConfigurationProperties(prefix = "security.auth0")
 public class OAuth2Configuration {
 
 
-    public static String AUDIENCE;
-    public static String CLIENT_ID;
-    public static String CLIENT_SECRET;
-    public static String DOMAIN;
-    public static String MANAGEMENT_API_ID;
-
+    private String clientId;
+    private String clientSecret;
+    private String domain;
+    private String managementApiId;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.audiences}")
-    public void setAudience(String audience) {
-        OAuth2Configuration.AUDIENCE = audience;
+    private String audiences;
+
+
+
+    public String getAudiences() {
+        return audiences;
     }
 
-    @Value("${security.auth0.clientId}")
-    public void setClientId(String clientID) {
-        OAuth2Configuration.CLIENT_ID = clientID;
+    public void setAudiences(String audiences) {
+        this.audiences = audiences;
     }
 
-    @Value("${security.auth0.clientSecret}")
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
     public void setClientSecret(String clientSecret) {
-        OAuth2Configuration.CLIENT_SECRET = clientSecret;
+        this.clientSecret = clientSecret;
     }
 
-    @Value("${security.auth0.domain}")
+    public String getDomain() {
+        return domain;
+    }
+
     public void setDomain(String domain) {
-        OAuth2Configuration.DOMAIN = domain;
+        this.domain = domain;
     }
 
-    @Value("${security.auth0.managementApiId}")
+    public String getManagementApiId() {
+        return managementApiId;
+    }
+
     public void setManagementApiId(String managementApiId) {
-        OAuth2Configuration.MANAGEMENT_API_ID = managementApiId;
+        this.managementApiId = managementApiId;
     }
 
 

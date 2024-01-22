@@ -80,7 +80,7 @@ public class SecurityConfiguration {
      * @throws Exception If invalid configuration is provided
      */
     @Bean
-    SecurityFilterChain createFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain createFilterChain(HttpSecurity http, Auth0AuthenticationConverter converter) throws Exception {
 
         http
 
@@ -130,7 +130,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new Auth0AuthenticationConverter()))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(converter))
                 )
 
                 .httpBasic(Customizer.withDefaults());
