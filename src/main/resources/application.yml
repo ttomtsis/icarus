@@ -18,6 +18,12 @@ security:
     testUserPassword: ${TEST_USER_PASSWORD:}
     testUserEmail: ${TEST_USER_EMAIL:}
 
+  auth0:
+    clientId: ${AUTH0_CLIENT_ID}
+    clientSecret: ${AUTH0_CLIENT_SECRET}
+    domain: ${AUTH0_DOMAIN}
+    managementApiId: ${AUTH0_MANAGEMENT_API_ID}
+
 
 
 jmeter:
@@ -53,9 +59,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${PROVIDER_URI}
-          jwk-set-uri: ${PROVIDER_JWKS}
-          audiences: ${AUDIENCES}
+          issuer-uri: ${AUTH0_PROVIDER_URI}
+          jwk-set-uri: ${AUTH0_PROVIDER_JWKS}
+          audiences: ${AUTH0_AUDIENCES}
 
   datasource:
     url: ${DATASOURCE_URL}

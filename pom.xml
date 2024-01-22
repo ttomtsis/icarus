@@ -93,6 +93,13 @@
 
         <!--> ###  - External Tools - ###<!/-->
 
+        <!---> Auth0 Client Library <!/-->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>auth0</artifactId>
+            <version>2.10.0</version>
+        </dependency>
+
         <!---> Eclipse BiRT <!/-->
 
         <!--> https://stackoverflow.com/questions/75804853/eclipse-birt-report-design-file-version-3-2-24-missing <!/-->
