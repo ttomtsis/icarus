@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface IcarusUserRepository extends JpaRepository<IcarusUser, Long> {
+public interface IcarusUserRepository extends JpaRepository<IcarusUser, String> {
 
     Optional<IcarusUser> findUserByUsername(String username);
 

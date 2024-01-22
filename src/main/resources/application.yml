@@ -10,14 +10,23 @@ icarus:
 
 security:
 
-  credentialsExpirationPeriod: ${CREDENTIALS_EXPIRATION_PERIOD:355}
+  httpBasic:
+    enableHttpBasic: ${ENABLE_HTTP_BASIC:false}
 
-  users:
+    credentialsExpirationPeriod: ${CREDENTIALS_EXPIRATION_PERIOD:355}
 
-    enableTestUser: ${ENABLE_TEST_USER:false}
-    testUserUsername: ${TEST_USER_USERNAME:}
-    testUserPassword: ${TEST_USER_PASSWORD:}
-    testUserEmail: ${TEST_USER_EMAIL:}
+    users:
+      enableTestUser: ${ENABLE_TEST_USER:false}
+      testUserUsername: ${TEST_USER_USERNAME:}
+      testUserPassword: ${TEST_USER_PASSWORD:}
+      testUserEmail: ${TEST_USER_EMAIL:}
+
+  auth0:
+    clientId: ${AUTH0_CLIENT_ID}
+    clientSecret: ${AUTH0_CLIENT_SECRET}
+    domain: ${AUTH0_DOMAIN}
+    managementApiId: ${AUTH0_MANAGEMENT_API_ID}
+    synchronizeDatabase: ${AUTH0_SYNCHRONIZE_DATABASE:true}
 
 
 
@@ -50,6 +59,14 @@ spring:
       max-file-size: 200MB
       max-request-size: 215MB
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH0_PROVIDER_URI}
+          jwk-set-uri: ${AUTH0_PROVIDER_JWKS}
+          audiences: ${AUTH0_AUDIENCES}
+
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DB_USERNAME}
@@ -75,5 +92,6 @@ server:
 
 logging:
   level:
+    org.springframework.security: DEBUG
     org.apache.jmeter: ERROR
 

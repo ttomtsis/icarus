@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static gr.aegean.icsd.icarus.util.security.SecurityConfiguration.*;
+import static gr.aegean.icsd.icarus.util.security.httpbasic.HttpBasicConfiguration.*;
 
 
 /**

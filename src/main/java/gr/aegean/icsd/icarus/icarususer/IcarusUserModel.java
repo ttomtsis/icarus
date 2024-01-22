@@ -8,7 +8,7 @@ import java.util.Set;
 public class IcarusUserModel extends RepresentationModel<IcarusUserModel> {
 
 
-    private Long id;
+    private String id;
     private String username;
     private String password;
     private String email;
@@ -22,11 +22,11 @@ public class IcarusUserModel extends RepresentationModel<IcarusUserModel> {
 
 
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

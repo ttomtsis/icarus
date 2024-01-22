@@ -17,7 +17,7 @@ public class TestModel extends RepresentationModel<TestModel> {
     private RequestMethod httpMethod;
     private String path;
     private String pathVariable;
-    private Long testAuthor;
+    private String testAuthor;
     private Long targetFunction;
     private  Set<Long> accountsList;
     private String authorUsername;
@@ -34,7 +34,7 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.path = model.getPath();
         this.pathVariable = model.getPathVariable();
         this.testAuthor = model.getTestAuthor();
-        this.targetFunction = model.getTestAuthor();
+        this.targetFunction = model.getTargetFunction();
         this.accountsList = model.getAccountsList();
         this.authorUsername = model.getAuthorUsername();
         this.state = model.getState();
@@ -93,11 +93,11 @@ public class TestModel extends RepresentationModel<TestModel> {
         this.pathVariable = pathVariable;
     }
 
-    public Long getTestAuthor() {
+    public String getTestAuthor() {
         return testAuthor;
     }
 
-    public void setTestAuthor(Long testAuthor) {
+    public void setTestAuthor(String testAuthor) {
         this.testAuthor = testAuthor;
     }
 
