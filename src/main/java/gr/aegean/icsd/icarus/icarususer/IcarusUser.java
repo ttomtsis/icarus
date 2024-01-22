@@ -92,7 +92,15 @@ public class IcarusUser implements UserDetails {
         this.credentialsLastChanged = Instant.now();
     }
 
-    public IcarusUser() {}
+    public IcarusUser() {
+
+        this.accountEnabled = true;
+        this.accountNonLocked = true;
+        this.accountNonExpired = true;
+        this.credentialsNonExpired = true;
+
+        this.credentialsLastChanged = Instant.now();
+    }
 
     public static IcarusUser createUserFromModel(IcarusUserModel model) {
 
