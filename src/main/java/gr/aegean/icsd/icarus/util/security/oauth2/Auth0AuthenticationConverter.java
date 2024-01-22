@@ -8,19 +8,19 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Collections;
 
+import static gr.aegean.icsd.icarus.util.security.oauth2.OAuth2Configuration.AUDIENCE;
+
 
 public class Auth0AuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+    
 
     @Override
     public AbstractAuthenticationToken convert(Jwt source) {
 
-        // Extract the custom claims from the JWT
-        String id = (String) source.getClaims().get("https://www.icarus.com/id");
-        String username = (String) source.getClaims().get("https://www.icarus.com/username");
-        String email = (String) source.getClaims().get("https://www.icarus.com/email");
+        String id = (String) source.getClaims().get(AUDIENCE + "/id");
+        String username = (String) source.getClaims().get(AUDIENCE + "/username");
+        String email = (String) source.getClaims().get(AUDIENCE + "/email");
 
-
-        // Create an instance of IcarusUser
         IcarusUser icarusUser = new IcarusUser();
 
         icarusUser.setId(id);
