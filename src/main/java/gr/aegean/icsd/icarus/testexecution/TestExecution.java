@@ -60,6 +60,8 @@ public class TestExecution {
     @Enumerated(EnumType.STRING)
     private ExecutionState state;
 
+    private String regressionEquation;
+
 
 
     public TestExecution(Test parentTest, Instant startDate, String deploymentId, IcarusUser creator) {
@@ -154,6 +156,14 @@ public class TestExecution {
 
     public void setCreator(IcarusUser creator) {
         this.creator = creator;
+    }
+
+    public String getRegressionEquation() {
+        return regressionEquation;
+    }
+
+    public void setRegressionEquation(String regressionEquation) {
+        this.regressionEquation = regressionEquation;
     }
 
 
