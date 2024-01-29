@@ -15,7 +15,7 @@ import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.ReportGenerationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
-import gr.aegean.icsd.icarus.util.services.MathService;
+import gr.aegean.icsd.icarus.util.services.RegressionService;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,7 +50,7 @@ public class TestExecutionService {
     private final ReportService reportService;
     private final ReportRepository reportRepository;
 
-    private final MathService mathService;
+    private final RegressionService regressionService;
 
 
 
@@ -58,7 +58,7 @@ public class TestExecutionService {
                                 MetricResultRepository metricResultRepository,
                                 TestCaseResultRepository testCaseResultRepository,
                                 FunctionDeployer deployer, ReportService reportService,
-                                ReportRepository reportRepository, MathService mathService) {
+                                ReportRepository reportRepository, RegressionService regressionService) {
 
         this.testExecutionRepository = repository;
         this.testRepository = testRepository;
@@ -67,7 +67,7 @@ public class TestExecutionService {
         this.deployer = deployer;
         this.reportService = reportService;
         this.reportRepository = reportRepository;
-        this.mathService = mathService;
+        this.regressionService = regressionService;
     }
 
 
@@ -87,7 +87,7 @@ public class TestExecutionService {
         Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAllAndFlush(metricResults));
         testExecution.addMetricResults(resultSet);
 
-        testExecution.setRegressionEquation(mathService.applyLinearRegression(testExecution));
+        testExecution.setRegressionEquation(regressionService.applyLinearRegression(testExecution));
 
         testExecutionRepository.save(testExecution);
     }
