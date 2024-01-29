@@ -14,9 +14,6 @@
             <property name="isRequired">true</property>
             <property name="dataType">string</property>
             <property name="distinct">true</property>
-            <simple-property-list name="defaultValue">
-                <value type="constant">1</value>
-            </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
             <property name="controlType">text-box</property>
@@ -28,9 +25,6 @@
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="distinct">true</property>
-            <simple-property-list name="defaultValue">
-                <value type="constant">test</value>
-            </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
             <property name="controlType">text-box</property>
@@ -43,9 +37,6 @@
             <property name="isRequired">true</property>
             <property name="dataType">string</property>
             <property name="distinct">true</property>
-            <simple-property-list name="defaultValue">
-                <value type="constant">52</value>
-            </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
             <property name="concealValue">false</property>
@@ -59,9 +50,6 @@
             <property name="isRequired">true</property>
             <property name="dataType">string</property>
             <property name="distinct">true</property>
-            <simple-property-list name="defaultValue">
-                <value type="constant">1</value>
-            </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
             <property name="concealValue">false</property>
@@ -74,9 +62,6 @@
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="distinct">true</property>
-            <simple-property-list name="defaultValue">
-                <value type="constant">11/11/1111</value>
-            </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
             <property name="controlType">text-box</property>
@@ -212,6 +197,11 @@
                         <property name="name">parent_test_id</property>
                         <property name="dataType">decimal</property>
                     </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">regression_equation</property>
+                        <property name="dataType">string</property>
+                    </structure>
                 </list-property>
             </structure>
             <property name="dataSource">Icarus DB</property>
@@ -257,6 +247,12 @@
                     <property name="name">parent_test_id</property>
                     <property name="nativeName">parent_test_id</property>
                     <property name="dataType">decimal</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">regression_equation</property>
+                    <property name="nativeName">regression_equation</property>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select *
@@ -4773,6 +4769,25 @@ and public.metric_result.id = public.metric_result_metric_values.id
             </detail>
         </table>
         <label id="897"/>
-        <label id="898"/>
+        <label id="899">
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#0000FF</property>
+            <text-property name="text">Linear Regression:</text-property>
+        </label>
+        <data id="903">
+            <property name="dataSet">Test Executions</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">regression_equation</property>
+                    <text-property name="displayName">regression_equation</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["regression_equation"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <property name="resultSetColumn">regression_equation</property>
+        </data>
+        <label id="901"/>
+        <label id="902"/>
     </body>
 </report>
