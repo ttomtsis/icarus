@@ -99,51 +99,52 @@
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">id</property>
+                    <property name="alias">id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">id</text-property>
                     <text-property name="heading">id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">deployment_id</property>
+                    <property name="alias">deployment_id</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">deployment_id</text-property>
                     <text-property name="heading">deployment_id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">end_date</property>
+                    <property name="alias">end_date</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">end_date</text-property>
                     <text-property name="heading">end_date</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">start_date</property>
+                    <property name="alias">start_date</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">start_date</text-property>
                     <text-property name="heading">start_date</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">state</property>
+                    <property name="alias">state</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">state</text-property>
                     <text-property name="heading">state</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">creator_id</property>
+                    <property name="alias">creator_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">creator_id</text-property>
                     <text-property name="heading">creator_id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">parent_test_id</property>
+                    <property name="alias">parent_test_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">parent_test_id</text-property>
                     <text-property name="heading">parent_test_id</text-property>
-                </structure>
-                <structure>
-                    <property name="columnName">test_report</property>
-                    <property name="analysis">measure</property>
-                    <text-property name="displayName">test_report</text-property>
-                    <text-property name="heading">test_report</text-property>
                 </structure>
             </list-property>
             <list-property name="parameters">
@@ -189,7 +190,7 @@
                     <structure>
                         <property name="position">6</property>
                         <property name="name">creator_id</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">7</property>
@@ -198,8 +199,8 @@
                     </structure>
                     <structure>
                         <property name="position">8</property>
-                        <property name="name">test_report</property>
-                        <property name="dataType">decimal</property>
+                        <property name="name">regression_equation</property>
+                        <property name="dataType">string</property>
                     </structure>
                 </list-property>
             </structure>
@@ -210,56 +211,48 @@
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">deployment_id</property>
                     <property name="nativeName">deployment_id</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">end_date</property>
                     <property name="nativeName">end_date</property>
                     <property name="dataType">date-time</property>
-                    <property name="nativeDataType">93</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">start_date</property>
                     <property name="nativeName">start_date</property>
                     <property name="dataType">date-time</property>
-                    <property name="nativeDataType">93</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">state</property>
                     <property name="nativeName">state</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">creator_id</property>
                     <property name="nativeName">creator_id</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
                     <property name="name">parent_test_id</property>
                     <property name="nativeName">parent_test_id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">8</property>
-                    <property name="name">test_report</property>
-                    <property name="nativeName">test_report</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
+                    <property name="name">regression_equation</property>
+                    <property name="nativeName">regression_equation</property>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select *
@@ -270,60 +263,70 @@ WHERE public.test_execution.id = (?)]]></xml-property>
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">id</property>
+                    <property name="alias">id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">id</text-property>
                     <text-property name="heading">id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">description</property>
+                    <property name="alias">description</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">description</text-property>
                     <text-property name="heading">description</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">http_method</property>
+                    <property name="alias">http_method</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">http_method</text-property>
                     <text-property name="heading">http_method</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">name</property>
+                    <property name="alias">name</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">name</text-property>
                     <text-property name="heading">name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">path</property>
+                    <property name="alias">path</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">path</text-property>
                     <text-property name="heading">path</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">path_variable</property>
+                    <property name="alias">path_variable</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">path_variable</text-property>
                     <text-property name="heading">path_variable</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">test_author_id</property>
+                    <property name="alias">test_author_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">test_author_id</text-property>
                     <text-property name="heading">test_author_id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">target_function_id</property>
+                    <property name="alias">target_function_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">target_function_id</text-property>
                     <text-property name="heading">target_function_id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">path_variable_value</property>
+                    <property name="alias">path_variable_value</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">path_variable_value</text-property>
                     <text-property name="heading">path_variable_value</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">request_body</property>
+                    <property name="alias">request_body</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">request_body</text-property>
                     <text-property name="heading">request_body</text-property>
@@ -376,7 +379,7 @@ WHERE public.test_execution.id = (?)]]></xml-property>
                     <structure>
                         <property name="position">7</property>
                         <property name="name">test_author_id</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">8</property>
@@ -402,70 +405,60 @@ WHERE public.test_execution.id = (?)]]></xml-property>
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">description</property>
                     <property name="nativeName">description</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">http_method</property>
                     <property name="nativeName">http_method</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">name</property>
                     <property name="nativeName">name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">path</property>
                     <property name="nativeName">path</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">path_variable</property>
                     <property name="nativeName">path_variable</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
                     <property name="name">test_author_id</property>
                     <property name="nativeName">test_author_id</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">8</property>
                     <property name="name">target_function_id</property>
                     <property name="nativeName">target_function_id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">9</property>
                     <property name="name">path_variable_value</property>
                     <property name="nativeName">path_variable_value</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">10</property>
                     <property name="name">request_body</property>
                     <property name="nativeName">request_body</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select *
@@ -676,48 +669,56 @@ where public.performance_test.id = (?)]]></xml-property>
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">id</property>
+                    <property name="alias">id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">id</text-property>
                     <text-property name="heading">id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">description</property>
+                    <property name="alias">description</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">description</text-property>
                     <text-property name="heading">description</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">function_handler</property>
+                    <property name="alias">function_handler</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">function_handler</text-property>
                     <text-property name="heading">function_handler</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">function_source_directory</property>
+                    <property name="alias">function_source_directory</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">function_source_directory</text-property>
                     <text-property name="heading">function_source_directory</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">function_source_file_name</property>
+                    <property name="alias">function_source_file_name</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">function_source_file_name</text-property>
                     <text-property name="heading">function_source_file_name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">githuburl</property>
+                    <property name="alias">githuburl</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">githuburl</text-property>
                     <text-property name="heading">githuburl</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">name</property>
+                    <property name="alias">name</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">name</text-property>
                     <text-property name="heading">name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">author_id</property>
+                    <property name="alias">author_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">author_id</text-property>
                     <text-property name="heading">author_id</text-property>
@@ -775,7 +776,7 @@ where public.performance_test.id = (?)]]></xml-property>
                     <structure>
                         <property name="position">8</property>
                         <property name="name">author_id</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">string</property>
                     </structure>
                 </list-property>
             </structure>
@@ -786,56 +787,48 @@ where public.performance_test.id = (?)]]></xml-property>
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">description</property>
                     <property name="nativeName">description</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">function_handler</property>
                     <property name="nativeName">function_handler</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">function_source_directory</property>
                     <property name="nativeName">function_source_directory</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">function_source_file_name</property>
                     <property name="nativeName">function_source_file_name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">githuburl</property>
                     <property name="nativeName">githuburl</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
                     <property name="name">name</property>
                     <property name="nativeName">name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">8</property>
                     <property name="name">author_id</property>
                     <property name="nativeName">author_id</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select *
@@ -1131,42 +1124,36 @@ where public.function.id = ?]]></xml-property>
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">function_runtime</property>
                     <property name="nativeName">function_runtime</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">provider_platform</property>
                     <property name="nativeName">provider_platform</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">memory_configurations</property>
                     <property name="nativeName">memory_configurations</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">cpu_configurations</property>
                     <property name="nativeName">cpu_configurations</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">regions</property>
                     <property name="nativeName">regions</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[SELECT 
@@ -1219,7 +1206,6 @@ WHERE
                     <property name="name">metric_name</property>
                     <property name="nativeName">metric_name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select REPLACE(public.chosen_metrics.metric, '_', ' ') as metric_name
@@ -1451,48 +1437,56 @@ where public.chosen_metrics.performance_test_id = ?]]></xml-property>
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">id</property>
+                    <property name="alias">id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">id</text-property>
                     <text-property name="heading">id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">concurrent_users</property>
+                    <property name="alias">concurrent_users</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">concurrent_users</text-property>
                     <text-property name="heading">concurrent_users</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">load_time</property>
+                    <property name="alias">load_time</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">load_time</text-property>
                     <text-property name="heading">load_time</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">ramp_up</property>
+                    <property name="alias">ramp_up</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">ramp_up</text-property>
                     <text-property name="heading">ramp_up</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">start_delay</property>
+                    <property name="alias">start_delay</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">start_delay</text-property>
                     <text-property name="heading">start_delay</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">think_time</property>
+                    <property name="alias">think_time</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">think_time</text-property>
                     <text-property name="heading">think_time</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">creator_id</property>
+                    <property name="alias">creator_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">creator_id</text-property>
                     <text-property name="heading">creator_id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">parent_test_id</property>
+                    <property name="alias">parent_test_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">parent_test_id</text-property>
                     <text-property name="heading">parent_test_id</text-property>
@@ -1545,7 +1539,7 @@ where public.chosen_metrics.performance_test_id = ?]]></xml-property>
                     <structure>
                         <property name="position">7</property>
                         <property name="name">creator_id</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">8</property>
@@ -1561,56 +1555,48 @@ where public.chosen_metrics.performance_test_id = ?]]></xml-property>
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">concurrent_users</property>
                     <property name="nativeName">concurrent_users</property>
                     <property name="dataType">integer</property>
-                    <property name="nativeDataType">4</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">load_time</property>
                     <property name="nativeName">load_time</property>
                     <property name="dataType">integer</property>
-                    <property name="nativeDataType">4</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">ramp_up</property>
                     <property name="nativeName">ramp_up</property>
                     <property name="dataType">integer</property>
-                    <property name="nativeDataType">4</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">start_delay</property>
                     <property name="nativeName">start_delay</property>
                     <property name="dataType">integer</property>
-                    <property name="nativeDataType">4</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">think_time</property>
                     <property name="nativeName">think_time</property>
                     <property name="dataType">integer</property>
-                    <property name="nativeDataType">4</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
                     <property name="name">creator_id</property>
                     <property name="nativeName">creator_id</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">8</property>
                     <property name="name">parent_test_id</property>
                     <property name="nativeName">parent_test_id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select *
@@ -1818,36 +1804,35 @@ where public.load_profile.parent_test_id = ?]]></xml-property>
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">metric_name</property>
+                    <property name="alias">metric_name</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">metric_name</text-property>
                     <text-property name="heading">metric_name</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">id</property>
+                    <property name="alias">id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">id</text-property>
                     <text-property name="heading">id</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">metric_name_1</property>
-                    <property name="analysis">dimension</property>
-                    <text-property name="displayName">metric_name</text-property>
-                    <text-property name="heading">metric_name</text-property>
-                </structure>
-                <structure>
                     <property name="columnName">creator_id</property>
+                    <property name="alias">creator_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">creator_id</text-property>
                     <text-property name="heading">creator_id</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">configuration_used</property>
+                    <property name="alias">configuration_used</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">configuration_used</text-property>
                     <text-property name="heading">configuration_used</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">metric_results_id</property>
+                    <property name="alias">metric_results_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">metric_results_id</text-property>
                     <text-property name="heading">metric_results_id</text-property>
@@ -1879,13 +1864,13 @@ where public.load_profile.parent_test_id = ?]]></xml-property>
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">metric_name_1</property>
+                        <property name="name">metric_name_3</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
                         <property name="name">creator_id</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
@@ -1906,42 +1891,36 @@ where public.load_profile.parent_test_id = ?]]></xml-property>
                     <property name="name">metric_name</property>
                     <property name="nativeName">metric_name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">metric_name_1</property>
+                    <property name="name">metric_name_3</property>
                     <property name="nativeName">metric_name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">creator_id</property>
                     <property name="nativeName">creator_id</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">configuration_used</property>
                     <property name="nativeName">configuration_used</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">metric_results_id</property>
                     <property name="nativeName">metric_results_id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[SELECT REPLACE(metric_name, '_', ' ') as metric_name, *
@@ -2008,21 +1987,18 @@ WHERE public.metric_result.metric_results_id = ?;
                     <property name="name">id</property>
                     <property name="nativeName">id</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">metric_values</property>
                     <property name="nativeName">metric_values</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">metric_values_key</property>
                     <property name="nativeName">metric_values_key</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select public.metric_result_metric_values.* 
@@ -3049,7 +3025,8 @@ and public.metric_result.id = public.metric_result_metric_values.id
                     <property name="name">creator_id</property>
                     <text-property name="displayName">creator_id</text-property>
                     <expression name="expression" type="javascript">dataSetRow["creator_id"]</expression>
-                    <property name="dataType">decimal</property>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
                 </structure>
                 <structure>
                     <property name="name">parent_test_id</property>
@@ -4792,6 +4769,25 @@ and public.metric_result.id = public.metric_result_metric_values.id
             </detail>
         </table>
         <label id="897"/>
-        <label id="898"/>
+        <label id="899">
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#0000FF</property>
+            <text-property name="text">Linear Regression:</text-property>
+        </label>
+        <data id="903">
+            <property name="dataSet">Test Executions</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">regression_equation</property>
+                    <text-property name="displayName">regression_equation</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["regression_equation"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <property name="resultSetColumn">regression_equation</property>
+        </data>
+        <label id="901"/>
+        <label id="902"/>
     </body>
 </report>
