@@ -29,7 +29,8 @@ public class ProcessService {
 
         String commandString = "_" + commands[1];
 
-        log.warn("executing command: {}", Arrays.toString(commands));
+        log.warn("executing command: {} at directory: {}",
+                Arrays.toString(commands), commandDirectory.getPath());
 
         File outputFile = new File(processBuilder.directory().getPath() + commandString + "_output.txt");
         processBuilder.redirectOutput(outputFile);
