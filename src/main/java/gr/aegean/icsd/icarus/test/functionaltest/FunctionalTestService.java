@@ -254,6 +254,13 @@ public class FunctionalTestService extends TestService {
 
         super.executeTest(requestedTest);
 
+        // Has one Resource Configuration
+        if (requestedTest.getResourceConfiguration() == null) {
+            throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),
+                    "does not have any Resource Configurations" +
+                            " associated with it");
+        }
+
         // Has at least 1 TestCase
         if (requestedTest.getTestCases().isEmpty()) {
             throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),

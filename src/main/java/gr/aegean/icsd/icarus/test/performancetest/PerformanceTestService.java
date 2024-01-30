@@ -173,18 +173,28 @@ public class PerformanceTestService extends TestService {
 
         super.executeTest(requestedTest);
 
+        // Has at least one load profile
         if (requestedTest.getLoadProfiles().isEmpty()) {
             throw new InvalidEntityConfigurationException(PerformanceTest.class, requestedTest.getId(),
                     " does not have any Load Profiles" +
                             " associated with it");
         }
 
+        // Has at least one metric
         if (requestedTest.getChosenMetrics().isEmpty()) {
             throw new InvalidEntityConfigurationException(PerformanceTest.class, requestedTest.getId(),
                     " does not have any Metrics" +
                             " associated with it");
         }
 
+        // Has at least one resource configuration
+        if (requestedTest.getResourceConfigurations().isEmpty()) {
+            throw new InvalidEntityConfigurationException(PerformanceTest.class, requestedTest.getId(),
+                    " does not have any Resource Configurations" +
+                            " associated with it");
+        }
+
+        // Has a provider account per target provider
         for (ProviderAccount account : requestedTest.getAccountsList()) {
 
             boolean foundAssociatedConfiguration = false;
