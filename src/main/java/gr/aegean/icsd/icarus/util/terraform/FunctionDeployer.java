@@ -61,16 +61,17 @@ public class FunctionDeployer {
         String stackDir = outputDir + File.separator + "stacks" + File.separator + name;
 
         // Create Terraform Stacks
+        log.warn("Creating infrastructure: {}", id);
         Set<DeploymentRecord> incompleteDeploymentRecords = createInfrastructure(outputDir, name,
                 associatedTest, id, resourceConfigurations);
 
-        log.warn("Finished synthesizing: {}", id);
+        log.warn("Finished creating infrastructure: {}", id);
 
         // Deploy Terraform Stacks
-        log.warn("Deploying stack: {}", id);
+        log.warn("Deploying infrastructure: {}", id);
         deployInfrastructure(stackDir);
 
-        log.warn("Finished deploying: {}", id);
+        log.warn("Finished deploying infrastructure: {}", id);
 
         // Get URLs of Deployed Stacks
         log.warn("Getting function URLs for: {}", id);
@@ -84,20 +85,25 @@ public class FunctionDeployer {
                                                                     Test associatedTest, String id,
                                                                     Set<ResourceConfiguration> resourceConfigurations) {
 
+        log.warn("Creating App: {}", id);
         App app = App.Builder.create()
                 .outdir(outputDir)
                 .build();
+
+        log.warn("Finished App: {}", id);
 
         // Create stack
         log.warn("Creating stack: {}", id);
         Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformStack(stackName, app, outputDir,
                 resourceConfigurations, associatedTest, id);
 
-        log.warn("Finished creating: {}", id);
+        log.warn("Finished stack: {}", id);
 
         // Synthesize it
-        log.warn("Synthesizing stack: {}", id);
+        log.warn("Synthesizing app: {}", id);
         app.synth();
+
+        log.warn("Finished synthesizing: {}", id);
 
         return incompleteDeploymentRecords;
     }
@@ -152,7 +158,8 @@ public class FunctionDeployer {
             return extractUrlsFromTerraformOutputs(deploymentRecords, rawTerraformOutputs.toString());
         }
         catch (IOException ex) {
-            log.error(ex.getMessage());
+            log.error("Error when completing deployment records at directory: {}\nError: {}",
+                    stackDirectory, ex.getMessage());
         }
 
 

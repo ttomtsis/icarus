@@ -125,11 +125,15 @@ public class FunctionalTestService extends TestService {
             Set<DeploymentRecord> deploymentRecords =  super.getDeployer()
                     .deployFunctions(requestedTest, configurations, deploymentId);
 
+            log.warn("Finished deploying: {} for Execution {}" ,deploymentId, testExecution.getId());
+
             executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator);
         }
         catch (RuntimeException ex) {
 
-            log.error("Deployment of: {} and Execution {} - FAILED", deploymentId, testExecution.getId());
+            log.error("Deployment of: {} and Execution {} - FAILED: {}",
+                    deploymentId, testExecution.getId(), ex.getMessage());
+
             testExecutionService.abortTestExecution(testExecution, deploymentId);
 
             throw new AsyncExecutionFailedException(ex);
