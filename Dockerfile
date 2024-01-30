@@ -13,6 +13,10 @@ RUN microdnf install nodejs
 # Required for JMeter as well as the jar
 RUN microdnf install java-21-openjdk
 
+# Developer release is required to install Terraform.
+# The Terraform binary is required to manage the serverless infrastructure
+RUN microdnf install oraclelinux-developer-release-el8
+RUN microdnf install terraform
 
 EXPOSE 8080
 
