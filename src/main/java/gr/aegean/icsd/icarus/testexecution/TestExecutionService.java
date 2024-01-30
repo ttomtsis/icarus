@@ -87,6 +87,7 @@ public class TestExecutionService {
         Set<MetricResult> resultSet = new HashSet<>(metricResultRepository.saveAllAndFlush(metricResults));
         testExecution.addMetricResults(resultSet);
 
+        LoggerFactory.getLogger(TestExecutionService.class).warn("Performing linear regression for {}", testExecution.getId());
         testExecution.setRegressionEquation(regressionService.applyLinearRegression(testExecution));
 
         testExecutionRepository.save(testExecution);
