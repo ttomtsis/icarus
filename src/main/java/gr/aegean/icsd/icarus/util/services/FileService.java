@@ -89,7 +89,7 @@ public class FileService {
             }
 
             byte[] bytes = file.getBytes();
-            Path filePath = Paths.get(fileDirectory + "\\" + fileName);
+            Path filePath = Paths.get(fileDirectory + File.separator + fileName);
             Files.write(filePath, bytes);
 
         } catch (IOException ex) {

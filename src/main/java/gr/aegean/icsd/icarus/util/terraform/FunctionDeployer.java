@@ -57,8 +57,8 @@ public class FunctionDeployer {
 
         String name = associatedTest.getTargetFunction().getName() + "-" + id;
 
-        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
-        String stackDir = outputDir + "\\stacks\\" + name;
+        String outputDir = STACK_OUTPUT_DIRECTORY + File.separator + name;
+        String stackDir = outputDir + File.separator + "stacks" + File.separator + name;
 
         // Create Terraform Stacks
         Set<DeploymentRecord> incompleteDeploymentRecords = createInfrastructure(outputDir, name,
@@ -156,7 +156,7 @@ public class FunctionDeployer {
         }
 
 
-        File errorFile = new File(processBuilder.directory().getPath() + "\\output-errors.txt");
+        File errorFile = new File(processBuilder.directory().getPath() + File.separator + "output-errors.txt");
         processBuilder.redirectError(errorFile);
 
         throw new StackDeploymentException(errorFile, TerraformCommand.OUTPUT.get());
@@ -167,8 +167,8 @@ public class FunctionDeployer {
     public void deleteInfrastructure(@NotBlank String stackName, @NotBlank String deploymentId) {
 
         String name = stackName + "-" + deploymentId;
-        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
-        String stackDir = outputDir + "\\stacks\\" + name;
+        String outputDir = STACK_OUTPUT_DIRECTORY + File.separator + name;
+        String stackDir = outputDir + File.separator + "stacks" + File.separator + name;
 
         File stackDirectory = new File(stackDir);
 
@@ -186,7 +186,7 @@ public class FunctionDeployer {
 
         mainStack.addOverride("terraform.backend", Map.of(
                 "local", Map.of(
-                        "path", outputDir + "/" + name + ".tfstate"
+                        "path", outputDir + File.separator + name + ".tfstate"
                 )
         ));
 

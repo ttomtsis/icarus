@@ -64,7 +64,7 @@ public class IcarusConfiguration {
 
     @Bean
     public void checkIcarusConfiguration() {
-        //TODO: Implement
+        //TODO: Check if terraform and jmeter can run, check configuration properties values
     }
 
 

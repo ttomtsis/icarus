@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.io.File;
+
 import static gr.aegean.icsd.icarus.IcarusConfiguration.FUNCTION_SOURCES_DIRECTORY;
 
 
@@ -41,7 +43,8 @@ public class IcarusUserService {
 
         authenticationManager.deleteUser(loggedInUserUsername);
 
-        String usersFunctionDirectory = FUNCTION_SOURCES_DIRECTORY + "\\Functions\\" + loggedInUserUsername;
+        String usersFunctionDirectory = FUNCTION_SOURCES_DIRECTORY + File.separator + "Functions" + File.separator
+                + loggedInUserUsername;
         fileService.deleteDirectory(usersFunctionDirectory);
     }
 
