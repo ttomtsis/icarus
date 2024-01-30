@@ -3,7 +3,6 @@ package gr.aegean.icsd.icarus.util.services;
 import gr.aegean.icsd.icarus.resourceconfiguration.ResourceConfiguration;
 import gr.aegean.icsd.icarus.testexecution.TestExecution;
 import gr.aegean.icsd.icarus.testexecution.metricresult.MetricResult;
-import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ public class RegressionService {
         Map<String, Integer> runtimeLabels = labelEncodeSet(usedRuntimes);
 
         for (String metric : usedMetrics) {
-            log.warn("Checking metric: {}", metric);
 
             OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
             ArrayList<Double> yList = new ArrayList<>();
@@ -45,11 +43,8 @@ public class RegressionService {
 
 
             for (MetricResult result : testExecution.getMetricResults()) {
-                log.warn("Checking result: {} result used metric: {}", result.getId(), result.getMetricName());
 
                 if (result.getMetricName().equals(metric)) {
-
-                    log.warn("Result is using the correct metric");
 
                     // Calculate and add y and x to the lists
                     yList.add(calculateAverageOfMetricResultValues(result));
@@ -79,9 +74,8 @@ public class RegressionService {
                 regressionEquation.append("\n");
             }
             catch (RuntimeException ex) {
-                log.error("Regression Failed");
+                log.error("Regression Failed: {}", ex.getMessage());
                 regressionEquation.append("Unable to perform regression: " + ex.getMessage());
-                throw new AsyncExecutionFailedException(ex);
             }
 
         }
@@ -181,12 +175,6 @@ public class RegressionService {
         double[][] predictors = new double[predictorList.size()][];
         for (int i = 0; i < predictorList.size(); i++) {
             predictors[i] = predictorList.get(i);
-        }
-
-        for (int i = 0; i < predictors.length; i++) {
-            for (int j = 0; j < predictors.length; j++) {
-                log.info("predictors[{}][{}]: {}", i, j, predictors[i][j]);
-            }
         }
 
         return predictorList;
