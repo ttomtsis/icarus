@@ -1,10 +1,10 @@
 icarus:
 
-  functionSourcesDirectory: ${FUNCTION_SOURCES_DIRECTORY:classpath/resources/user_resources}
+  functionSourcesDirectory: ${FUNCTION_SOURCES_DIRECTORY:icarusData/users}
 
   reports:
-    testCaseResultReportTemplateLocation: ${TEST_CASE_RESULT_REPORT_DIRECTORY:classpath/resources/testCaseResultReportTemplate.rptdesign}
-    metricResultReportTemplateLocation: ${METRIC_RESULT_REPORT_DIRECTORY:classpath/resources/metricResultReportTemplate.rptdesign}
+    testCaseResultReportTemplateLocation: ${TEST_CASE_RESULT_REPORT_DIRECTORY}
+    metricResultReportTemplateLocation: ${METRIC_RESULT_REPORT_DIRECTORY}
 
 
 
@@ -26,7 +26,7 @@ security:
     clientSecret: ${AUTH0_CLIENT_SECRET}
     domain: ${AUTH0_DOMAIN}
     managementApiId: ${AUTH0_MANAGEMENT_API_ID}
-    synchronizeDatabase: ${AUTH0_SYNCHRONIZE_DATABASE:true}
+    synchronizeDatabase: ${AUTH0_SYNCHRONIZE_DATABASE:false}
 
 
 
@@ -40,9 +40,9 @@ jmeter:
 
 terraform:
 
-  stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY:classpath:/resources/terraform/stacks}
-  useLocalProviders: ${USE_LOCAL_PROVIDERS:true} # Increases terraform initialization time dramatically
-  localProvidersDirectory: ${LOCAL_PROVIDERS_DIRECTORY:classpath:resources/terraform/providers}
+  stackOutputDirectory: ${STACK_OUTPUT_DIRECTORY:icarusData/terraform/stacks}
+  useLocalProviders: ${USE_LOCAL_PROVIDERS:false} # Increases terraform initialization time dramatically
+  localProvidersDirectory: ${LOCAL_PROVIDERS_DIRECTORY}
 
 
 
