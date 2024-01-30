@@ -8,6 +8,7 @@ COPY ./target /app
 
 
 # Required for Terraform CDK
+RUN microdnf module enable nodejs:20
 RUN microdnf install nodejs
 
 # Required for JMeter as well as the jar
