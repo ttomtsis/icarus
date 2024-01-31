@@ -125,11 +125,15 @@ public class FunctionalTestService extends TestService {
             Set<DeploymentRecord> deploymentRecords =  super.getDeployer()
                     .deployFunctions(requestedTest, configurations, deploymentId);
 
+            log.warn("Finished deploying: {} for Execution {}" ,deploymentId, testExecution.getId());
+
             executeFunctionalTest(requestedTest, testExecution, deploymentRecords, deploymentId, creator);
         }
         catch (RuntimeException ex) {
 
-            log.error("Deployment of: {} and Execution {} - FAILED", deploymentId, testExecution.getId());
+            log.error("Deployment of: {} and Execution {} - FAILED: {}",
+                    deploymentId, testExecution.getId(), ex.getMessage());
+
             testExecutionService.abortTestExecution(testExecution, deploymentId);
 
             throw new AsyncExecutionFailedException(ex);
@@ -253,6 +257,13 @@ public class FunctionalTestService extends TestService {
         FunctionalTest requestedTest = checkIfFunctionalTestExists(testId);
 
         super.executeTest(requestedTest);
+
+        // Has one Resource Configuration
+        if (requestedTest.getResourceConfiguration() == null) {
+            throw new InvalidEntityConfigurationException(FunctionalTest.class, requestedTest.getId(),
+                    "does not have any Resource Configurations" +
+                            " associated with it");
+        }
 
         // Has at least 1 TestCase
         if (requestedTest.getTestCases().isEmpty()) {

@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.function.FunctionService;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ import java.util.zip.ZipOutputStream;
 @Service
 @Validated
 public class FileService {
+
+
+    private static final Logger log = LoggerFactory.getLogger(FileService.class);
 
 
 
@@ -89,7 +93,7 @@ public class FileService {
             }
 
             byte[] bytes = file.getBytes();
-            Path filePath = Paths.get(fileDirectory + "\\" + fileName);
+            Path filePath = Paths.get(fileDirectory + File.separator + fileName);
             Files.write(filePath, bytes);
 
         } catch (IOException ex) {
@@ -127,6 +131,21 @@ public class FileService {
 
         }
 
+    }
+
+
+    public void createDirectory(@NotBlank String directoryPath) {
+
+        Path path = Paths.get(directoryPath);
+
+        try {
+            if(!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+        } catch (IOException e) {
+            log.error("Could not create directory: {}", directoryPath);
+            throw new AsyncExecutionFailedException(e);
+        }
     }
 
 

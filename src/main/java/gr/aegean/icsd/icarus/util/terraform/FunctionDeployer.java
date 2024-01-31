@@ -40,7 +40,7 @@ public class FunctionDeployer {
     private final FileService fileService;
     private final ProcessService processService;
 
-    private static final Logger log = LoggerFactory.getLogger("Stack Deployer");
+    private static final Logger log = LoggerFactory.getLogger(FunctionDeployer.class);
 
 
 
@@ -57,20 +57,26 @@ public class FunctionDeployer {
 
         String name = associatedTest.getTargetFunction().getName() + "-" + id;
 
-        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
-        String stackDir = outputDir + "\\stacks\\" + name;
+        String outputDir = STACK_OUTPUT_DIRECTORY + File.separator + name;
+        String stackDir = outputDir + File.separator + "stacks" + File.separator + name;
+
+        // Create directories that will be used
+        log.warn("Creating directories:\n{}\n{}", outputDir, stackDir);
+        fileService.createDirectory(outputDir);
+        fileService.createDirectory(stackDir);
 
         // Create Terraform Stacks
+        log.warn("Creating infrastructure: {}", id);
         Set<DeploymentRecord> incompleteDeploymentRecords = createInfrastructure(outputDir, name,
                 associatedTest, id, resourceConfigurations);
 
-        log.warn("Finished synthesizing: {}", id);
+        log.warn("Finished creating infrastructure: {}", id);
 
         // Deploy Terraform Stacks
-        log.warn("Deploying stack: {}", id);
+        log.warn("Deploying infrastructure: {}", id);
         deployInfrastructure(stackDir);
 
-        log.warn("Finished deploying: {}", id);
+        log.warn("Finished deploying infrastructure: {}", id);
 
         // Get URLs of Deployed Stacks
         log.warn("Getting function URLs for: {}", id);
@@ -84,20 +90,25 @@ public class FunctionDeployer {
                                                                     Test associatedTest, String id,
                                                                     Set<ResourceConfiguration> resourceConfigurations) {
 
+        log.warn("Creating App: {}", id);
         App app = App.Builder.create()
                 .outdir(outputDir)
                 .build();
+
+        log.warn("Finished App: {}", id);
 
         // Create stack
         log.warn("Creating stack: {}", id);
         Set<DeploymentRecord> incompleteDeploymentRecords = createTerraformStack(stackName, app, outputDir,
                 resourceConfigurations, associatedTest, id);
 
-        log.warn("Finished creating: {}", id);
+        log.warn("Finished stack: {}", id);
 
         // Synthesize it
-        log.warn("Synthesizing stack: {}", id);
+        log.warn("Synthesizing app: {}", id);
         app.synth();
+
+        log.warn("Finished synthesizing: {}", id);
 
         return incompleteDeploymentRecords;
     }
@@ -110,11 +121,11 @@ public class FunctionDeployer {
         try {
 
             // Initialize terraform
-            log.warn("Initializing terraform...");
+            log.warn("Initializing terraform at directory: {}", stackDir);
             processService.createProcess(stackDirectory, TerraformCommand.INIT.get());
 
             // Deploy infrastructure
-            log.warn("Deploying infrastructure...");
+            log.warn("Deploying stacks at directory: {}", stackDir);
             processService.createProcess(stackDirectory, TerraformCommand.APPLY.get());
         }
         catch (RuntimeException ex) {
@@ -152,11 +163,12 @@ public class FunctionDeployer {
             return extractUrlsFromTerraformOutputs(deploymentRecords, rawTerraformOutputs.toString());
         }
         catch (IOException ex) {
-            log.error(ex.getMessage());
+            log.error("Error when completing deployment records at directory: {}\nError: {}",
+                    stackDirectory, ex.getMessage());
         }
 
 
-        File errorFile = new File(processBuilder.directory().getPath() + "\\output-errors.txt");
+        File errorFile = new File(processBuilder.directory().getPath() + File.separator + "output-errors.txt");
         processBuilder.redirectError(errorFile);
 
         throw new StackDeploymentException(errorFile, TerraformCommand.OUTPUT.get());
@@ -167,8 +179,8 @@ public class FunctionDeployer {
     public void deleteInfrastructure(@NotBlank String stackName, @NotBlank String deploymentId) {
 
         String name = stackName + "-" + deploymentId;
-        String outputDir = STACK_OUTPUT_DIRECTORY + "\\" + name;
-        String stackDir = outputDir + "\\stacks\\" + name;
+        String outputDir = STACK_OUTPUT_DIRECTORY + File.separator + name;
+        String stackDir = outputDir + File.separator + "stacks" + File.separator + name;
 
         File stackDirectory = new File(stackDir);
 
@@ -186,7 +198,7 @@ public class FunctionDeployer {
 
         mainStack.addOverride("terraform.backend", Map.of(
                 "local", Map.of(
-                        "path", outputDir + "/" + name + ".tfstate"
+                        "path", outputDir + File.separator + name + ".tfstate"
                 )
         ));
 

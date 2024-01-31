@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  icarus_db:
+    image: postgres:16.1-alpine3.18
+    container_name: icarus_postgres
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+    # Provided in the same folder as the .yml file
+    env_file:
+      - icarus_postgres.env
+    networks:
+      - icarus_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  icarus-server:
+    build: .
+    image: ttomtsis/icarus
+    container_name: icarus_backend
+
+    networks:
+      - icarus_network
+    ports:
+      - "8080:8080"
+    depends_on:
+      icarus_db:
+        condition: service_healthy
+
+    # Provided in the same folder as the .yml file
+    env_file:
+      - icarus_backend.env
+    restart: unless-stopped
+
+networks:
+  icarus_network:

@@ -12,6 +12,7 @@ import gr.aegean.icsd.icarus.util.gcp.GcfRuntime;
 import gr.aegean.icsd.icarus.util.gcp.GcpRegion;
 import software.constructs.Construct;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -78,7 +79,7 @@ public class GcpConstruct extends Construct
 
         this.deploymentId = deploymentId;
 
-        String functionSource = gcfFunctionSource + "/" + gcfFunctionSourceFileName;
+        String functionSource = gcfFunctionSource + File.separator + gcfFunctionSourceFileName;
         this.functionRuntime = gcfRuntime;
         this.functionEntrypoint = gcfFunctionEntrypoint;
         this.functionDescription = gcfFunctionDescription;

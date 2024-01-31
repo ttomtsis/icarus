@@ -28,6 +28,7 @@ import io.micrometer.common.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import software.constructs.Construct;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -111,7 +112,7 @@ public class AwsConstruct extends Construct {
         this.accessKey = awsAccessKey;
         this.secretKey = awsSecretKey;
 
-        this.functionSource = objectSource + "\\" + objectFileName;
+        this.functionSource = objectSource + File.separator + objectFileName;
         this.functionArchiveName = objectFileName;
 
         for ( AwsRegion region : awsRegions ) {

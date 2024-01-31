@@ -238,10 +238,16 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <imageName>ttomtsis/icarus:jvm-latest</imageName>
                     <image>
                         <builder>paketobuildpacks/builder-jammy-base:latest</builder>
+                        <env>
+                            <JAVA_TOOL_OPTIONS>--enable-preview</JAVA_TOOL_OPTIONS>
+                        </env>
                     </image>
+
                 </configuration>
+
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -249,7 +255,7 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <enablePreview>true</enablePreview>
                 </configuration>
             </plugin>
 

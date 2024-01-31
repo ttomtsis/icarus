@@ -164,7 +164,7 @@ public class FunctionService {
         String functionSourceDirectory = getFunctionSourceDirectory();
         String functionSourceFileName = function.getName() + ".zip";
 
-        String functionSourceFilePath = functionSourceDirectory + "\\" + functionSourceFileName;
+        String functionSourceFilePath = functionSourceDirectory + File.separator + functionSourceFileName;
 
         fileService.deleteFile(functionSourceFilePath);
     }
@@ -173,7 +173,7 @@ public class FunctionService {
     private void cloneFunctionSourceFromRepository(@NotNull Function function,
                                                    @GithubUrl String repositoryUrl) {
 
-        String tempDirectory = getFunctionSourceDirectory() + "\\temp\\temp-"
+        String tempDirectory = getFunctionSourceDirectory() + File.separator + "temp" + File.separator + "temp-"
                 + UUID.randomUUID().toString().substring(0, 8);
 
         File repositoryOutputDirectory = new File(tempDirectory);
@@ -184,7 +184,7 @@ public class FunctionService {
                     .setDirectory(repositoryOutputDirectory)
                     .call()
         ) {
-            String functionSourceFileName = getFunctionSourceDirectory() + "\\" + function.getName() + ".zip";
+            String functionSourceFileName = getFunctionSourceDirectory() + File.separator + function.getName() + ".zip";
             File functionSourceZipFile = new File(functionSourceFileName);
 
             fileService.saveFileAsZip(repositoryOutputDirectory, functionSourceZipFile);
@@ -208,7 +208,7 @@ public class FunctionService {
 
 
     private String getFunctionSourceDirectory() {
-        return FUNCTION_SOURCES_DIRECTORY + "\\" + UserUtils.getUsername() + "\\Functions";
+        return FUNCTION_SOURCES_DIRECTORY + File.separator + UserUtils.getUsername() + File.separator + "Functions";
     }
 
 
