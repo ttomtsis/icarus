@@ -40,7 +40,7 @@ public class FunctionDeployer {
     private final FileService fileService;
     private final ProcessService processService;
 
-    private static final Logger log = LoggerFactory.getLogger("Stack Deployer");
+    private static final Logger log = LoggerFactory.getLogger(FunctionDeployer.class);
 
 
 
@@ -59,6 +59,11 @@ public class FunctionDeployer {
 
         String outputDir = STACK_OUTPUT_DIRECTORY + File.separator + name;
         String stackDir = outputDir + File.separator + "stacks" + File.separator + name;
+
+        // Create directories that will be used
+        log.warn("Creating directories:\n{}\n{}", outputDir, stackDir);
+        fileService.createDirectory(outputDir);
+        fileService.createDirectory(stackDir);
 
         // Create Terraform Stacks
         log.warn("Creating infrastructure: {}", id);
@@ -116,11 +121,11 @@ public class FunctionDeployer {
         try {
 
             // Initialize terraform
-            log.warn("Initializing terraform...");
+            log.warn("Initializing terraform at directory: {}", stackDir);
             processService.createProcess(stackDirectory, TerraformCommand.INIT.get());
 
             // Deploy infrastructure
-            log.warn("Deploying infrastructure...");
+            log.warn("Deploying stacks at directory: {}", stackDir);
             processService.createProcess(stackDirectory, TerraformCommand.APPLY.get());
         }
         catch (RuntimeException ex) {
