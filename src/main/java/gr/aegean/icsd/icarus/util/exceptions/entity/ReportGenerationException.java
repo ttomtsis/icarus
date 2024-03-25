@@ -4,8 +4,10 @@ public class ReportGenerationException extends RuntimeException{
 
 
     public ReportGenerationException(String deploymentId, Throwable cause) {
-        super("Test execution with deployment ID: " + deploymentId + " failed to generate a report",
-                cause);
+        super("Test execution with deployment ID: " + deploymentId + " failed to generate a report." +
+                        "\nCause: " + cause.getClass().getSimpleName() +
+                "\n" + cause.getMessage(), cause
+        );
     }
 
 
