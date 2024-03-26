@@ -1,6 +1,5 @@
 package gr.aegean.icsd.icarus.util.services;
 
-import gr.aegean.icsd.icarus.function.FunctionService;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,7 +34,7 @@ public class FileService {
         Path filePath = Paths.get(fileLocation);
 
         if (!Files.exists(filePath)) {
-            LoggerFactory.getLogger(FunctionService.class).warn("Failed to delete file: {}\n" +
+            log.warn("Failed to delete file: {}\n" +
                     " Specified file does not exist", fileLocation);
         }
 
@@ -44,7 +43,7 @@ public class FileService {
                 Files.delete(filePath);
             }
             catch (RuntimeException ex) {
-                LoggerFactory.getLogger(FileService.class).warn("Unable to access: {}\n Will not delete", filePath);
+                log.warn("Unable to access: {}\n Will not delete", filePath);
                 throw new AsyncExecutionFailedException(ex);
             }
         }
