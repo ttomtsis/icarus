@@ -16,6 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.eclipse.birt.report.engine.api.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -40,6 +41,15 @@ public class ReportService {
     private final TestRepository testRepository;
     private final TestExecutionRepository testExecutionRepository;
     private final ReportRepository reportRepository;
+
+    @Value("${spring.datasource.username}")
+    private String databaseUser;
+
+    @Value("${spring.datasource.password}")
+    private String databasePassword;
+
+    @Value("${spring.datasource.url}")
+    private String databaseUrl;
 
 
 
@@ -94,16 +104,8 @@ public class ReportService {
     public Report regenerateReport(TestExecution associatedExecution) {
 
         if (associatedExecution.getReport() != null) {
-            throw new ReportGenerationException("Test execution with deployment ID: " +
-                    associatedExecution.getDeploymentId() + " and ID: " + associatedExecution.getId() +
-                    " already has a Report associated with it");
-        }
-
-        if (!associatedExecution.getState().equals(ExecutionState.REPORT_FAILED)) {
-            throw new ReportGenerationException("Test execution with deployment ID: " +
-                    associatedExecution.getDeploymentId() + " and ID: " + associatedExecution.getId() +
-                    " is in an invalid state and cannot regenerate it's report.\n" +
-                    "State: " + associatedExecution.getState());
+            reportRepository.delete(associatedExecution.getReport());
+            reportRepository.flush();
         }
 
         try {
@@ -180,6 +182,10 @@ public class ReportService {
                 .withZone(ZoneId.systemDefault())
                 .format(Instant.now());
         parameters.put("creationDate", formattedTimestamp);
+
+        parameters.put("databaseUser", "" + databaseUser);
+        parameters.put("databasePassword", "" + databasePassword);
+        parameters.put("databaseUrl", "" + databaseUrl);
 
         return parameters;
     }
