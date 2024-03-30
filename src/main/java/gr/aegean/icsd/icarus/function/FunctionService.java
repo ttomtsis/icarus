@@ -4,6 +4,7 @@ import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
+import gr.aegean.icsd.icarus.util.interfaces.UtilitiesInterface;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import gr.aegean.icsd.icarus.util.services.FileService;
 import jakarta.transaction.Transactional;
@@ -12,22 +13,21 @@ import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-import java.util.function.Consumer;
-
-import static gr.aegean.icsd.icarus.IcarusConfiguration.FUNCTION_SOURCES_DIRECTORY;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 @Service
 @Transactional
 @Validated
-public class FunctionService {
+public class FunctionService implements UtilitiesInterface {
 
 
     private final FunctionRepository functionRepository;
@@ -63,13 +63,14 @@ public class FunctionService {
         else if (StringUtils.isBlank(newFunction.getGithubURL()) &&
                 functionSource != null) {
 
-            saveFunctionSourceFromRequest(newFunction, functionSource);
+            saveFunctionSourceCode(newFunction, functionSource);
         }
 
         // Both url and source code provided, will persist the source code on the request
-        else {
+        else if (StringUtils.isNotBlank(newFunction.getGithubURL()) &&
+                    functionSource != null){
 
-            saveFunctionSourceFromRequest(newFunction, functionSource);
+            saveFunctionSourceCode(newFunction, functionSource);
         }
 
         return functionRepository.save(newFunction);
@@ -81,7 +82,7 @@ public class FunctionService {
 
         Function existingFunction = checkIfFunctionExists(functionId);
 
-        deleteFunctionSource(existingFunction);
+        deleteFunctionSourceCode(existingFunction);
 
         functionRepository.delete(existingFunction);
     }
@@ -102,18 +103,18 @@ public class FunctionService {
 
         if (newFunctionSource != null && model != null && StringUtils.isBlank(model.getGithubURL())) {
 
-            deleteFunctionSource(existingFunction);
-            saveFunctionSourceFromRequest(existingFunction, newFunctionSource);
+            deleteFunctionSourceCode(existingFunction);
+            saveFunctionSourceCode(existingFunction, newFunctionSource);
         }
         else if (newFunctionSource == null && model != null && !StringUtils.isBlank(model.getGithubURL())) {
 
-            deleteFunctionSource(existingFunction);
+            deleteFunctionSourceCode(existingFunction);
             cloneFunctionSourceFromRepository(existingFunction, model.getGithubURL());
         }
         else if (newFunctionSource != null && model != null && StringUtils.isNotBlank(model.getGithubURL())) {
 
-            deleteFunctionSource(existingFunction);
-            saveFunctionSourceFromRequest(existingFunction, newFunctionSource);
+            deleteFunctionSourceCode(existingFunction);
+            saveFunctionSourceCode(existingFunction, newFunctionSource);
         }
 
         functionRepository.save(existingFunction);
@@ -126,15 +127,6 @@ public class FunctionService {
     }
 
 
-
-    private void setIfNotBlank(Consumer<String> setter, String value) {
-
-        if (StringUtils.isNotBlank(value)) {
-            setter.accept(value);
-        }
-    }
-
-
     private Function checkIfFunctionExists(Long functionId) {
 
         IcarusUser loggedInUser = UserUtils.getLoggedInUser();
@@ -144,53 +136,71 @@ public class FunctionService {
     }
 
 
-    private void saveFunctionSourceFromRequest(@NotNull Function function,
-                                               @NotNull MultipartFile functionSourceFile)
+    private void saveFunctionSourceCode(Function function,
+                                        MultipartFile functionSourceFile)
             throws IOException {
 
-        String functionSourceDirectory = getFunctionSourceDirectory();
         String functionSourceFileName = function.getName() + ".zip";
 
-        fileService.saveFile(functionSourceDirectory, functionSourceFileName, functionSourceFile);
+        fileService.saveFile(getFunctionSourceDirectory(), functionSourceFileName, functionSourceFile);
+        fileService.validateZipFile(getFunctionSourceDirectory() + File.separator + functionSourceFileName);
 
-        function.setFunctionSourceDirectory(functionSourceDirectory);
+        function.setFunctionSource(functionSourceFile.getBytes());
         function.setFunctionSourceFileName(functionSourceFileName);
     }
 
 
-    private void deleteFunctionSource(Function function)
+    private void saveFunctionSourceCode(Function function,
+                                        File functionSourceFile)
+            throws IOException {
+
+        fileService.validateZipFile(functionSourceFile.getPath());
+
+        function.setFunctionSource(Files.readAllBytes(Path.of(functionSourceFile.getPath())));
+        function.setFunctionSourceFileName(function.getName() + ".zip");
+    }
+
+
+    private void deleteFunctionSourceCode(Function function)
             throws IOException {
 
         String functionSourceDirectory = getFunctionSourceDirectory();
         String functionSourceFileName = function.getName() + ".zip";
 
-        String functionSourceFilePath = functionSourceDirectory + File.separator + functionSourceFileName;
+        String absoluteFunctionSourceFilePath = functionSourceDirectory + File.separator + functionSourceFileName;
 
-        fileService.deleteFile(functionSourceFilePath);
+        if (Files.exists(Path.of(absoluteFunctionSourceFilePath))) {
+            fileService.deleteFile(absoluteFunctionSourceFilePath);
+        }
+
     }
 
 
-    private void cloneFunctionSourceFromRepository(@NotNull Function function,
+    private void cloneFunctionSourceFromRepository(Function function,
                                                    @GithubUrl String repositoryUrl) {
 
-        String tempDirectory = getFunctionSourceDirectory() + File.separator + "temp" + File.separator + "temp-"
-                + UUID.randomUUID().toString().substring(0, 8);
-
+        // Specify a temporary directory to store cloned files
+        String tempDirectory = getFunctionSourceDirectory() + File.separator + "temp";
         File repositoryOutputDirectory = new File(tempDirectory);
 
+        // Clone repository into the temporary directory
         try (
             Git _ = Git.cloneRepository()
                     .setURI(repositoryUrl)
                     .setDirectory(repositoryOutputDirectory)
                     .call()
         ) {
-            String functionSourceFileName = getFunctionSourceDirectory() + File.separator + function.getName() + ".zip";
-            File functionSourceZipFile = new File(functionSourceFileName);
 
-            fileService.saveFileAsZip(repositoryOutputDirectory, functionSourceZipFile);
+            // Specify the absolute file path where the source code of the function will be located, in zip format
+            String sourceOutputDirectory = getFunctionSourceDirectory() + File.separator + function.getName() + ".zip";
+            File outputDirectory = new File(sourceOutputDirectory);
 
-            function.setFunctionSourceDirectory(getFunctionSourceDirectory());
-            function.setFunctionSourceFileName(function.getName() + ".zip");
+            // Compress the cloned repository files into a zip
+            fileService.compressDirectoryToZip(repositoryOutputDirectory, outputDirectory);
+
+            // Save the source code in the database
+            saveFunctionSourceCode(function, outputDirectory);
+
         }
 
         catch (GitAPIException | IOException e) {
@@ -198,17 +208,12 @@ public class FunctionService {
                     "code from repository", e);
         }
 
+        // Delete the temporary directory and all of it's contents
         finally {
             Git.shutdown();
             fileService.deleteDirectory(repositoryOutputDirectory.getPath());
         }
 
-        }
-
-
-
-    private String getFunctionSourceDirectory() {
-        return FUNCTION_SOURCES_DIRECTORY + File.separator + UserUtils.getUsername() + File.separator + "Functions";
     }
 
 
