@@ -5,7 +5,9 @@ import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.provideraccount.ProviderAccount;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
+import gr.aegean.icsd.icarus.util.interfaces.UtilitiesInterface;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
+import gr.aegean.icsd.icarus.util.services.FileService;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -15,27 +17,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.function.Consumer;
+import java.nio.file.Path;
 
 
 @Service
 @Transactional
 @Validated
-public class TestService {
+public class TestService implements UtilitiesInterface {
 
 
     private final TestRepository repository;
 
     private final FunctionDeployer deployer;
 
+    private final FileService fileService;
+
+
 
     public TestService(TestRepository repository,
-                       FunctionDeployer deployer) {
+                       FunctionDeployer deployer,
+                       FileService fileService) {
 
         this.repository = repository;
         this.deployer = deployer;
+        this.fileService = fileService;
     }
 
 
@@ -107,25 +114,33 @@ public class TestService {
         }
 
         // Function's source code is available
-        String functionSourceCodeLocation = requestedTest.getTargetFunction().getFunctionSourceDirectory()
-                + File.separator + requestedTest.getTargetFunction().getFunctionSourceFileName();
-
-        if(!Files.exists(Paths.get(functionSourceCodeLocation))) {
+        if(requestedTest.getTargetFunction().getFunctionSource() == null) {
             throw new InvalidEntityConfigurationException(Test.class, requestedTest.getId(),
                     " is unable to find the source code" +
                     " of it's target Function in the filesystem");
         }
 
-    }
+        // Copy source code from the database to the local filesystem
+        try {
+            Function targetFunction = requestedTest.getTargetFunction();
+            String functionSourceDirectory = getFunctionSourceDirectory() + File.separator
+                    + targetFunction.getFunctionSourceFileName() + ".zip";
 
+            if (!Files.exists(Path.of(functionSourceDirectory))) {
 
+                fileService.saveBytesAsZip(requestedTest.getTargetFunction().getFunctionSource(),
+                        getFunctionSourceDirectory() + File.separator + targetFunction.getName() + ".zip");
+            }
 
-    protected void setIfNotNull(Consumer<String> setter, String value) {
-
-        if (value != null) {
-            setter.accept(value);
+            targetFunction.setFunctionSourceDirectory(getFunctionSourceDirectory());
         }
+        catch (IOException ex) {
+            throw new InvalidEntityConfigurationException(Test.class,
+                    "Unable to export the source code of the function into a zip file", ex);
+        }
+
     }
+
 
     protected FunctionDeployer getDeployer() {
         return this.deployer;
