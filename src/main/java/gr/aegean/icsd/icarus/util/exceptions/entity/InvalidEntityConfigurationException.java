@@ -17,7 +17,9 @@ public class InvalidEntityConfigurationException extends RuntimeException {
 
     public <T> InvalidEntityConfigurationException(Class<T> entityClass, String message, Throwable throwable) {
         super("Entity: " + entityClass.getSimpleName() + " was not configured properly:\n"
-                + message, throwable);
+                + message + "\n" +
+                "Reason: " + throwable.getClass().getSimpleName() + "\n" +
+                "Cause: " + throwable.getMessage(), throwable);
     }
 
 
