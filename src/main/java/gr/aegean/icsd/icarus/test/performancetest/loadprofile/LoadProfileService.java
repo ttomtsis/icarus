@@ -1,9 +1,10 @@
 package gr.aegean.icsd.icarus.test.performancetest.loadprofile;
 
+import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTest;
 import gr.aegean.icsd.icarus.test.performancetest.PerformanceTestRepository;
-import gr.aegean.icsd.icarus.icarususer.IcarusUser;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
+import gr.aegean.icsd.icarus.util.interfaces.UtilitiesInterface;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -14,13 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.function.Consumer;
-
 
 @Service
 @Transactional
 @Validated
-public class LoadProfileService {
+public class LoadProfileService implements UtilitiesInterface {
 
 
     private final PerformanceTestRepository testRepository;
@@ -69,13 +68,6 @@ public class LoadProfileService {
         setIfNotNull(existingLoadProfile::setThinkTime, model.getLoadTime());
 
         loadProfileRepository.save(existingLoadProfile);
-    }
-
-    private void setIfNotNull(Consumer<Integer> setter, Integer value) {
-
-        if (value != null && value >= 0) {
-            setter.accept(value);
-        }
     }
 
 

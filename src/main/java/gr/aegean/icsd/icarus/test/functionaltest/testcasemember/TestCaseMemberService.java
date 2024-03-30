@@ -8,6 +8,7 @@ import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCase;
 import gr.aegean.icsd.icarus.test.functionaltest.testcase.TestCaseRepository;
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
+import gr.aegean.icsd.icarus.util.interfaces.UtilitiesInterface;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -18,13 +19,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.function.Consumer;
-
 
 @Service
 @Transactional
 @Validated
-public class TestCaseMemberService {
+public class TestCaseMemberService implements UtilitiesInterface {
     
     
     private final TestCaseMemberRepository testCaseMemberRepository;
@@ -102,14 +101,6 @@ public class TestCaseMemberService {
                     " if the parent Test does not expose a path");
         }
         testCaseMemberRepository.save(existingTestCaseMember);
-    }
-
-
-    private void setIfNotNull(Consumer<String> setter, String value) {
-
-        if (value != null) {
-            setter.accept(value);
-        }
     }
 
 
