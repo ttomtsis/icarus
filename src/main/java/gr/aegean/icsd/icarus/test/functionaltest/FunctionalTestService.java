@@ -20,6 +20,7 @@ import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.restassured.RestAssuredTest;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
+import gr.aegean.icsd.icarus.util.services.FileService;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.validation.constraints.NotBlank;
@@ -53,9 +54,10 @@ public class FunctionalTestService extends TestService {
 
 
     public FunctionalTestService(FunctionalTestRepository repository, TestRepository testRepository,
-                                 FunctionDeployer deployer, TestExecutionService testExecutionService) {
+                                 FunctionDeployer deployer, TestExecutionService testExecutionService,
+                                 FileService fileService) {
 
-        super(testRepository, deployer);
+        super(testRepository, deployer, fileService);
         this.repository = repository;
         this.testExecutionService = testExecutionService;
     }
