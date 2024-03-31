@@ -128,6 +128,8 @@ public class TestService implements UtilitiesInterface {
 
             if (!Files.exists(Path.of(functionSourceDirectory))) {
 
+                fileService.createDirectory(getFunctionSourceDirectory());
+
                 fileService.saveBytesAsZip(requestedTest.getTargetFunction().getFunctionSource(),
                         getFunctionSourceDirectory() + File.separator + targetFunction.getName() + ".zip");
             }
