@@ -18,9 +18,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class ProviderAccountModelAssembler extends RepresentationModelAssemblerSupport<ProviderAccount, ProviderAccountModel> {
 
 
+
     public ProviderAccountModelAssembler() {
         super(ProviderAccountController.class, ProviderAccountModel.class);
     }
+
 
 
     @NonNull
@@ -77,11 +79,11 @@ public class ProviderAccountModelAssembler extends RepresentationModelAssemblerS
         gcpAccountModel.setCreator(entity.getCreator().getUsername());
         gcpAccountModel.setName(accountName);
         gcpAccountModel.setDescription(accountDescription);
-        gcpAccountModel.setKeyfile(gcpCredentials);
+        gcpAccountModel.setGcpKeyfile(gcpCredentials);
         gcpAccountModel.setGcpProjectId(entity.getGcpProjectId());
 
         gcpAccountModel.add(linkTo(methodOn(ProviderAccountController.class)
-                .updateGcpAccount(UserUtils.getUsername(), entity.getName(), gcpAccountModel))
+                .updateGcpAccount(UserUtils.getUsername(), entity.getName(), gcpAccountModel.toString(), null))
                 .withRel("Update")
 
         );
