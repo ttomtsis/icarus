@@ -142,10 +142,10 @@ public class FileService {
     public void saveBytesAsZip(@NotNull byte[] bytes, @NotBlank String filePath)
             throws IOException {
 
-        FileOutputStream fos = new FileOutputStream(filePath);
+        try(FileOutputStream fos = new FileOutputStream(filePath)) {
+            fos.write(bytes);
+        }
 
-        fos.write(bytes);
-        fos.close();
     }
 
 
