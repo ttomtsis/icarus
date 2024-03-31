@@ -14,6 +14,7 @@ import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException
 import gr.aegean.icsd.icarus.util.exceptions.entity.EntityNotFoundException;
 import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import gr.aegean.icsd.icarus.util.security.UserUtils;
+import gr.aegean.icsd.icarus.util.services.FileService;
 import gr.aegean.icsd.icarus.util.terraform.DeploymentRecord;
 import gr.aegean.icsd.icarus.util.terraform.FunctionDeployer;
 import jakarta.transaction.Transactional;
@@ -47,9 +48,10 @@ public class PerformanceTestService extends TestService {
 
 
     public PerformanceTestService(TestRepository testRepository, PerformanceTestRepository repository,
-                                  FunctionDeployer deployer, TestExecutionService testExecutionService) {
+                                  FunctionDeployer deployer, TestExecutionService testExecutionService,
+                                  FileService fileService) {
 
-        super(testRepository, deployer);
+        super(testRepository, deployer, fileService);
         this.repository = repository;
         this.testExecutionService = testExecutionService;
     }

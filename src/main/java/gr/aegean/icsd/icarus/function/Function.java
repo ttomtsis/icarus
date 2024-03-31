@@ -1,9 +1,8 @@
 package gr.aegean.icsd.icarus.function;
 
-import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.icarususer.IcarusUser;
+import gr.aegean.icsd.icarus.test.Test;
 import gr.aegean.icsd.icarus.util.annotations.GithubUrl.GithubUrl;
-import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -43,11 +42,14 @@ public class Function {
     @GithubUrl(message = "Function's GitHub URL is not valid ")
     private String githubURL;
 
-    @ValidFilePath(message = "Function's source directory is not a valid filepath")
+    @Transient
     private String functionSourceDirectory;
 
+    @Lob
+    private byte[] functionSource;
+
     @Pattern(regexp = "^[^\\\\/:*?\"<>|]*$",
-            message = "Function's source code archive name cannot invalid characters")
+            message = "Function's source code archive name contains invalid characters")
     private String functionSourceFileName;
 
     @NotBlank(message = "Function's handler cannot be blank")
@@ -152,6 +154,14 @@ public class Function {
 
     public void setAuthor(IcarusUser author) {
         this.author = author;
+    }
+
+    public byte[] getFunctionSource() {
+        return functionSource;
+    }
+
+    public void setFunctionSource(byte[] functionSource) {
+        this.functionSource = functionSource;
     }
 
 

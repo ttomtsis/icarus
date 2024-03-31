@@ -1,7 +1,9 @@
 package gr.aegean.icsd.icarus.util.services;
 
-import gr.aegean.icsd.icarus.function.FunctionService;
+import gr.aegean.icsd.icarus.function.Function;
+import gr.aegean.icsd.icarus.util.annotations.ValidFilePath.ValidFilePath;
 import gr.aegean.icsd.icarus.util.exceptions.async.AsyncExecutionFailedException;
+import gr.aegean.icsd.icarus.util.exceptions.entity.InvalidEntityConfigurationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 
@@ -35,7 +38,7 @@ public class FileService {
         Path filePath = Paths.get(fileLocation);
 
         if (!Files.exists(filePath)) {
-            LoggerFactory.getLogger(FunctionService.class).warn("Failed to delete file: {}\n" +
+            log.warn("Failed to delete file: {}\n" +
                     " Specified file does not exist", fileLocation);
         }
 
@@ -44,7 +47,7 @@ public class FileService {
                 Files.delete(filePath);
             }
             catch (RuntimeException ex) {
-                LoggerFactory.getLogger(FileService.class).warn("Unable to access: {}\n Will not delete", filePath);
+                log.warn("Unable to access: {}\n Will not delete", filePath);
                 throw new AsyncExecutionFailedException(ex);
             }
         }
@@ -82,7 +85,16 @@ public class FileService {
     }
 
 
-    public void saveFile(String fileDirectory, String fileName, MultipartFile file)
+    /**
+     * Saves a MultipartFile in a specified Directory
+     *
+     * @param fileDirectory Directory that the file will be saved at
+     * @param fileName Name that will be given to the saved file
+     * @param file MultipartFile that will be saved
+     *
+     * @throws IOException If an issue is encountered during the saving of the file
+     */
+    public void saveFile(@ValidFilePath String fileDirectory, @NotBlank String fileName, @NotNull MultipartFile file)
             throws IOException {
 
         try {
@@ -107,7 +119,37 @@ public class FileService {
     }
 
 
-    public void saveFileAsZip(@NotNull File sourceDirectory, @NotNull File outputDirectory)
+    /**
+     * Checks if target file is a zip file and can be opened without errors
+     *
+     * @param absoluteFilePath Path to the file
+     *
+     * @throws InvalidEntityConfigurationException If the file is not a valid zip file
+     */
+    public void validateZipFile(@NotBlank String absoluteFilePath) {
+
+        try (ZipFile zipfile = new ZipFile(absoluteFilePath)) {
+
+        } catch (IOException e) {
+            throw new InvalidEntityConfigurationException(Function.class,
+                    "Function's Source Code is not a valid zip file", e);
+        }
+
+
+    }
+
+
+    public void saveBytesAsZip(@NotNull byte[] bytes, @NotBlank String filePath)
+            throws IOException {
+
+        try(FileOutputStream fos = new FileOutputStream(filePath)) {
+            fos.write(bytes);
+        }
+
+    }
+
+
+    public void compressDirectoryToZip(@NotNull File sourceDirectory, @NotNull File outputDirectory)
             throws IOException {
 
         try (
@@ -130,7 +172,6 @@ public class FileService {
             });
 
         }
-
     }
 
 
