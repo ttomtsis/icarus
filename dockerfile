@@ -24,4 +24,4 @@ EXPOSE 8080
 
 ENV JAVA_TOOL_OPTIONS=--enable-preview
 
-ENTRYPOINT ["java", "-jar", "icarus-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "icarus-0.0.1.jar"]
