@@ -13,7 +13,6 @@ import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -142,6 +141,8 @@ public class FunctionService implements UtilitiesInterface {
 
         String functionSourceFileName = function.getName() + ".zip";
 
+        fileService.createDirectory(getFunctionSourceDirectory());
+
         fileService.saveFile(getFunctionSourceDirectory(), functionSourceFileName, functionSourceFile);
         fileService.validateZipFile(getFunctionSourceDirectory() + File.separator + functionSourceFileName);
 
@@ -185,7 +186,7 @@ public class FunctionService implements UtilitiesInterface {
 
         // Clone repository into the temporary directory
         try (
-            Git _ = Git.cloneRepository()
+            Git g = Git.cloneRepository()
                     .setURI(repositoryUrl)
                     .setDirectory(repositoryOutputDirectory)
                     .call()
