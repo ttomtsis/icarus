@@ -46,7 +46,7 @@ After installing the required dependencies the rest of the process is straightfo
 * Download the latest jar from the releases page of the project: https://github.com/ttomtsis/icarus/releases
 * Place it in the directory of your choosing
 * Enable java preview features by setting the JAVA_TOOL_OPTIONS environment variable equal to --enable-preview `$env:JAVA_TOOL_OPTIONS=--enable-preview` ( for powershell )
-* Run Icarus using Java `java -jar icarus-0.0.1-SNAPSHOT.jar`
+* Run Icarus using Java `java -jar icarus-0.0.1.jar`
 
 Or you can also built the jar yourself:
 * Clone the repository using git  `git clone https://github.com/ttomtsis/icarus`
