@@ -14,10 +14,10 @@ RUN microdnf install nodejs
 # Required by JMeter and Icarus
 RUN microdnf install java-21-openjdk
 
-# Developer release is required to install Terraform.
-# The Terraform binary is required to manage the serverless infrastructure
-RUN microdnf install oraclelinux-developer-release-el8
-RUN microdnf install terraform
+# Terraform is required to manage the serverless infrastructure
+RUN microdnf install unzip
+RUN curl -O https://releases.hashicorp.com/terraform/1.6.3/terraform_1.6.3_linux_amd64.zip
+RUN unzip terraform_1.6.3_linux_amd64.zip -d /usr/local/bin/
 
 
 EXPOSE 8080
