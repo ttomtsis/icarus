@@ -60,9 +60,12 @@ To install Icarus as a container you will need Docker installed and properly con
 
 * Simply pull the latest Icarus image from the associated DockerHub repository: `docker pull ttomtsis/icarus:latest`
 * Configure Icarus environment variables located in the 'icarus_backend.env' file ( refer to the Configuration section )
-* Run Icarus using Docker `docker run ttomtsis/icarus:latest`
+* Run Icarus using Docker `docker run --env-file ./icarus_backend.env ttomtsis/icarus:latest`
 
-You can also use docker compose to automatically deploy both Icarus and a PostgreSQL database `docker compose up`
+You can also use docker compose to automatically deploy both Icarus and a PostgreSQL database:
+* Configure Icarus environment variables located in the 'icarus_backend.env' file ( refer to the Configuration section )
+* Configure the PostgreSQL database's environment variables located in the 'icarus_postgres.env' file ( refer to the Environment Variables section of the official PostgreSQL docker image documentation: https://hub.docker.com/_/postgres ) 
+* Run the docker compose script `docker compose up`
 
 ## Configuration
 Icarus is configured by using environment variables. If you have installed Icarus using docker, you can modify the .env file and use it when running the container
