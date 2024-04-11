@@ -15,7 +15,7 @@ https://hub.docker.com/r/ttomtsis/icarus
 * Execution of Functional Tests using RestAssured
 * Function lifecycle management using Terraform and the Terraform CDK
 * Querying of Function Metrics from every provider
-* Automated Generation of Reports containing Test results and artefacts using Eclipse BiRT
+* Automated generation of reports containing test artefacts and test results using Eclipse BiRT
 * User management
 * Auth0 integration
 
@@ -35,7 +35,7 @@ To get started with this project, you can install Icarus on your host system or 
 ### Install on host system
 To install Icarus in your host system you will need the following dependencies:
 * Java 21+ installed
-* A PostgreSQL 15.5+
+* A PostgreSQL v15.5+ database  
 * NodeJS 20+ installed and properly configured ( required by Terraform CDK )
 * Terraform installed and available on the PATH
 * JMeter installed
@@ -46,18 +46,20 @@ After installing the required dependencies the rest of the process is straightfo
 * Download the latest jar from the releases page of the project: https://github.com/ttomtsis/icarus/releases
 * Place it in the directory of your choosing
 * Enable java preview features by setting the JAVA_TOOL_OPTIONS environment variable equal to --enable-preview `$env:JAVA_TOOL_OPTIONS=--enable-preview` ( for powershell )
+* Configure Icarus environment variables ( refer to the Configuration section )
 * Run Icarus using Java `java -jar icarus-0.0.1.jar`
 
-Or you can also built the jar yourself:
+You can also build the jar yourself:
 * Clone the repository using git  `git clone https://github.com/ttomtsis/icarus`
 * Use the maven wrapper, or maven to produce a jar of the application  `mvn clean package`
 * The jar will be located in the 'target' directory  `cd ./target`
 
 ### Install as a container
 This is the recommended way of installing Icarus as it is far easier and less error prone
-To install Icarus as a container you will need Docker installed and properly configured
+To install Icarus as a container you will need Docker installed and properly configured ( refer to the Appendix for Docker help with the installation )
 
 * Simply pull the latest Icarus image from the associated DockerHub repository: `docker pull ttomtsis/icarus:latest`
+* Configure Icarus environment variables located in the 'icarus_backend.env' file ( refer to the Configuration section )
 * Run Icarus using Docker `docker run ttomtsis/icarus:latest`
 
 You can also use docker compose to automatically deploy both Icarus and a PostgreSQL database `docker compose up`
@@ -69,13 +71,13 @@ Icarus is configured by using environment variables. If you have installed Icaru
 * **FUNCTION_SOURCES_DIRECTORY** - Icarus temporarily places the source code of the functions in a directory, before persisting it permanently to the database or before executing a Test. This environment variable specifies the location of that temporary directory.
 
 ### Auth0 Configuration variables
-The variables below configure Auth0's integration to Icarus. However it should be noted that **using Auth0 is not mandatory**, for non production environments users can opt to use Basic Authentication.
+The variables below configure Auth0's integration.
 The value of the below variables can be found in the Auth0 console
 * **AUTH0_AUDIENCES** - The required audiences that valid JWT tokens must possess
 * **AUTH0_DOMAIN** - Auth0's domain
 * **AUTH0_PROVIDER_JWKS** - URL where Auth0's Key set is available
 * **AUTH0-PROVIDER_URI** - Auth0's provider URI
-* **AUTH0_SYNCHRONIZE_DATABASE** - Icarus can automatically delete resources if a user deleted his/her account in Auth0. This process is called 'database synchronization' and by default is set to FALSE.
+* **AUTH0_SYNCHRONIZE_DATABASE** - Icarus can automatically delete resources if a user deleted his/her account in Auth0. This process is called 'database synchronization' and by default is set to FALSE
 * **AUTH0_MANAGEMENT_API_ID** - ID of Auth0's management API ( Required to synchronize the database )
 * **AUTH0_CLIENT_ID** - Auth0 Client's ID ( Required to synchronize the database )
 * **AUTH0_CLIENT_SECRET** - Auth0 Client's Secret ( Required to synchronize the database )
@@ -114,5 +116,6 @@ Icarus comes bundled with two ready to use BiRT templates, however a user may ch
 * NodeJS 20 - https://nodejs.org/en/learn/getting-started/how-to-install-nodejs
 * Terraform - https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 * JMeter - https://jmeter.apache.org/usermanual/get-started.html#install
+* Docker - https://docs.docker.com/engine/install/
 
   
