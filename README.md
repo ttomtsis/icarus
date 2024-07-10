@@ -6,6 +6,7 @@ The rest of the thesis can be found in University of the Aegean's public reposit
 https://hellanicus.lib.aegean.gr/handle/11610/26562
 
 
+
 **Concept**: 
 
 Icarus is a FaaS testing utility, able to evaluate the Functional and Performance characteristics of AWS Lambda and Google Cloud Function serverless functions.
