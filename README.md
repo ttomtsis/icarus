@@ -33,6 +33,7 @@ https://hub.docker.com/r/ttomtsis/icarus
 * Eclipse BiRT 4.8.0
 
 # Getting started
+For a detailed guide to the internal workings of Icarus as well as instructions on how to use it, refer to the repository's wiki. 
 
 ## Installation
 To get started with this project, you can install Icarus on your host system or use a container.
