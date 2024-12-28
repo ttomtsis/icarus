@@ -10,7 +10,7 @@ https://hellanicus.lib.aegean.gr/handle/11610/26562
 **Concept**: 
 
 Icarus is a FaaS testing utility, able to evaluate the Functional and Performance characteristics of AWS Lambda and Google Cloud Function serverless functions.
-The main goal of the project is to provide an easy to use, extendable, open source serverless tesing tool that supports several FaaS providers and abstracts the complexity of managing the lifecycle of individual functions. Icarus relies on well known tools to execute Functional and Performance tests and utilizes Terraform and the Terraform CDK to manage the lifecycle of the functions. 
+The main goal of the project is to provide an easy to use, extendable, open source serverless testing tool that supports several FaaS providers and abstracts the complexity of managing the lifecycle of individual functions. Icarus relies on well known tools to execute Functional and Performance tests and utilizes Terraform and the Terraform CDK to manage the lifecycle of the functions. 
 
 **Associated DockerHub repository:** 
 https://hub.docker.com/r/ttomtsis/icarus
